@@ -37,11 +37,11 @@ vim.opt.cursorline = true
 require("lazy").setup({
   -- UI & Colorscheme
   {
-    "catppuccin/nvim",
-    name = "catppuccin",
+    "folke/tokyonight.nvim",
+    name = "tokyonight",
     priority = 1000,
     config = function()
-      vim.cmd.colorscheme "catppuccin-macchiato"
+      vim.cmd.colorscheme "tokyonight-storm"
     end,
   },
   
