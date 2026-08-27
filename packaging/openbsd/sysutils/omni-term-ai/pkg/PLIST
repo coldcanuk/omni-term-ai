@@ -1,0 +1,13 @@
+bin/launch-ai-workspace
+bin/omni-exec
+bin/omni-secret
+bin/tmux-toggle-scratch
+share/omni-term-ai/lib/boot.sh
+share/omni-term-ai/lib/omni.sh
+share/omni-term-ai/tmux.conf
+share/omni-term-ai/nvim-config/init.lua
+share/applications/ai-workspace.desktop
+share/icons/hicolor/scalable/apps/ai-workspace.svg
+@man man/man1/launch-ai-workspace.1
+share/doc/omni-term-ai/README.md
+share/doc/omni-term-ai/LICENSE
