@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
 Name=AI Workspace
-Comment=Launch Grok and Agy in Tmux
+Comment=Launch AI assistant panes in Tmux
 Exec=launch-ai-workspace
 TryExec=tmux
 Icon=ai-workspace
 Terminal=true
 Type=Application
 Categories=Development;Utility;
-Keywords=tmux;ai;grok;agy;
+Keywords=tmux;ai;grok;agy;copilot;claude;codex;deepseek;
