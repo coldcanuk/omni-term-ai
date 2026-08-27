@@ -1,15 +1,27 @@
-#!/usr/bin/env bash
-# Omni-Exec: Securely fetches API keys on the fly for a single command.
-# Usage: ./omni-exec.sh <command> [args...]
+#!/bin/sh
+# Omni-Exec: fetch API keys on the fly for a single command.
+# Usage: omni-exec <command> [args...]
+set -eu
+
+if [ -f "$(dirname "$0")/lib/boot.sh" ]; then
+    # shellcheck source=lib/boot.sh
+    . "$(dirname "$0")/lib/boot.sh"
+else
+    OMNI_TERM_AI_HOME="${OMNI_TERM_AI_HOME:-@OMNI_HOME@}"
+    export OMNI_TERM_AI_HOME
+    # shellcheck source=/dev/null
+    . "$OMNI_TERM_AI_HOME/lib/omni.sh"
+fi
 
 if [ $# -eq 0 ]; then
-    echo "Usage: omni-exec.sh <command>"
+    echo "Usage: omni-exec <command> [args...]" >&2
     exit 1
 fi
 
-# Fetch keys ephemerally
-XAI_KEY=$(secret-tool lookup api xai 2>/dev/null)
-DEEPSEEK_KEY=$(secret-tool lookup api deepseek 2>/dev/null)
+XAI_KEY=$(omni_secret_get xai)
+DEEPSEEK_KEY=$(omni_secret_get deepseek)
 
-# Run the command with keys injected into its environment
-env XAI_API_KEY="$XAI_KEY" DEEPSEEK_API_KEY="$DEEPSEEK_KEY" "$@"
+export XAI_API_KEY="$XAI_KEY"
+export DEEPSEEK_API_KEY="$DEEPSEEK_KEY"
+
+exec "$@"
