@@ -11,13 +11,31 @@ Neovim is launched with
 .B NVIM_APPNAME=omni-term-ai
 so the packaged configuration does not replace
 .IR ~/.config/nvim .
+.PP
+The Command Center has three panes. The top-left and top-right panes each
+launch a shell AI assistant ("harness") chosen with
+.BR omni-config (1):
+grok, agy, copilot, claude, codex, or deepseek.
+The bottom pane is a plain terminal.
+Harness names are shown in the pane's top border (tmux >= 3.2).
+.PP
+If a chosen harness binary is missing,
+.B launch-ai-workspace
+prints the install command for that harness and exits non-zero before
+creating any session. Harness API keys are read from the OS secret store
+(see
+.BR omni-secret (1))
+and exported into the tmux session environment.
 .SH COMMANDS
 .TP
 .B omni-exec
-Run a command with
-.B XAI_API_KEY
-and
-.B DEEPSEEK_API_KEY
+Run a command with every harness API key
+.RB ( XAI_API_KEY ,
+.BR DEEPSEEK_API_KEY ,
+.BR ANTHROPIC_API_KEY ,
+.BR OPENAI_API_KEY ,
+.BR GH_TOKEN ,
+.BR GEMINI_API_KEY )
 injected from the OS secret store.
 .TP
 .B omni-secret
@@ -28,6 +46,17 @@ macOS
 .BR pass (1),
 or mode-0600 files under
 .IR ~/.config/omni-term-ai/secrets/ .
+.TP
+.B omni-config
+Choose the harnesses for the top-left and top-right Command Center panes.
+.SH FILES
+.TP
+.I ~/.config/omni-term-ai/config
+Selects the panes' harnesses:
+.RS
+OMNI_LEFT_HARNESS=agy
+OMNI_RIGHT_HARNESS=grok
+.RE
 .SH ENVIRONMENT
 .TP
 .B OMNI_TERM_AI_HOME
@@ -38,7 +67,9 @@ Override the share directory (normally
 Set to
 .B omni-term-ai
 by the launcher.
-.SH FILES
-.I PREFIX/share/omni-term-ai
 .SH SEE ALSO
-tmux(1), nvim(1)
+.BR omni-config (1),
+.BR omni-secret (1),
+.BR omni-exec (1),
+.BR tmux (1),
+.BR nvim (1)

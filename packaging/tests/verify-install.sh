@@ -15,19 +15,22 @@ for f in \
     usr/bin/launch-ai-workspace \
     usr/bin/omni-exec \
     usr/bin/omni-secret \
+    usr/bin/omni-config \
     usr/bin/tmux-toggle-scratch \
     usr/share/omni-term-ai/lib/omni.sh \
     usr/share/omni-term-ai/tmux.conf \
     usr/share/omni-term-ai/nvim-config/init.lua \
+    usr/share/omni-term-ai/nvim-config/lua/omni_fim.lua \
     usr/share/applications/ai-workspace.desktop \
     usr/share/icons/hicolor/scalable/apps/ai-workspace.svg \
     usr/share/man/man1/launch-ai-workspace.1 \
+    usr/share/man/man1/omni-config.1 \
     usr/share/doc/omni-term-ai/README.md \
     usr/share/doc/omni-term-ai/LICENSE; do
     [ -e "$STAGE/$f" ] || fail "missing $f"
 done
 
-for f in usr/bin/launch-ai-workspace usr/bin/omni-exec usr/bin/omni-secret usr/bin/tmux-toggle-scratch; do
+for f in usr/bin/launch-ai-workspace usr/bin/omni-exec usr/bin/omni-secret usr/bin/omni-config usr/bin/tmux-toggle-scratch; do
     [ -x "$STAGE/$f" ] || fail "not executable: $f"
 done
 
@@ -45,7 +48,7 @@ if grep -R '/home/chuck' "$STAGE" >/dev/null 2>&1; then
 fi
 
 # Source-tree scripts must parse.
-for s in launch-ai-workspace omni-exec.sh omni-secret tmux-toggle-scratch install.sh \
+for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch install.sh \
     packaging/build-deb.sh packaging/build-rpm.sh packaging/tests/verify-install.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done

@@ -119,3 +119,10 @@ require("lazy").setup({
     },
   },
 })
+
+-- DeepSeek Fill-In-The-Middle (FIM) ghost-text completion.
+-- Uses $DEEPSEEK_API_KEY (injected by omni-exec / launch-ai-workspace from
+-- the OS secret store). Quietly no-ops until that key is stored:
+--   omni-secret store deepseek
+-- <Tab> accepts, <C-e> dismisses. See lua/omni_fim.lua for options.
+require("omni_fim").setup({})

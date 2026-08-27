@@ -1,0 +1,97 @@
+.TH OMNI-CONFIG 1 "August 2026" "omni-term-ai" "User Commands"
+.SH NAME
+omni-config \- choose the shell AI assistants shown in the Command Center
+.SH SYNOPSIS
+.B omni-config
+.RI [ command ]
+.SH DESCRIPTION
+Selects which shell AI assistants ("harnesses") launch in the two top panes
+of the Omni Term AI Command Center window.
+The top-left pane and the top-right pane can each run any harness, including
+the same harness twice.
+.PP
+Configuration is stored in a POSIX shell file that
+.BR launch-ai-workspace (1)
+sources at startup:
+.IR $XDG_CONFIG_HOME/omni-term-ai/config
+(default:
+.IR ~/.config/omni-term-ai/config ).
+It contains two variables:
+.IP
+OMNI_LEFT_HARNESS=agy
+.IP
+OMNI_RIGHT_HARNESS=grok
+.PP
+Supported harnesses:
+.TP
+.B grok
+xAI Grok Build. Install:
+.BR "curl -fsSL https://x.ai/cli/install.sh | bash" .
+Auth: browser sign-in or
+.BR XAI_API_KEY .
+.TP
+.B agy
+Google Antigravity. Install:
+.BR "curl -fsSL https://antigravity.google/cli/install.sh | bash" .
+Auth: Google sign-in (optional
+.BR GEMINI_API_KEY ).
+.TP
+.B copilot
+GitHub Copilot CLI. Install:
+.BR "brew install copilot-cli" .
+Auth:
+.B /login
+or
+.BR GH_TOKEN .
+.TP
+.B claude
+Claude Code. Install:
+.BR "npm install -g @anthropic-ai/claude-code" .
+Auth:
+.B "claude /login"
+or
+.BR ANTHROPIC_API_KEY .
+.TP
+.B codex
+OpenAI Codex. Install:
+.BR "npm install -g @openai/codex" .
+Auth:
+.B "codex login"
+or
+.BR OPENAI_API_KEY .
+.TP
+.B deepseek
+DeepSeek Harness. Install:
+.BR "npm install -g @deepseek-ai/dsh" .
+Auth:
+.BR DEEPSEEK_API_KEY .
+The DeepSeek key also powers Fill-In-The-Middle completion in the Neovim
+Editor window (see
+.BR launch-ai-workspace (1)).
+.SH COMMANDS
+.TP
+.B omni-config
+With no arguments, runs an interactive wizard that writes both harness
+choices.
+.TP
+.B omni-config list
+Lists every supported harness with its installed status and, for missing
+binaries, the install command.
+.TP
+.B omni-config get [left|right]
+Prints the current selection for one pane, or both panes when no side is
+given.
+.TP
+.B omni-config set <left|right> <harness>
+Writes one pane's harness into the config file. Fails for unknown harness
+names.
+.TP
+.B omni-config path
+Prints the config file path.
+.SH FILES
+.I $XDG_CONFIG_HOME/omni-term-ai/config
+.SH SEE ALSO
+.BR launch-ai-workspace (1),
+.BR omni-secret (1),
+.BR omni-exec (1),
+.BR tmux (1)

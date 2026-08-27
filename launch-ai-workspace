@@ -25,9 +25,21 @@ bindir=$(CDPATH= cd -P -- "$(dirname "$0")" && pwd) || bindir=$(dirname "$0")
 PATH="$bindir:$PATH"
 export PATH
 
+# Push harness auth keys into the tmux session so every pane (grok, agy,
+# copilot, claude, codex, dsh) can read them. Missing secrets export empty.
 omni_apply_tmux_env() {
+    omni_export_harness_keys
     omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
     omni_tmux set-environment -g PATH "$PATH"
+    # Explicit, eval-free: the keys were exported above by
+    # omni_export_harness_keys (empty strings when never stored).
+    omni_tmux set-environment -g XAI_API_KEY "$XAI_API_KEY"
+    omni_tmux set-environment -g DEEPSEEK_API_KEY "$DEEPSEEK_API_KEY"
+    omni_tmux set-environment -g ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY"
+    omni_tmux set-environment -g OPENAI_API_KEY "$OPENAI_API_KEY"
+    omni_tmux set-environment -g GH_TOKEN "$GH_TOKEN"
+    omni_tmux set-environment -g GITHUB_TOKEN "$GITHUB_TOKEN"
+    omni_tmux set-environment -g GEMINI_API_KEY "$GEMINI_API_KEY"
 }
 
 attach_or_switch() {
@@ -38,12 +50,43 @@ attach_or_switch() {
     fi
 }
 
+# Which harnesses fill the two Command Center panes?
+omni_load_config
+LEFT_HARNESS=$(omni_config_get left)
+RIGHT_HARNESS=$(omni_config_get right)
+
+# Refuse to create a session with a harness the user does not have.
+validate_harness() {
+    side=$1
+    harness=$2
+    if ! omni_valid_harness "$harness"; then
+        echo "omni-term-ai: unknown $side harness '$harness' in $(omni_config_path)" >&2
+        echo "Run: omni-config set $side <grok|agy|copilot|claude|codex|deepseek>" >&2
+        exit 1
+    fi
+    if ! omni_harness_installed "$harness"; then
+        bin=$(omni_harness_bin "$harness")
+        echo "omni-term-ai: $side harness '$harness' needs '$bin' on PATH." >&2
+        echo "Install it with:" >&2
+        echo "  $(omni_harness_install_hint "$harness")" >&2
+        echo "Then re-run launch-ai-workspace, or pick another harness:" >&2
+        echo "  omni-config" >&2
+        exit 1
+    fi
+}
+
 if omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     echo "Session $SESSION_NAME already exists. Attaching..."
     omni_apply_tmux_env
     attach_or_switch
 else
+    validate_harness left "$LEFT_HARNESS"
+    validate_harness right "$RIGHT_HARNESS"
+    LEFT_CMD=$(omni_harness_cmd "$LEFT_HARNESS")
+    RIGHT_CMD=$(omni_harness_cmd "$RIGHT_HARNESS")
+
     echo "Creating new session $SESSION_NAME with dual-tab layout..."
+    echo "Command Center: left=$LEFT_HARNESS ($LEFT_CMD)  right=$RIGHT_HARNESS ($RIGHT_CMD)"
 
     ( unset TMUX; omni_tmux new-session -d -s "$SESSION_NAME" -n "Command Center" )
 
@@ -51,8 +94,10 @@ else
     omni_tmux split-window -v -t "$WIN_CMD"
     omni_tmux split-window -h -t "$WIN_CMD.0"
 
-    omni_tmux send-keys -t "$WIN_CMD.0" "agy" C-m
-    omni_tmux send-keys -t "$WIN_CMD.1" "grok" C-m
+    omni_tmux send-keys -t "$WIN_CMD.0" "$LEFT_CMD" C-m
+    omni_tmux send-keys -t "$WIN_CMD.1" "$RIGHT_CMD" C-m
+    omni_tmux select-pane -T "$LEFT_HARNESS" -t "$WIN_CMD.0"
+    omni_tmux select-pane -T "$RIGHT_HARNESS" -t "$WIN_CMD.1"
 
     omni_tmux new-window -t "$SESSION_NAME" -n "Editor"
     omni_tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
