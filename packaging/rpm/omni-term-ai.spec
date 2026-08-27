@@ -18,8 +18,10 @@ Requires:       libsecret
 
 %description
 Omni Term AI is a tmux-based dual-tab workspace that launches a command
-center and a Neovim editor with a packaged configuration. API keys are
-read from the OS keychain via omni-secret (libsecret on Linux).
+center with configurable AI assistant panes (grok, agy, copilot, claude,
+codex, deepseek) and a Neovim editor with DeepSeek Fill-In-The-Middle
+completion. API keys are read from the OS keychain via omni-secret
+(libsecret on Linux).
 
 %prep
 %setup -q
@@ -34,6 +36,7 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 /usr/bin/launch-ai-workspace
 /usr/bin/omni-exec
 /usr/bin/omni-secret
+/usr/bin/omni-config
 /usr/bin/tmux-toggle-scratch
 /usr/share/omni-term-ai
 /usr/share/applications/ai-workspace.desktop

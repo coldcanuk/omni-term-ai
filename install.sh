@@ -122,4 +122,5 @@ fi
 make -C "$ROOT" install PREFIX="$PREFIX"
 echo "Installed to $PREFIX"
 echo "Ensure $PREFIX/bin is on PATH, then run: omni-secret store xai"
+echo "Choose your AI assistant panes with: omni-config"
 echo "Launch with: launch-ai-workspace"

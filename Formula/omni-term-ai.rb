@@ -18,14 +18,26 @@ class OmniTermAi < Formula
 
   def caveats
     <<~EOS
-      Store API keys in the macOS Keychain:
+      Homebrew 6.0+ requires tapping repos to be trusted before their
+      formulae may be evaluated. If you tapped this repository, run:
+
+        brew trust coldcanuk/omni-term-ai
+
+      (or the scoped form: brew trust --formula coldcanuk/omni-term-ai/omni-term-ai)
+
+      Store API keys in the macOS Keychain (xai, deepseek, anthropic,
+      openai, github, gemini are supported):
         omni-secret store xai
         omni-secret store deepseek
+
+      Pick which AI assistants fill the Command Center panes:
+        omni-config
 
       Launch from a terminal:
         launch-ai-workspace
 
       Neovim uses NVIM_APPNAME=omni-term-ai and will not replace ~/.config/nvim.
+      DeepSeek FIM completion in the Editor uses $DEEPSEEK_API_KEY.
     EOS
   end
 
