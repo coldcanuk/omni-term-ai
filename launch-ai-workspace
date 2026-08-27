@@ -8,6 +8,12 @@ if ! command -v tmux &> /dev/null; then
     exit 1
 fi
 
+# Ensure Neovim config is linked
+if [ ! -d "$HOME/.config/nvim" ]; then
+    mkdir -p "$HOME/.config"
+    ln -s /opt/repo/omni-term-ai/nvim-config "$HOME/.config/nvim"
+fi
+
 # Function to attach or switch to the session
 attach_or_switch() {
     if [ -n "$TMUX" ]; then
@@ -22,34 +28,33 @@ if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     echo "Session $SESSION_NAME already exists. Attaching..."
     attach_or_switch
 else
-    echo "Creating new session $SESSION_NAME with top/bottom layout..."
+    echo "Creating new session $SESSION_NAME with dual-tab layout..."
     
-    # Start a new detached session
-    env -u TMUX tmux new-session -d -s "$SESSION_NAME"
+    # Start a new detached session with Tab 1
+    env -u TMUX tmux new-session -d -s "$SESSION_NAME" -n "Command Center"
     
-    # We start with 1 pane (Pane 0).
-    # Split vertically (-v) to create a bottom pane for the terminal.
-    # We use a 50/50 split. You can resize it using the mouse or prefix+Shift+J/K.
-    tmux split-window -v -t "$SESSION_NAME:0.0"
+    # Store the first window's ID so we don't care about base-index
+    WIN_CMD="$SESSION_NAME:^"
     
-    # Now we have Pane 0 (Top) and Pane 1 (Bottom).
-    # Split the top pane horizontally (-h) for the two bots.
-    tmux split-window -h -t "$SESSION_NAME:0.0"
+    # Split Tab 1 into Top/Bottom
+    tmux split-window -v -t "$WIN_CMD"
+    # Split Top into Left/Right
+    tmux split-window -h -t "$WIN_CMD.0"
     
-    # Now we have:
-    # 0.0: Top-Left
-    # 0.1: Top-Right
-    # 0.2: Bottom (Terminal)
+    # Pane 0: agy, Pane 1: grok, Pane 2: bash
+    tmux send-keys -t "$WIN_CMD.0" "agy" C-m
+    tmux send-keys -t "$WIN_CMD.1" "grok" C-m
     
-    # Send commands to the bots
-    tmux send-keys -t "$SESSION_NAME:0.0" "agy" C-m
-    tmux send-keys -t "$SESSION_NAME:0.1" "grok" C-m
+    # Tab 2: Editor (Neovim)
+    tmux new-window -t "$SESSION_NAME" -n "Editor"
+    WIN_ED="$SESSION_NAME:^" # Wait, `^` means first window. `$` means last window.
     
-    # Launch Neovim in the bottom terminal
-    tmux send-keys -t "$SESSION_NAME:0.2" "nvim" C-m
+    # Let's just use window names to target them!
+    tmux send-keys -t "$SESSION_NAME:=Editor" "nvim" C-m
     
-    # Set focus on the bottom terminal (Pane 0.2)
-    tmux select-pane -t "$SESSION_NAME:0.2"
+    # Set focus on Tab 1 Terminal by default
+    tmux select-window -t "$SESSION_NAME:=Command Center"
+    tmux select-pane -t "$SESSION_NAME:=Command Center.2"
     
     # Attach or switch to the session
     attach_or_switch
