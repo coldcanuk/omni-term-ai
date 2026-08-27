@@ -1,12 +1,15 @@
-# Phase 1: Security Audit & Strategy
+# Research: Dual Tab Tmux & Neovim
 
-## Findings
-1. **GitHub Auth**: User `coldcanuk` is successfully authenticated via `gh` with `repo` scopes.
-2. **Bashrc Cleanliness**: All traces of `XAI_API_KEY` and `DEEPSEEK_API_KEY` have been stripped from `~/.bashrc`. The system is now secure against global process leaking.
-3. **Dynamic Fetching Feasibility**: 
-   - A wrapper script (e.g. `omni-exec.sh`) can dynamically call `secret-tool lookup` and pass the credential into the environment of a single, ephemeral child process.
-   - Example architecture: `XAI_API_KEY=$(secret-tool lookup api xai) my-ai-command`
-   - This ensures the key exists *only* in the memory of the specific command executing the AI request, rather than polluting the global interactive shell.
+1. **Neovim Dependencies**: 
+   - Found `rg`, `gcc`, `unzip`, `git` are installed on the system.
+   - Neovim 0.9.5 is present. We can safely deploy a `lazy.nvim` based configuration.
+   - We will use a single-file `init.lua` (Kickstart style) tailored for AI workspace.
 
-## Next Steps (Phase 2 & 3)
-Build the `omni-exec.sh` wrapper, which will wrap AI terminal scripts. Ensure `.gitignore` ignores any accidentally generated local `.env` files.
+2. **Tmux Window Toggling**:
+   - The command `tmux last-window` switches to the previously active window.
+   - If we have exactly 2 windows (Command Center and Editor), `last-window` acts as a perfect boolean toggle.
+   - We will bind `Ctrl-b e` to `last-window`.
+
+3. **Tmux Setup Script**:
+   - `tmux new-window -t $SESSION_NAME:2 -n "Editor" "nvim"` will spawn the second tab.
+   - We will ensure Tab 1 is named "Command Center".
