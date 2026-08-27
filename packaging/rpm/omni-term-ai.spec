@@ -38,7 +38,7 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 /usr/share/omni-term-ai
 /usr/share/applications/ai-workspace.desktop
 /usr/share/icons/hicolor/scalable/apps/ai-workspace.svg
-/usr/share/man/man1/launch-ai-workspace.1
+%{_mandir}/man1/launch-ai-workspace.1*
 /usr/share/doc/omni-term-ai
 
 %changelog

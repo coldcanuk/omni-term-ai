@@ -27,7 +27,7 @@ jobs:
 
   rpm:
     runs-on: ubuntu-latest
-    container: fedora:41
+    container: fedora:latest
     steps:
       - uses: actions/checkout@v4
       - name: Install rpmbuild
