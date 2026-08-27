@@ -18,10 +18,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-XAI_KEY=$(omni_secret_get xai)
-DEEPSEEK_KEY=$(omni_secret_get deepseek)
-
-export XAI_API_KEY="$XAI_KEY"
-export DEEPSEEK_API_KEY="$DEEPSEEK_KEY"
+# Inject every harness auth key from the OS secret store. Keys that were
+# never stored become empty strings so interactive logins still work.
+omni_export_harness_keys
 
 exec "$@"
