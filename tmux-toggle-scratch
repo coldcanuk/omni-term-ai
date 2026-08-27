@@ -1,0 +1,6 @@
+#!/bin/bash
+if tmux list-clients -t scratch 2>/dev/null | grep -q .; then
+    tmux detach-client -s scratch
+else
+    tmux display-popup -w 80% -h 80% -E "tmux attach -t scratch || tmux new -s scratch"
+fi
