@@ -31,11 +31,15 @@ omni_apply_tmux_env() {
     omni_export_harness_keys
     omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
     omni_tmux set-environment -g PATH "$PATH"
-    for v in XAI_API_KEY DEEPSEEK_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY \
-        GH_TOKEN GITHUB_TOKEN GEMINI_API_KEY; do
-        eval "val=\$$v"
-        omni_tmux set-environment -g "$v" "$val"
-    done
+    # Explicit, eval-free: the keys were exported above by
+    # omni_export_harness_keys (empty strings when never stored).
+    omni_tmux set-environment -g XAI_API_KEY "$XAI_API_KEY"
+    omni_tmux set-environment -g DEEPSEEK_API_KEY "$DEEPSEEK_API_KEY"
+    omni_tmux set-environment -g ANTHROPIC_API_KEY "$ANTHROPIC_API_KEY"
+    omni_tmux set-environment -g OPENAI_API_KEY "$OPENAI_API_KEY"
+    omni_tmux set-environment -g GH_TOKEN "$GH_TOKEN"
+    omni_tmux set-environment -g GITHUB_TOKEN "$GITHUB_TOKEN"
+    omni_tmux set-environment -g GEMINI_API_KEY "$GEMINI_API_KEY"
 }
 
 attach_or_switch() {
