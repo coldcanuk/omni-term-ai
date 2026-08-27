@@ -1,0 +1,188 @@
+#!/bin/sh
+# omni-config: choose the shell AI assistants shown in the Command Center.
+#
+#   omni-config                  interactive wizard (choose left/right)
+#   omni-config list             supported harnesses + installed status
+#   omni-config get [left|right] show current selection
+#   omni-config set <side> <h>   set one pane (left|right) to a harness
+#   omni-config path             print the config file path
+#
+# The config file is POSIX sh and sourced by launch-ai-workspace:
+#   $XDG_CONFIG_HOME/omni-term-ai/config   (default ~/.config/...)
+set -eu
+
+if [ -f "$(dirname "$0")/lib/boot.sh" ]; then
+    # shellcheck source=lib/boot.sh
+    . "$(dirname "$0")/lib/boot.sh"
+else
+    OMNI_TERM_AI_HOME="${OMNI_TERM_AI_HOME:-@OMNI_HOME@}"
+    export OMNI_TERM_AI_HOME
+    # shellcheck source=/dev/null
+    . "$OMNI_TERM_AI_HOME/lib/omni.sh"
+fi
+
+usage() {
+    echo "Usage: omni-config [command]" >&2
+    echo "  (no command)   interactive wizard" >&2
+    echo "  list           supported harnesses and install status" >&2
+    echo "  get [side]     current selection (side: left|right)" >&2
+    echo "  set side name  set a pane's harness (side: left|right)" >&2
+    echo "  path           print the config file path" >&2
+    exit 1
+}
+
+# Replace or append KEY=VALUE in a POSIX config file.
+update_key() {
+    key=$1
+    value=$2
+    file=$3
+    if grep -q "^${key}=" "$file" 2>/dev/null; then
+        tmp=$(mktemp "${file}.XXXXXX") || exit 1
+        sed "s|^${key}=.*|${key}=${value}|" "$file" >"$tmp"
+        mv "$tmp" "$file"
+    else
+        printf '%s=%s\n' "$key" "$value" >>"$file"
+    fi
+}
+
+cmd_list() {
+    echo "Supported harnesses (Command Center panes):"
+    for h in $(omni_harness_list); do
+        name=$(omni_harness_name "$h")
+        envvar=$(omni_harness_env "$h")
+        if omni_harness_installed "$h"; then
+            printf '  %-10s %-34s env: %-20s [installed]\n' "$h" "$name" "$envvar"
+        else
+            printf '  %-10s %-34s env: %-20s [not installed]\n' "$h" "$name" "$envvar"
+            printf '           install: %s\n' "$(omni_harness_install_hint "$h")"
+        fi
+    done
+}
+
+cmd_get() {
+    omni_load_config
+    case ${1:-} in
+    "")
+        echo "left:  $(omni_config_get left)"
+        echo "right: $(omni_config_get right)"
+        ;;
+    left | right)
+        omni_config_get "$1"
+        ;;
+    *)
+        usage
+        ;;
+    esac
+}
+
+cmd_set() {
+    side=$1
+    harness=$2
+    case $side in left | right) ;; *) usage ;; esac
+    if ! omni_valid_harness "$harness"; then
+        echo "omni-config: unknown harness '$harness'" >&2
+        echo "Supported: $(omni_harness_list | tr '\n' ' ')" >&2
+        exit 1
+    fi
+    file=$(omni_config_path)
+    mkdir -p "$(dirname "$file")"
+    if [ ! -f "$file" ]; then
+        cat >"$file" <<'EOF'
+# Omni Term AI configuration (POSIX sh).
+# Shell AI assistants shown in the Command Center panes.
+# Supported: grok agy copilot claude codex deepseek
+OMNI_LEFT_HARNESS=agy
+OMNI_RIGHT_HARNESS=grok
+EOF
+    fi
+    update_key "OMNI_$(echo "$side" | tr '[:lower:]' '[:upper:]')_HARNESS" "$harness" "$file"
+    chmod 600 "$file" 2>/dev/null || true
+    echo "Saved: $side = $harness ($file)"
+    if ! omni_harness_installed "$harness"; then
+        echo "Note: '$harness' is not on PATH yet. Install it with:" >&2
+        echo "  $(omni_harness_install_hint "$harness")" >&2
+    fi
+}
+
+# Interactive wizard: numbered menu, POSIX read.
+wizard_side() {
+    label=$1
+    default=$2
+    echo "Select the $label harness (default: $default):"
+    i=1
+    for h in $(omni_harness_list); do
+        if omni_harness_installed "$h"; then
+            printf '  %d) %s [installed]\n' "$i" "$(omni_harness_name "$h")"
+        else
+            printf '  %d) %s\n' "$i" "$(omni_harness_name "$h")"
+        fi
+        i=$((i + 1))
+    done
+    n=$((i - 1))
+    printf 'Choice [1-%d, empty=%s]: ' "$n" "$default"
+    IFS= read -r choice || return 1
+    if [ -z "$choice" ]; then
+        echo "$default"
+        return 0
+    fi
+    case $choice in
+    '' | *[!0-9]*)
+        echo "omni-config: enter a number 1-$n" >&2
+        return 1
+        ;;
+    esac
+    if [ "$choice" -lt 1 ] || [ "$choice" -gt "$n" ]; then
+        echo "omni-config: enter a number 1-$n" >&2
+        return 1
+    fi
+    j=1
+    for h in $(omni_harness_list); do
+        if [ "$j" -eq "$choice" ]; then
+            echo "$h"
+            return 0
+        fi
+        j=$((j + 1))
+    done
+    return 1
+}
+
+cmd_wizard() {
+    omni_load_config
+    left=$(wizard_side left "$OMNI_LEFT_HARNESS") || exit 1
+    right=$(wizard_side right "$OMNI_RIGHT_HARNESS") || exit 1
+    file=$(omni_config_path)
+    mkdir -p "$(dirname "$file")"
+    cat >"$file" <<EOF
+# Omni Term AI configuration (POSIX sh).
+# Shell AI assistants shown in the Command Center panes.
+# Supported: grok agy copilot claude codex deepseek
+OMNI_LEFT_HARNESS=$left
+OMNI_RIGHT_HARNESS=$right
+EOF
+    chmod 600 "$file" 2>/dev/null || true
+    echo "Saved: left=$left right=$right ($file)"
+}
+
+cmd=${1:-}
+case $cmd in
+list)
+    cmd_list
+    ;;
+get)
+    shift || true
+    cmd_get "${1:-}"
+    ;;
+set)
+    [ $# -eq 3 ] || usage
+    cmd_set "$2" "$3"
+    ;;
+path)
+    omni_config_path
+    ;;
+"")
+    cmd_wizard
+    ;;
+*)
+    usage
+    ;;
+esac
