@@ -20,6 +20,7 @@ for f in \
     usr/share/omni-term-ai/lib/omni.sh \
     usr/share/omni-term-ai/tmux.conf \
     usr/share/omni-term-ai/nvim-config/init.lua \
+    usr/share/omni-term-ai/nvim-config/lua/omni_fim.lua \
     usr/share/applications/ai-workspace.desktop \
     usr/share/icons/hicolor/scalable/apps/ai-workspace.svg \
     usr/share/man/man1/launch-ai-workspace.1 \

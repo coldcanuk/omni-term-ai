@@ -18,6 +18,7 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(BINDIR)
 	$(INSTALL) -d $(DESTDIR)$(DATADIR)/lib
 	$(INSTALL) -d $(DESTDIR)$(DATADIR)/nvim-config
+	$(INSTALL) -d $(DESTDIR)$(DATADIR)/nvim-config/lua
 	$(INSTALL) -d $(DESTDIR)$(APPDIR)
 	$(INSTALL) -d $(DESTDIR)$(ICONDIR)
 	$(INSTALL) -d $(DESTDIR)$(MANDIR)
@@ -27,6 +28,7 @@ install:
 	chmod 644 $(DESTDIR)$(DATADIR)/lib/boot.sh
 	$(INSTALL) -m 644 tmux.conf $(DESTDIR)$(DATADIR)/tmux.conf
 	$(INSTALL) -m 644 nvim-config/init.lua $(DESTDIR)$(DATADIR)/nvim-config/init.lua
+	$(INSTALL) -m 644 nvim-config/lua/omni_fim.lua $(DESTDIR)$(DATADIR)/nvim-config/lua/omni_fim.lua
 	if [ -f nvim-config/lazy-lock.json ]; then \
 		$(INSTALL) -m 644 nvim-config/lazy-lock.json $(DESTDIR)$(DATADIR)/nvim-config/lazy-lock.json; \
 	fi
