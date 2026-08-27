@@ -177,3 +177,61 @@ Pop!_OS 24.04: `dpkg-deb` present; `rpmbuild`, `nfpm`, `fpm`, `brew`, Docker/Pod
 13. macOS `security` password commands. https://ss64.com/mac/security-password.html
 14. Apple Keychain items documentation. https://developer.apple.com/documentation/security/keychain-items
 15. GNU GPLv3. `LICENSE` in this repository.
+
+---
+
+# 7. Research: Multi-harness shell assistants, Homebrew tap trust, DeepSeek FIM (2026-08-27)
+
+**Date of search:** 2026-08-27
+**Methodology:** RDAP Spiral risk-driven research; every claim verified live against official docs, the npm registry, the GitHub API, and `docs.brew.sh` (no training-data guesses).
+**Research question:** Which shell AI assistants can the Command Center panes launch, how does each authenticate, how do macOS Homebrew users trust and install from this repo, and how does the DeepSeek API key power Fill-In-The-Middle (FIM) completion in Neovim?
+
+## 7.1 Harness registry (verified 2026-08-27)
+
+| Harness | Binary | Install | Launch | Auth env var(s) |
+| --- | --- | --- | --- | --- |
+| grok (xAI Grok Build) | `grok` | `curl -fsSL https://x.ai/cli/install.sh \| bash` | `grok` | `XAI_API_KEY` (fallback; browser OAuth primary) |
+| agy (Google Antigravity) | `agy` | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` | `agy` | Google sign-in; optional `GEMINI_API_KEY` / `GOOGLE_API_KEY` |
+| copilot (GitHub copilot-cli) | `copilot` | `brew install copilot-cli` or `curl -fsSL https://gh.io/copilot-install \| bash` | `copilot` | `/login`; PAT via `GH_TOKEN` / `GITHUB_TOKEN` |
+| claude code | `claude` | `npm install -g @anthropic-ai/claude-code` | `claude` | `ANTHROPIC_API_KEY` (or `/login`) |
+| codex (OpenAI) | `codex` | `npm install -g @openai/codex` | `codex` | `OPENAI_API_KEY` (or `codex login`) |
+| deepseek (DeepSeek Harness) | `dsh` | `npm install -g @deepseek-ai/dsh` (or `npx @deepseek-ai/dsh`) | `dsh web --no-open` | `DEEPSEEK_API_KEY` |
+
+Notes:
+- `grok-code` is obsolete; the current product is **Grok Build** (repo `xai-org/grok-build`), binary `grok`. There is no `GROK_API_KEY`; the documented API-key env var is `XAI_API_KEY`.
+- `agy` is **Google's Antigravity CLI** (npm package `agy` is an empty placeholder). Google account sign-in is the primary auth; no `AGY_API_KEY` exists.
+- `gh copilot` (extension repo `github/gh-copilot`) was deprecated 2025-10-25 in favor of the standalone **`copilot`** CLI (`github/copilot-cli`, `brew install copilot-cli`).
+- `claude-code` npm latest verified: `@anthropic-ai/claude-code@2.1.247`, bin `claude`.
+- `codex` npm latest verified: `@openai/codex@0.150.1`, bin `codex`.
+- DeepSeek Harness: npm `@deepseek-ai/dsh@0.1.1-rc.2`, repo `deepseek-ai/deepseek-harness` (MIT, developer preview). `dsh web` starts a web UI at `http://127.0.0.1:3080`; `--no-open` suits a tmux pane. One-shot mode: `dsh --profile headless "job"`.
+
+## 7.2 Homebrew tap trust (`brew trust`) — verified from docs.brew.sh
+
+- Homebrew **6.0.0** (released 2026-06-11) introduced **tap trust**: non-official taps must be explicitly trusted before Homebrew evaluates their Ruby.
+- `brew trust` exists (manpage): `brew trust [options] [target …]` with `--tap`, `--formula`, `--cask`, `--command`, `--json=v1`. Companion: `brew untrust`. Trust store: `${XDG_CONFIG_HOME}/homebrew/trust.json` (or `~/.homebrew/trust.json`).
+- `HOMEBREW_REQUIRE_TAP_TRUST` defaults to true; `HOMEBREW_NO_REQUIRE_TAP_TRUST` is the (not recommended, to-be-removed) opt-out.
+- For this repo the copy-paste sequence is:
+  ```sh
+  brew tap coldcanuk/omni-term-ai
+  brew trust --formula coldcanuk/omni-term-ai/omni-term-ai   # scoped trust (recommended)
+  # or: brew trust coldcanuk/omni-term-ai                    # whole tap
+  brew install omni-term-ai
+  ```
+  A fully-qualified `brew install coldcanuk/omni-term-ai/omni-term-ai` also works (trusts just that item). Until a tagged release exists, the formula is head-only, so use `brew install --HEAD coldcanuk/omni-term-ai/omni-term-ai` or the in-tree `brew install --HEAD --formula ./Formula/omni-term-ai.rb` fallback for older Homebrew.
+- Sources: https://docs.brew.sh/Manpage , https://docs.brew.sh/Tap-Trust , https://brew.sh/2026/06/11/homebrew-6.0.0/
+
+## 7.3 DeepSeek FIM — verified from api-docs.deepseek.com/guides/fim_completion
+
+- Endpoint: OpenAI-compatible `POST https://api.deepseek.com/beta/completions` (the `/beta` base URL enables the feature).
+- Request: `{ "model": "deepseek-v4-pro", "prompt": "<prefix>", "suffix": "<suffix>", "max_tokens": 128 }` (suffix optional).
+- Response: standard completions → `choices[0].text`. Max FIM output: 4K tokens.
+- Auth: `Authorization: Bearer ${DEEPSEEK_API_KEY}`.
+- Env var convention confirmed: `DEEPSEEK_API_KEY` (platform.deepseek.com).
+
+## 7.4 Neovim FIM plugin decision
+
+Surveyed `tzachar/cmp-ai` (277★, last push 2026-02), `magicalne/fim.nvim`, `aliou/nvim-fim`, `fimloom.nvim`, `vimsurf.nvim`. All either target local models (Ollama/llama.cpp), use chat-format payloads (not FIM `prompt`/`suffix`), or are single-author experiments. **Decision:** ship a small, self-contained `nvim-config/lua/omni_fim.lua` module (no new plugin dependency) that calls the verified DeepSeek FIM endpoint with `curl`, renders ghost text via an extmark, and no-ops when `DEEPSEEK_API_KEY` is unset. Model/endpoint are configurable via `setup()`.
+
+## 7.5 tmux pane titles
+
+`select-pane -T <title>` (pane title) was added in tmux 3.2 (CHANGES line 888) — matches the repo's existing `tmux >= 3.2` minimum. `pane-border-status top` displays titles in the borders.
