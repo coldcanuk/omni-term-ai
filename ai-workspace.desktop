@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=AI Workspace
+Comment=Launch Grok and Agy in Tmux
+Exec=/home/chuck/.local/bin/launch-ai-workspace
+Icon=ai-workspace
+Terminal=true
+Type=Application
+Categories=Development;Utility;
+Keywords=tmux;ai;grok;agy;
