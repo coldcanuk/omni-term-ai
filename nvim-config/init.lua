@@ -109,7 +109,8 @@ require("lazy").setup({
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    config = function(_, opts) require('nvim-treesitter.configs').setup(opts) end,
+    tag = 'v0.9.3',
+    main = 'nvim-treesitter.configs',
     opts = {
       ensure_installed = { 'bash', 'c', 'html', 'lua', 'markdown', 'vim', 'vimdoc', 'python', 'go', 'javascript', 'typescript' },
       auto_install = true,
