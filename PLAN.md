@@ -1,44 +1,39 @@
-# Scope of Work
+# Omni Term AI - Dual Tab Neovim Plan (RDAP)
 
-**Primary Goal**: Open-source the terminal AI workspace setup in `/opt/repo/omni-term-ai` on GitHub. Use GPLv3. Ensure API keys are fetched on the fly via `secret-tool` rather than using global environment variables in `.bashrc`.
-**Non-Goals**: Full LLM FIM completion client implementation (this phase is strictly repository setup, architecture, and secure dynamic credential wiring).
+## 2. Scope of Work
+**Primary Goal**: Convert the tmux workspace into a dual-tab architecture (Tab 1: Command Center, Tab 2: Full-screen Neovim) with an instant hotkey toggle, and provide a fully configured Neovim setup.
+**Non-Goals**: We are not writing a custom Neovim plugin from scratch. We are not setting up multiple popups.
 **Success Criteria**: 
-  - Repo initialized at `/opt/repo/omni-term-ai`.
-  - Pushed to GitHub under `coldcanuk/omni-term-ai`.
-  - GPLv3 `LICENSE` and valid `.gitignore` present.
-  - `README.md` explicitly documents how to use `secret-tool` to avoid cleartext keys.
-  - `~/.bashrc` is verified to NOT contain any global key exports.
-  - Scripts dynamically fetch keys via `secret-tool lookup` only when needed.
-**Constraints**: `/opt/repo` local directory. GitHub CLI (`gh`). RDAP methodology.
-**Top Risks**: 
-  - Accidental key exposure (Mitigation: Strict `.gitignore`, code review of wrapper scripts).
+- `launch-ai-workspace` creates two tmux windows.
+- `Ctrl-b e` toggles instantly between the two windows.
+- Neovim is configured with a file explorer (e.g., neo-tree or nvim-tree) and modern defaults.
+**Constraints**: Tmux 3.2+, Neovim 0.9.5+.
+**Risks**: Tmux window switching bindings might conflict. Neovim kickstart might require external dependencies like `ripgrep` or `gcc` (will mitigate by checking system).
 
-# RDAP Plan
+## 3. Comprehensive Plan
 
-## Phase 0: Environment & Isolation Setup
-- **M0.1**: Initialize Repo
-  - **Task 1**: `mkdir -p /opt/repo/omni-term-ai && cd /opt/repo/omni-term-ai && git init`
-  - **Task 2**: Create baseline files (`.gitignore`, `LICENSE`, `README.md`)
-  - **Task 3**: Commit and configure GitHub repository via `gh`.
-  - **Task 4**: Create git worktree `gb/dynamic-secrets`.
+### Phase 1 - Research & Discovery
+- **Milestone 1.1**: Verify dependencies (`ripgrep`, `gcc`, `unzip` for Neovim plugins).
+  - Task 1: Check dependencies.
+- **Milestone 1.2**: Research Tmux window toggling.
+  - Task 1: Find the command to switch between exactly two windows. (e.g. `tmux select-window -t :=1` or `tmux last-window`).
+  - Task 2: Synthesize findings into `RESEARCH.md`.
 
-## Phase 1: Research & Discovery
-- **M1.1**: Security & Authentication Audit.
-  - **Task 1**: Verify `gh auth status` confirms `coldcanuk` access.
-  - **Task 2**: Audit `~/.bashrc` to ensure `XAI_API_KEY` and `DEEPSEEK_API_KEY` global exports are permanently removed.
-  - **Task 3**: Synthesize `RESEARCH.md` and confirm the dynamic fetching strategy.
+### Phase 2 - Architecture
+- **Milestone 2.1**: Update script logic.
+  - Task 1: Design `launch-ai-workspace` to create a second window and map `Ctrl-b e` to `last-window` (since it switches between the two).
 
-## Phase 2: Define / Architecture
-- **M2.1**: Define the dynamic secret fetching wrapper.
-  - **Task 1**: Outline the architecture for an on-the-fly execution wrapper that prevents credential leakage into child process environments longer than necessary.
+### Phase 3 - Implementation
+- **Milestone 3.1**: Deploy Neovim Config.
+  - Task 1: Clone or write a kickstart-based `init.lua` into `nvim-config/init.lua` in the repo.
+  - Task 2: Symlink it to `~/.config/nvim`.
+- **Milestone 3.2**: Modify `launch-ai-workspace`.
+  - Task 1: Update the bash script to spawn `ai-session:1` (Command Center) and `ai-session:2` (Editor).
+  - Task 2: Remove Neovim from the bottom pane of Tab 1.
+- **Milestone 3.3**: Update `tmux.conf`.
+  - Task 1: Map `bind e last-window` or custom select window in `tmux.conf`.
 
-## Phase 3: Implementation
-- **M3.1**: Build dynamic key fetcher.
-  - **Task 1**: Write `omni-exec.sh` that securely wraps AI commands and injects credentials ephemerally.
-  - **Task 2**: Add the customized `launch-ai-workspace` and `tmux.conf` configs into the repository.
-
-## Phase 4: Verification, Polish, Integration & Cleanup
-- **M4.1**: Finalize & Merge.
-  - **Task 1**: Verify script syntax and `.gitignore`.
-  - **Task 2**: Merge worktree into main, push to GitHub.
-  - **Task 3**: Remove worktree.
+### Final Phase - Verification & Polish
+- **Milestone 4.1**: Test the environment.
+  - Task 1: Run the launcher and verify dual tabs.
+  - Task 2: Commit, PR, merge, clean up worktree.
