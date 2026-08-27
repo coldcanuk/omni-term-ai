@@ -27,3 +27,8 @@ credentials*
 # OS
 .DS_Store
 Thumbs.db
+
+# Package build output
+dist/
+*.deb
+*.rpm
