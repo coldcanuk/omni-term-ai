@@ -1,0 +1,4 @@
+Omni Term AI is a tmux-based dual-tab workspace that launches a command
+center and a Neovim editor with a packaged configuration. API keys are
+read via omni-secret (pass(1) or 0600 files; OpenBSD has no libsecret).
+tmux is in the OpenBSD base system.

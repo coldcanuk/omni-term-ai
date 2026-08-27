@@ -1,0 +1,12 @@
+Package: omni-term-ai
+Version: @VERSION@-1
+Section: editors
+Priority: optional
+Architecture: all
+Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools
+Maintainer: Frozen Packet <chuck.pitre@hotmail.com>
+Homepage: https://github.com/coldcanuk/omni-term-ai
+Description: tmux workspace with Neovim and AI tooling
+ Omni Term AI is a tmux-based dual-tab workspace that launches a command
+ center and a Neovim editor with a packaged configuration. API keys are
+ read from the OS keychain via omni-secret (libsecret on Linux).

@@ -1,0 +1,44 @@
+.TH LAUNCH-AI-WORKSPACE 1 "August 2026" "omni-term-ai" "User Commands"
+.SH NAME
+launch-ai-workspace \- start the Omni Term AI tmux workspace
+.SH SYNOPSIS
+.B launch-ai-workspace
+.SH DESCRIPTION
+Creates or attaches a dedicated tmux server (socket name
+.BR omni-term-ai )
+with a Command Center window and a Neovim Editor window.
+Neovim is launched with
+.B NVIM_APPNAME=omni-term-ai
+so the packaged configuration does not replace
+.IR ~/.config/nvim .
+.SH COMMANDS
+.TP
+.B omni-exec
+Run a command with
+.B XAI_API_KEY
+and
+.B DEEPSEEK_API_KEY
+injected from the OS secret store.
+.TP
+.B omni-secret
+Store or retrieve API keys. Backends: Linux
+.BR secret-tool (1),
+macOS
+.BR security (1),
+.BR pass (1),
+or mode-0600 files under
+.IR ~/.config/omni-term-ai/secrets/ .
+.SH ENVIRONMENT
+.TP
+.B OMNI_TERM_AI_HOME
+Override the share directory (normally
+.IR PREFIX/share/omni-term-ai ).
+.TP
+.B NVIM_APPNAME
+Set to
+.B omni-term-ai
+by the launcher.
+.SH FILES
+.I PREFIX/share/omni-term-ai
+.SH SEE ALSO
+tmux(1), nvim(1)

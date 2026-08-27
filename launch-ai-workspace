@@ -1,61 +1,65 @@
-#!/usr/bin/env bash
+#!/bin/sh
+set -eu
+
+if [ -f "$(dirname "$0")/lib/boot.sh" ]; then
+    # shellcheck source=lib/boot.sh
+    . "$(dirname "$0")/lib/boot.sh"
+else
+    OMNI_TERM_AI_HOME="${OMNI_TERM_AI_HOME:-@OMNI_HOME@}"
+    export OMNI_TERM_AI_HOME
+    # shellcheck source=/dev/null
+    . "$OMNI_TERM_AI_HOME/lib/omni.sh"
+fi
 
 SESSION_NAME="ai-session"
 
-# Check if tmux is installed
-if ! command -v tmux &> /dev/null; then
-    echo "tmux is not installed. Please install it first."
+if ! command -v tmux >/dev/null 2>&1; then
+    echo "tmux is not installed. Please install it first." >&2
     exit 1
 fi
 
-# Ensure Neovim config is linked
-if [ ! -d "$HOME/.config/nvim" ]; then
-    mkdir -p "$HOME/.config"
-    ln -s /opt/repo/omni-term-ai/nvim-config "$HOME/.config/nvim"
-fi
+omni_ensure_nvim_config
+export NVIM_APPNAME=omni-term-ai
 
-# Function to attach or switch to the session
+bindir=$(CDPATH= cd -P -- "$(dirname "$0")" && pwd) || bindir=$(dirname "$0")
+PATH="$bindir:$PATH"
+export PATH
+
+omni_apply_tmux_env() {
+    omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
+    omni_tmux set-environment -g PATH "$PATH"
+}
+
 attach_or_switch() {
-    if [ -n "$TMUX" ]; then
-        tmux switch-client -t "$SESSION_NAME"
+    if [ -n "${TMUX:-}" ]; then
+        omni_tmux switch-client -t "$SESSION_NAME"
     else
-        tmux attach-session -t "$SESSION_NAME"
+        omni_tmux attach-session -t "$SESSION_NAME"
     fi
 }
 
-# Check if session exists
-if tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+if omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
     echo "Session $SESSION_NAME already exists. Attaching..."
+    omni_apply_tmux_env
     attach_or_switch
 else
     echo "Creating new session $SESSION_NAME with dual-tab layout..."
-    
-    # Start a new detached session with Tab 1
-    env -u TMUX tmux new-session -d -s "$SESSION_NAME" -n "Command Center"
-    
-    # Store the first window's ID so we don't care about base-index
+
+    ( unset TMUX; omni_tmux new-session -d -s "$SESSION_NAME" -n "Command Center" )
+
     WIN_CMD="$SESSION_NAME:^"
-    
-    # Split Tab 1 into Top/Bottom
-    tmux split-window -v -t "$WIN_CMD"
-    # Split Top into Left/Right
-    tmux split-window -h -t "$WIN_CMD.0"
-    
-    # Pane 0: agy, Pane 1: grok, Pane 2: bash
-    tmux send-keys -t "$WIN_CMD.0" "agy" C-m
-    tmux send-keys -t "$WIN_CMD.1" "grok" C-m
-    
-    # Tab 2: Editor (Neovim)
-    tmux new-window -t "$SESSION_NAME" -n "Editor"
-    WIN_ED="$SESSION_NAME:^" # Wait, `^` means first window. `$` means last window.
-    
-    # Let's just use window names to target them!
-    tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
-    
-    # Set focus on Tab 1 Terminal by default
-    tmux select-window -t "$SESSION_NAME:=Command Center"
-    tmux select-pane -t "$SESSION_NAME:=Command Center.2"
-    
-    # Attach or switch to the session
+    omni_tmux split-window -v -t "$WIN_CMD"
+    omni_tmux split-window -h -t "$WIN_CMD.0"
+
+    omni_tmux send-keys -t "$WIN_CMD.0" "agy" C-m
+    omni_tmux send-keys -t "$WIN_CMD.1" "grok" C-m
+
+    omni_tmux new-window -t "$SESSION_NAME" -n "Editor"
+    omni_tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
+
+    omni_tmux select-window -t "$SESSION_NAME:=Command Center"
+    omni_tmux select-pane -t "$SESSION_NAME:=Command Center.2"
+    omni_apply_tmux_env
+
     attach_or_switch
 fi

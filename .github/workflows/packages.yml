@@ -1,0 +1,41 @@
+name: packages
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+jobs:
+  deb:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify DESTDIR layout
+        run: sh packaging/tests/verify-install.sh
+      - name: Build Debian package
+        run: make deb
+      - name: Inspect .deb
+        run: |
+          deb=$(ls dist/omni-term-ai_*_all.deb)
+          dpkg-deb -I "$deb"
+          dpkg-deb -c "$deb" | grep usr/bin/launch-ai-workspace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: debian-package
+          path: dist/*.deb
+
+  rpm:
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install rpmbuild
+        run: dnf install -y make rpm-build tar gzip findutils
+      - name: Build RPM
+        run: make rpm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-package
+          path: dist/*.rpm
+          if-no-files-found: error

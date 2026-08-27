@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 if tmux list-clients -t scratch 2>/dev/null | grep -q .; then
     tmux detach-client -s scratch
 else
