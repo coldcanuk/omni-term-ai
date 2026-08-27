@@ -50,7 +50,7 @@ else
     WIN_ED="$SESSION_NAME:^" # Wait, `^` means first window. `$` means last window.
     
     # Let's just use window names to target them!
-    tmux send-keys -t "$SESSION_NAME:=Editor" "nvim" C-m
+    tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
     
     # Set focus on Tab 1 Terminal by default
     tmux select-window -t "$SESSION_NAME:=Command Center"
