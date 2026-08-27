@@ -14,3 +14,21 @@ The wrapper scripts in this repository will dynamically fetch these keys only wh
 
 ## License
 GPLv3
+
+## Dependencies
+
+To run the Omni Term AI workspace seamlessly, ensure the following dependencies are installed on your system:
+
+- **tmux** (3.2 or newer) - For the dual-tab architecture and window management.
+- **Neovim** (0.9.5 or newer) - For the embedded, full-screen editor environment.
+- **git** - Required for Neovim's `lazy.nvim` package manager.
+- **gcc** or **make** - Required to compile Treesitter parsers and Telescope's C-port.
+- **ripgrep** (`rg`) - Required for Telescope's blazing-fast fuzzy finding and grep search.
+- **unzip** - Required for various Neovim plugin installations.
+- **libsecret-tools** - Provides `secret-tool` for the dynamic, secure credential fetching.
+
+### Installation on Ubuntu / Pop!_OS:
+```bash
+sudo apt update
+sudo apt install tmux neovim git build-essential ripgrep unzip libsecret-tools
+```
