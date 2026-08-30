@@ -83,7 +83,7 @@ if [ ! -t 0 ] && ! [ -c /dev/tty ]; then
         exit 0
     fi
 else
-    while omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+    while omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; do
         echo "====================================================="
         echo "Session '$SESSION_NAME' already exists!"
         echo "====================================================="
