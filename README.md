@@ -129,9 +129,9 @@ Options live at the bottom of `nvim-config/init.lua`
 window, keymaps, highlight group. FIM output is capped at 4K tokens by the
 API.
 
-## DeepSeek AI Bash Tab Completion
+## DeepSeek AI Bash Completion
 
-You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Tab>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor. This also seamlessly enables Neovim's inline AI completions when run outside of the tmux workspace.
+You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor, while leaving standard `<Tab>` completion fully functional for commands and files. This also seamlessly enables Neovim's inline AI completions when run outside of the tmux workspace.
 
 Add the following to your `~/.bashrc`:
 ```bash
