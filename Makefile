@@ -24,6 +24,9 @@ install:
 	$(INSTALL) -d $(DESTDIR)$(MANDIR)
 	$(INSTALL) -d $(DESTDIR)$(DOCDIR)
 	$(INSTALL) -m 644 lib/omni.sh $(DESTDIR)$(DATADIR)/lib/omni.sh
+	sed "s|@OMNI_HOME@|$(OMNI_HOME_VALUE)|g" lib/omni-bash.sh > $(DESTDIR)$(DATADIR)/lib/omni-bash.sh
+	chmod 644 $(DESTDIR)$(DATADIR)/lib/omni-bash.sh
+	$(INSTALL) -m 644 lib/deepseek-completion.bash $(DESTDIR)$(DATADIR)/lib/deepseek-completion.bash
 	sed "s|@OMNI_HOME@|$(OMNI_HOME_VALUE)|g" lib/boot.sh > $(DESTDIR)$(DATADIR)/lib/boot.sh
 	chmod 644 $(DESTDIR)$(DATADIR)/lib/boot.sh
 	$(INSTALL) -m 644 tmux.conf $(DESTDIR)$(DATADIR)/tmux.conf
