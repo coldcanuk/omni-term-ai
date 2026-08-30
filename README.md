@@ -129,6 +129,19 @@ Options live at the bottom of `nvim-config/init.lua`
 window, keymaps, highlight group. FIM output is capped at 4K tokens by the
 API.
 
+## DeepSeek AI Bash Tab Completion
+
+You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Tab>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor. This also seamlessly enables Neovim's inline AI completions when run outside of the tmux workspace.
+
+Add the following to your `~/.bashrc`:
+```bash
+# Omni Term AI integration
+. $HOME/.local/share/omni-term-ai/lib/omni-bash.sh
+```
+*(Adjust the path if you installed to a different prefix.)*
+
+Make sure you have stored your DeepSeek key using `omni-secret store deepseek`.
+
 ## License
 
 GPLv3
