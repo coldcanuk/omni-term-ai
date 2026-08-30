@@ -1,18 +1,12 @@
-# DeepSeek Bash Tab Completion
-# Binds <Tab> to try normal completion first, then fall back to DeepSeek AI.
+# DeepSeek Bash Completion
+# Binds <C-f> to DeepSeek AI completion.
+# (Leaving <Tab> strictly for standard bash programmable completion)
 
-_omni_deepseek_tab_completion() {
+_omni_deepseek_completion() {
     local line="${READLINE_LINE}"
     local point="${READLINE_POINT}"
     local prefix="${line:0:point}"
     local suffix="${line:point}"
-
-    # First, let's just trigger DeepSeek directly because 
-    # capturing standard tab completion inside bind -x is highly complex.
-    # To use standard completion as well, users typically bind this to Ctrl-Space or Ctrl-F,
-    # but the requirement is "inline tab completion", "predict text when I'm typing".
-    # We will bind it to Tab, and if DeepSeek returns nothing, we could fallback, 
-    # but since it's an AI, it almost always returns something.
     
     if [ -z "$DEEPSEEK_API_KEY" ]; then
         return
@@ -88,12 +82,8 @@ else:
 
     if [ -n "$cmd" ]; then
         eval "$cmd"
-    else
-        # If AI returns nothing, we could trigger standard completion by falling back
-        # but bind -x shadowing Tab prevents normal Tab. 
-        # A common trick is to insert a literal tab or do nothing.
-        true
     fi
 }
 
-bind -x '"\t": _omni_deepseek_tab_completion'
+# Bind Ctrl-F to DeepSeek AI Completion
+bind -x '"\C-f": _omni_deepseek_completion'
