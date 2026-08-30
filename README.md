@@ -150,6 +150,10 @@ GPLv3
 
 Pick the path for your OS. All of them install the same files via `make install`.
 
+### Windows 11 (WSL)
+
+Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) for full setup instructions!
+
 ### Ubuntu / Debian / Pop!_OS
 
 ```bash
