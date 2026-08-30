@@ -75,36 +75,77 @@ validate_harness() {
     fi
 }
 
-if omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
-    echo "Session $SESSION_NAME already exists. Attaching..."
-    omni_apply_tmux_env
-    attach_or_switch
+if [ ! -t 0 ] && ! [ -c /dev/tty ]; then
+    if omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        echo "Session $SESSION_NAME already exists. Attaching (non-interactive)..."
+        omni_apply_tmux_env
+        attach_or_switch
+        exit 0
+    fi
 else
-    validate_harness left "$LEFT_HARNESS"
-    validate_harness right "$RIGHT_HARNESS"
-    LEFT_CMD=$(omni_harness_cmd "$LEFT_HARNESS")
-    RIGHT_CMD=$(omni_harness_cmd "$RIGHT_HARNESS")
-
-    echo "Creating new session $SESSION_NAME with dual-tab layout..."
-    echo "Command Center: left=$LEFT_HARNESS ($LEFT_CMD)  right=$RIGHT_HARNESS ($RIGHT_CMD)"
-
-    ( unset TMUX; omni_tmux new-session -d -s "$SESSION_NAME" -n "Command Center" )
-
-    WIN_CMD="$SESSION_NAME:^"
-    omni_tmux split-window -v -t "$WIN_CMD"
-    omni_tmux split-window -h -t "$WIN_CMD.0"
-
-    omni_tmux send-keys -t "$WIN_CMD.0" "$LEFT_CMD" C-m
-    omni_tmux send-keys -t "$WIN_CMD.1" "$RIGHT_CMD" C-m
-    omni_tmux select-pane -T "$LEFT_HARNESS" -t "$WIN_CMD.0"
-    omni_tmux select-pane -T "$RIGHT_HARNESS" -t "$WIN_CMD.1"
-
-    omni_tmux new-window -t "$SESSION_NAME" -n "Editor"
-    omni_tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
-
-    omni_tmux select-window -t "$SESSION_NAME:=Command Center"
-    omni_tmux select-pane -t "$SESSION_NAME:=Command Center.2"
-    omni_apply_tmux_env
-
-    attach_or_switch
+    while omni_tmux has-session -t "$SESSION_NAME" 2>/dev/null; then
+        echo "====================================================="
+        echo "Session '$SESSION_NAME' already exists!"
+        echo "====================================================="
+        echo " [a] Attach to the existing session (default)"
+        echo " [k] Kill the existing session and create a new one"
+        echo " [n] Name a new session instead"
+        echo " [q] Quit"
+        printf "Choice: "
+        read -r choice </dev/tty || exit 1
+        case "$choice" in
+            a|A|"")
+                echo "Attaching to $SESSION_NAME..."
+                omni_apply_tmux_env
+                attach_or_switch
+                exit 0
+                ;;
+            k|K)
+                echo "Killing session $SESSION_NAME..."
+                omni_tmux kill-session -t "$SESSION_NAME"
+                break
+                ;;
+            n|N)
+                printf "Enter new session name: "
+                read -r SESSION_NAME </dev/tty || exit 1
+                if [ -z "$SESSION_NAME" ]; then
+                    echo "Invalid name. Try again."
+                fi
+                ;;
+            q|Q)
+                exit 0
+                ;;
+            *)
+                echo "Invalid choice."
+                ;;
+        esac
+    done
 fi
+
+validate_harness left "$LEFT_HARNESS"
+validate_harness right "$RIGHT_HARNESS"
+LEFT_CMD=$(omni_harness_cmd "$LEFT_HARNESS")
+RIGHT_CMD=$(omni_harness_cmd "$RIGHT_HARNESS")
+
+echo "Creating new session $SESSION_NAME with dual-tab layout..."
+echo "Command Center: left=$LEFT_HARNESS ($LEFT_CMD)  right=$RIGHT_HARNESS ($RIGHT_CMD)"
+
+( unset TMUX; omni_tmux new-session -d -s "$SESSION_NAME" -n "Command Center" )
+
+WIN_CMD="$SESSION_NAME:^"
+omni_tmux split-window -v -t "$WIN_CMD"
+omni_tmux split-window -h -t "$WIN_CMD.0"
+
+omni_tmux send-keys -t "$WIN_CMD.0" "$LEFT_CMD" C-m
+omni_tmux send-keys -t "$WIN_CMD.1" "$RIGHT_CMD" C-m
+omni_tmux select-pane -T "$LEFT_HARNESS" -t "$WIN_CMD.0"
+omni_tmux select-pane -T "$RIGHT_HARNESS" -t "$WIN_CMD.1"
+
+omni_tmux new-window -t "$SESSION_NAME" -n "Editor"
+omni_tmux send-keys -t "$SESSION_NAME:=Editor" "nvim -c \"Neotree show\"" C-m
+
+omni_tmux select-window -t "$SESSION_NAME:=Command Center"
+omni_tmux select-pane -t "$SESSION_NAME:=Command Center.2"
+omni_apply_tmux_env
+
+attach_or_switch
