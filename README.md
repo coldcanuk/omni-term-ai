@@ -160,6 +160,12 @@ cd omni-term-ai
 sudo make install PREFIX=/usr
 ```
 
+Or download the latest `.deb` package from [GitHub Releases](https://github.com/coldcanuk/omni-term-ai/releases) and install it:
+
+```bash
+sudo apt install ./omni-term-ai_*_all.deb
+```
+
 Or install a `.deb` built from this tree:
 
 ```bash
@@ -174,6 +180,12 @@ sudo dnf install tmux neovim git gcc make ripgrep unzip libsecret
 git clone https://github.com/coldcanuk/omni-term-ai.git
 cd omni-term-ai
 sudo make install PREFIX=/usr
+```
+
+Or download the latest `.rpm` package from [GitHub Releases](https://github.com/coldcanuk/omni-term-ai/releases) and install it:
+
+```bash
+sudo dnf install ./omni-term-ai-*.noarch.rpm
 ```
 
 With `rpm-build` installed, `make rpm` writes RPMs under `dist/`.
