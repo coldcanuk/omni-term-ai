@@ -32,3 +32,9 @@ Thumbs.db
 dist/
 *.deb
 *.rpm
+
+# Private Jumpbox Data
+servers.csv
+*.local
+config.yml
+secrets/

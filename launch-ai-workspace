@@ -13,6 +13,28 @@ fi
 
 SESSION_NAME="${1:-ai-session}"
 
+omni_load_config
+
+if [ -n "${SESSION_NAME}" ] && [ "${SESSION_NAME#@}" != "${SESSION_NAME}" ]; then
+    TARGET_NAME="${SESSION_NAME#@}"
+    JUMPBOX=$(omni_config_get jumpbox)
+    if [ -z "$JUMPBOX" ]; then
+        echo "Error: Remote target specified, but no jumpbox configured." >&2
+        echo "Run: omni-config set jumpbox user@host" >&2
+        exit 1
+    fi
+    echo "Connecting to jumpbox $JUMPBOX for target $TARGET_NAME..."
+    exec ssh -t "$JUMPBOX" "
+        mkdir -p ~/mnt/$TARGET_NAME
+        if ! mountpoint -q ~/mnt/$TARGET_NAME; then
+            sshfs $TARGET_NAME:/ ~/mnt/$TARGET_NAME || echo 'Warning: sshfs mount failed'
+        fi
+        cd ~/mnt/$TARGET_NAME || exit 1
+        export TERM=\$TERM
+        launch-ai-workspace $TARGET_NAME
+    "
+fi
+
 if ! command -v tmux >/dev/null 2>&1; then
     echo "tmux is not installed. Please install it first." >&2
     exit 1

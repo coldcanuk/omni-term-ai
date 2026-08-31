@@ -25,8 +25,8 @@ usage() {
     echo "Usage: omni-config [command]" >&2
     echo "  (no command)   interactive wizard" >&2
     echo "  list           supported harnesses and install status" >&2
-    echo "  get [side]     current selection (side: left|right)" >&2
-    echo "  set side name  set a pane's harness (side: left|right)" >&2
+    echo "  get [side]     current selection (side: left|right|jumpbox)" >&2
+    echo "  set side name  set a pane's harness or jumpbox (side: left|right|jumpbox)" >&2
     echo "  path           print the config file path" >&2
     exit 1
 }
@@ -63,10 +63,11 @@ cmd_get() {
     omni_load_config
     case ${1:-} in
     "")
-        echo "left:  $(omni_config_get left)"
-        echo "right: $(omni_config_get right)"
+        echo "left:    $(omni_config_get left)"
+        echo "right:   $(omni_config_get right)"
+        echo "jumpbox: $(omni_config_get jumpbox)"
         ;;
-    left | right)
+    left | right | jumpbox)
         omni_config_get "$1"
         ;;
     *)
@@ -78,12 +79,21 @@ cmd_get() {
 cmd_set() {
     side=$1
     harness=$2
-    case $side in left | right) ;; *) usage ;; esac
-    if ! omni_valid_harness "$harness"; then
-        echo "omni-config: unknown harness '$harness'" >&2
-        echo "Supported: $(omni_harness_list | tr '\n' ' ')" >&2
-        exit 1
-    fi
+    case $side in
+        left | right)
+            if ! omni_valid_harness "$harness"; then
+                echo "omni-config: unknown harness '$harness'" >&2
+                echo "Supported: $(omni_harness_list | tr '\n' ' ')" >&2
+                exit 1
+            fi
+            ;;
+        jumpbox)
+            # harness here is the user@host jumpbox target
+            ;;
+        *) 
+            usage 
+            ;;
+    esac
     file=$(omni_config_path)
     mkdir -p "$(dirname "$file")"
     if [ ! -f "$file" ]; then
@@ -93,12 +103,17 @@ cmd_set() {
 # Supported: grok agy copilot claude codex deepseek
 OMNI_LEFT_HARNESS=agy
 OMNI_RIGHT_HARNESS=grok
+OMNI_JUMPBOX=
 EOF
     fi
     update_key "OMNI_$(echo "$side" | tr '[:lower:]' '[:upper:]')_HARNESS" "$harness" "$file"
+    # Special case for jumpbox which doesn't use the _HARNESS suffix:
+    if [ "$side" = "jumpbox" ]; then
+        update_key "OMNI_JUMPBOX" "$harness" "$file"
+    fi
     chmod 600 "$file" 2>/dev/null || true
     echo "Saved: $side = $harness ($file)"
-    if ! omni_harness_installed "$harness"; then
+    if [ "$side" != "jumpbox" ] && ! omni_harness_installed "$harness"; then
         echo "Note: '$harness' is not on PATH yet. Install it with:" >&2
         echo "  $(omni_harness_install_hint "$harness")" >&2
     fi
