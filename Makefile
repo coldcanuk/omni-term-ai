@@ -35,7 +35,8 @@ install:
 	if [ -f nvim-config/lazy-lock.json ]; then \
 		$(INSTALL) -m 644 nvim-config/lazy-lock.json $(DESTDIR)$(DATADIR)/nvim-config/lazy-lock.json; \
 	fi
-	$(INSTALL) -m 644 ai-workspace.desktop $(DESTDIR)$(APPDIR)/ai-workspace.desktop
+	sed "s|@BINDIR@|$(BINDIR)|g" ai-workspace.desktop > $(DESTDIR)$(APPDIR)/ai-workspace.desktop
+	chmod 644 $(DESTDIR)$(APPDIR)/ai-workspace.desktop
 	$(INSTALL) -m 644 brain.svg $(DESTDIR)$(ICONDIR)/ai-workspace.svg
 	$(INSTALL) -m 644 man/launch-ai-workspace.1 $(DESTDIR)$(MANDIR)/launch-ai-workspace.1
 	$(INSTALL) -m 644 man/omni-config.1 $(DESTDIR)$(MANDIR)/omni-config.1
