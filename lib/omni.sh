@@ -192,13 +192,15 @@ omni_load_config() {
     # config instead of silently getting a different harness.
     : "${OMNI_LEFT_HARNESS:=agy}"
     : "${OMNI_RIGHT_HARNESS:=grok}"
-    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS
+    : "${OMNI_JUMPBOX:=}"
+    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX
 }
 
 omni_config_get() {
     case $1 in
     left) printf '%s\n' "$OMNI_LEFT_HARNESS" ;;
     right) printf '%s\n' "$OMNI_RIGHT_HARNESS" ;;
+    jumpbox) printf '%s\n' "$OMNI_JUMPBOX" ;;
     esac
 }
 
