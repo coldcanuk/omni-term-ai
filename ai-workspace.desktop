@@ -2,7 +2,7 @@
 Version=1.0
 Name=AI Workspace
 Comment=Launch AI assistant panes in Tmux
-Exec=launch-ai-workspace
+Exec=@BINDIR@/launch-ai-workspace
 TryExec=tmux
 Icon=ai-workspace
 Terminal=true
