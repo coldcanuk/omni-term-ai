@@ -123,18 +123,18 @@ EOF
 wizard_side() {
     label=$1
     default=$2
-    echo "Select the $label harness (default: $default):"
+    echo "Select the $label harness (default: $default):" >&2
     i=1
     for h in $(omni_harness_list); do
         if omni_harness_installed "$h"; then
-            printf '  %d) %s [installed]\n' "$i" "$(omni_harness_name "$h")"
+            printf '  %d) %s [installed]\n' "$i" "$(omni_harness_name "$h")" >&2
         else
-            printf '  %d) %s\n' "$i" "$(omni_harness_name "$h")"
+            printf '  %d) %s\n' "$i" "$(omni_harness_name "$h")" >&2
         fi
         i=$((i + 1))
     done
     n=$((i - 1))
-    printf 'Choice [1-%d, empty=%s]: ' "$n" "$default"
+    printf 'Choice [1-%d, empty=%s]: ' "$n" "$default" >&2
     IFS= read -r choice || return 1
     if [ -z "$choice" ]; then
         echo "$default"
@@ -161,10 +161,24 @@ wizard_side() {
     return 1
 }
 
+wizard_jumpbox() {
+    default=$1
+    echo "Enter jumpbox target (e.g. user@host, or leave empty) [default: $default]:" >&2
+    printf 'Choice: ' >&2
+    IFS= read -r choice || return 1
+    if [ -z "$choice" ]; then
+        echo "$default"
+        return 0
+    fi
+    echo "$choice"
+    return 0
+}
+
 cmd_wizard() {
     omni_load_config
     left=$(wizard_side left "$OMNI_LEFT_HARNESS") || exit 1
     right=$(wizard_side right "$OMNI_RIGHT_HARNESS") || exit 1
+    jumpbox=$(wizard_jumpbox "$OMNI_JUMPBOX") || exit 1
     file=$(omni_config_path)
     mkdir -p "$(dirname "$file")"
     cat >"$file" <<EOF
@@ -173,9 +187,10 @@ cmd_wizard() {
 # Supported: grok agy copilot claude codex deepseek
 OMNI_LEFT_HARNESS=$left
 OMNI_RIGHT_HARNESS=$right
+OMNI_JUMPBOX=$jumpbox
 EOF
     chmod 600 "$file" 2>/dev/null || true
-    echo "Saved: left=$left right=$right ($file)"
+    echo "Saved: left=$left right=$right jumpbox=$jumpbox ($file)"
 }
 
 cmd=${1:-}
