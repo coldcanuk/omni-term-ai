@@ -82,7 +82,8 @@ pop!OS: deb
 popos: deb
 
 fedora: rpm
-
+redhat: rpm
+rhel: rpm
 omarchy: arch
 arch:
 	sh packaging/build-arch.sh
