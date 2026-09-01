@@ -38,3 +38,6 @@ servers.csv
 *.local
 config.yml
 secrets/
+
+# Git worktrees
+.worktrees/
