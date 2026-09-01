@@ -99,15 +99,21 @@ end
 
 local function fetch()
   local endpoint = cfg.endpoint
+  local model = cfg.model
   local auth_header = ""
   local azure_key = vim.env.AZURE_OPENAI_API_KEY
   local azure_endpoint = vim.env.AZURE_OPENAI_ENDPOINT
   local azure_deployment = vim.env.AZURE_OPENAI_DEPLOYMENT
+  local openai_key = vim.env.OPENAI_API_KEY
   local deepseek_key = vim.env.DEEPSEEK_API_KEY
 
   if azure_key and azure_key ~= "" and azure_endpoint and azure_endpoint ~= "" and azure_deployment and azure_deployment ~= "" then
     endpoint = azure_endpoint:gsub("/$", "") .. "/openai/deployments/" .. azure_deployment .. "/completions?api-version=2024-02-15-preview"
     auth_header = "api-key: " .. azure_key
+  elseif openai_key and openai_key ~= "" then
+    endpoint = "https://api.openai.com/v1/completions"
+    model = "gpt-3.5-turbo-instruct"
+    auth_header = "Authorization: Bearer " .. openai_key
   elseif deepseek_key and deepseek_key ~= "" then
     auth_header = "Authorization: Bearer " .. deepseek_key
   else
@@ -148,7 +154,7 @@ local function fetch()
   end
 
   local payload = vim.json.encode({
-    model = cfg.model,
+    model = model,
     prompt = prefix,
     suffix = suffix,
     max_tokens = cfg.max_tokens,
