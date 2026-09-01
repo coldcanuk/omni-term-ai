@@ -1,15 +1,25 @@
 # Omni Term AI Workspace
 
-A tmux-based terminal workspace with Neovim and pluggable shell AI assistants
-("harnesses"). The Command Center window shows two AI assistants side by side
-(top-left and top-right panes) plus a plain terminal pane below; an Editor
-window runs a packaged Neovim with DeepSeek Fill-In-The-Middle (FIM) code
-completion.
+A tmux-based terminal workspace with Neovim and pluggable shell AI assistants ("harnesses"). The Command Center window shows two AI assistants side by side (top-left and top-right panes) plus a plain terminal pane below; an Editor window runs a packaged Neovim with DeepSeek Fill-In-The-Middle (FIM) code completion.
+
+## Table of Contents
+
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Shortcut Keys](#shortcut-keys)
+- [Features](#features)
+  - [Command Center Configuration](#command-center-configuration)
+  - [Remote Workspaces (Jumpbox)](#remote-workspaces-jumpbox)
+  - [DeepSeek FIM Editor Completion](#deepseek-fim-editor-completion)
+  - [DeepSeek AI Bash Completion](#deepseek-ai-bash-completion)
+- [Supported AI Assistants](#supported-ai-assistants)
+- [Security: API Keys](#security-api-keys)
+- [License](#license)
 
 ## Requirements
 
-These are the runtime requirements **you** provide; the package installs only
-configuration and helper scripts:
+These are the runtime requirements **you** provide; the package installs only configuration and helper scripts:
 
 | Requirement | Minimum | Notes |
 | --- | --- | --- |
@@ -20,40 +30,145 @@ configuration and helper scripts:
 | An AI assistant CLI | — | at least one of: `grok`, `agy`, `copilot`, `claude`, `codex`, `dsh` |
 | An API key | — | stored in the OS keychain via `omni-secret` (see below) |
 
-## Supported AI assistants (harnesses)
+## Installation
 
-Configure which assistants fill the top-left and top-right Command Center
-panes with `omni-config` — any combination, including the same assistant on
-both sides.
+Pick the path for your OS. All of them install the same files via `make install`.
+
+### Windows 11 (WSL)
+Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) for full setup instructions!
+
+### Ubuntu / Debian / Pop!_OS
+```bash
+sudo apt update
+sudo apt install tmux neovim git build-essential ripgrep unzip libsecret-tools
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+sudo make install PREFIX=/usr
+```
+*Note: You can also run `make ubuntu` or `make deb` to build `.deb` packages in `dist/`.*
+
+### Fedora / RHEL / Rocky / AlmaLinux
+```bash
+sudo dnf install tmux neovim git gcc make ripgrep unzip libsecret
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+sudo make install PREFIX=/usr
+```
+*Note: With `rpm-build` installed, run `make fedora` or `make rpm` to build RPMs.*
+
+### Arch Linux / Manjaro
+Run `make arch` to automatically build an Arch package (`PKGBUILD`).
+
+### macOS (Homebrew)
+Run `make macos` to build an installer `.pkg`, or install via Homebrew:
+```bash
+brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai
+brew trust coldcanuk/omni-term-ai
+brew install --HEAD omni-term-ai
+```
+
+### FreeBSD & OpenBSD
+Run `make freebsd` or `make openbsd` to prepare the respective ports directory.
+
+### Any Unix (user prefix)
+```bash
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+./install.sh --deps --prefix "$HOME/.local"
+```
+Put `$HOME/.local/bin` on `PATH`.
+
+## Usage
+
+```bash
+# Store your API keys in the native OS keychain
+omni-secret store xai
+omni-secret store deepseek
+
+# Launch the workspace! (Will run first-time setup if unconfigured)
+launch-ai-workspace
+```
+
+The launcher uses a dedicated tmux socket (`omni-term-ai`) and `NVIM_APPNAME=omni-term-ai`, so it does not replace `~/.config/nvim` or your default tmux server.
+
+## Shortcut Keys
+
+The workspace is powered by tmux. By default, the tmux prefix is `Ctrl+b`. Here are the custom workspace shortcuts:
+
+- **`Prefix + ?`**: **Show Help Window** (list of all bound shortcut keys)
+- **`Prefix + h/j/k/l`**: Navigate panes (left/down/up/right)
+- **`Prefix + Shift + H/J/K/L`**: Resize current pane
+- **`Prefix + e`**: Dual-Tab Toggle (instantly switch between Command Center and Editor tabs)
+- **`Prefix + E`**: Panic Button (kills the Editor tab and spawns a fresh Neovim instance)
+- **`Prefix + Space`**: Toggle the floating scratchpad terminal
+- **`Prefix + n`**: Open Neovim with Neotree in the current focused pane
+
+## Features
+
+### Command Center Configuration
+
+Configure which assistants fill the top-left and top-right Command Center panes. You will be prompted automatically on your first run, but you can change it anytime with `omni-config`:
+
+```bash
+omni-config          # interactive wizard: pick left, right harnesses and jumpbox
+omni-config list     # supported harnesses + installed status + install hints
+omni-config get      # show current selection
+omni-config path     # where the config lives
+```
+
+Manual overrides:
+```bash
+omni-config set left copilot && omni-config set right copilot   # copilot on both
+omni-config set left agy    && omni-config set right grok       # agy left, grok right
+```
+
+### Remote Workspaces (Jumpbox)
+
+Omni Term AI supports seamlessly developing on remote targets via an optional Jumpbox architecture. 
+
+1. **Setup**: Run `omni-config` and enter your jumpbox address when prompted, or manually set it: 
+   `omni-config set jumpbox user@jumpbox.example.com`
+2. **Launch**: Start a session with the `@` prefix for your remote target:
+   `launch-ai-workspace @production-server`
+
+The workspace will SSH to your jumpbox, mount `production-server:/` locally onto the jumpbox using `sshfs`, and seamlessly run the AI workspace on the remote code!
+
+### DeepSeek FIM Editor Completion
+
+With `DEEPSEEK_API_KEY` stored, the Editor window shows ghost-text completions as you type (insert mode, ~120 ms debounce). Completions call DeepSeek's FIM endpoint:
+
+- **`<Tab>`** accepts the ghost completion
+- **`<C-e>`** dismisses it
+- Without a stored DeepSeek key, the plugin quietly does nothing.
+
+Options live at the bottom of `nvim-config/init.lua` (`require("omni_fim").setup({ ... })`).
+
+### DeepSeek AI Bash Completion
+
+You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor.
+
+Add the following to your `~/.bashrc`:
+```bash
+# Omni Term AI integration
+. $HOME/.local/share/omni-term-ai/lib/omni-bash.sh
+```
+
+## Supported AI Assistants
 
 | Harness | Binary | Install | Launch | Auth |
 | --- | --- | --- | --- | --- |
 | grok (xAI Grok Build) | `grok` | `curl -fsSL https://x.ai/cli/install.sh \| bash` | `grok` | browser sign-in, or `XAI_API_KEY` |
 | agy (Google Antigravity) | `agy` | `curl -fsSL https://antigravity.google/cli/install.sh \| bash` | `agy` | Google sign-in; optional `GEMINI_API_KEY` |
-| copilot (GitHub Copilot CLI) | `copilot` | `brew install copilot-cli` (or `curl -fsSL https://gh.io/copilot-install \| bash`) | `copilot` | `/login`; or `GH_TOKEN` / `GITHUB_TOKEN` |
+| copilot (GitHub Copilot CLI) | `copilot` | `brew install copilot-cli` | `copilot` | `/login`; or `GH_TOKEN` |
 | claude (Claude Code) | `claude` | `npm install -g @anthropic-ai/claude-code` | `claude` | `claude /login`; or `ANTHROPIC_API_KEY` |
 | codex (OpenAI Codex) | `codex` | `npm install -g @openai/codex` | `codex` | `codex login`; or `OPENAI_API_KEY` |
 | deepseek (DeepSeek Harness) | `dsh` | `npm install -g @deepseek-ai/dsh` | `dsh web --no-open` | `DEEPSEEK_API_KEY` |
 
-The DeepSeek API key is special: beyond powering the `deepseek` harness, it
-drives **FIM (Fill-In-The-Middle) code completion** in the Neovim Editor —
-DeepSeek's specialty — with no extra subscription.
+`launch-ai-workspace` validates your two chosen harnesses before starting. If missing, it prints the install command.
 
-`launch-ai-workspace` validates your two chosen harnesses before starting:
-if a binary is missing it prints the exact install command for that harness
-and exits, so you never get an empty pane by accident.
+## Security: API Keys
 
-## Security First: No Clear-Text API Keys
-
-This project does not write API keys in `~/.bashrc` or `.env` files. `omni-secret` stores and fetches keys from the native OS secret store:
-
-| Platform | Backend |
-| --- | --- |
-| Ubuntu / Debian / Fedora | `secret-tool` (libsecret / GNOME Keyring) |
-| macOS | `security` (Keychain) |
-| OpenBSD | `pass` if installed, otherwise `~/.config/omni-term-ai/secrets/` (mode 0600) |
-
-Store the keys for whichever harnesses you use:
+This project does not write API keys in plain text. `omni-secret` stores and fetches keys from the native OS secret store (libsecret on Linux, Keychain on macOS).
 
 ```bash
 omni-secret store xai        # grok            -> XAI_API_KEY
@@ -64,198 +179,8 @@ omni-secret store github     # copilot         -> GH_TOKEN / GITHUB_TOKEN
 omni-secret store gemini     # agy (optional)  -> GEMINI_API_KEY
 ```
 
-Linux equivalent without the helper:
-
-```bash
-secret-tool store --label="xAI API Key" api xai
-secret-tool store --label="Deepseek API Key" api deepseek
-```
-
-`omni-exec` injects every harness key (`XAI_API_KEY`, `DEEPSEEK_API_KEY`,
-`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GH_TOKEN`, `GEMINI_API_KEY`) into a
-single command's environment; `launch-ai-workspace` does the same for the
-whole tmux session. Keys you never stored are exported empty, so interactive
-logins (browser sign-in, `/login`) still work.
-
-## Choose your assistants: omni-config
-
-```bash
-omni-config          # interactive wizard: pick left and right harnesses
-omni-config list     # supported harnesses + installed status + install hints
-omni-config get      # show current left/right selection
-omni-config set left codex
-omni-config set right claude
-omni-config path     # where the config lives
-```
-
-Examples:
-
-```bash
-omni-config set left copilot && omni-config set right copilot   # copilot on both
-omni-config set left agy    && omni-config set right grok       # agy left, grok right
-omni-config set left codex  && omni-config set right claude     # codex left, claude right
-```
-
-The config file is plain POSIX shell at
-`~/.config/omni-term-ai/config` (`$XDG_CONFIG_HOME` honored):
-
-```sh
-OMNI_LEFT_HARNESS=agy
-OMNI_RIGHT_HARNESS=grok
-```
-
-Defaults are `agy` (left) and `grok` (right).
-
-## DeepSeek FIM completion in the Editor
-
-With `DEEPSEEK_API_KEY` stored, the Editor window shows ghost-text
-completions as you type (insert mode, ~120 ms debounce). Completions call
-DeepSeek's FIM endpoint:
-
-```
-POST https://api.deepseek.com/beta/completions
-{ "model": "deepseek-v4-pro", "prompt": <text before cursor>,
-  "suffix": <text after cursor>, "max_tokens": 128, "temperature": 0 }
-```
-
-- **`<Tab>`** accepts the ghost completion (falls through to a real Tab when
-  none is shown)
-- **`<C-e>`** dismisses it
-- Without a stored DeepSeek key the plugin quietly does nothing; the Editor
-  works normally.
-
-Options live at the bottom of `nvim-config/init.lua`
-(`require("omni_fim").setup({ ... })`): model, endpoint, debounce, context
-window, keymaps, highlight group. FIM output is capped at 4K tokens by the
-API.
-
-## DeepSeek AI Bash Completion
-
-You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor, while leaving standard `<Tab>` completion fully functional for commands and files. This also seamlessly enables Neovim's inline AI completions when run outside of the tmux workspace.
-
-Add the following to your `~/.bashrc`:
-```bash
-# Omni Term AI integration
-. $HOME/.local/share/omni-term-ai/lib/omni-bash.sh
-```
-*(Adjust the path if you installed to a different prefix.)*
-
-Make sure you have stored your DeepSeek key using `omni-secret store deepseek`.
+`omni-exec` securely injects the keys into the harnesses at runtime. Keys you never stored are exported empty, so interactive browser logins still work perfectly.
 
 ## License
 
 GPLv3
-
-## Install
-
-Pick the path for your OS. All of them install the same files via `make install`.
-
-### Windows 11 (WSL)
-
-Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) for full setup instructions!
-
-### Ubuntu / Debian / Pop!_OS
-
-```bash
-sudo apt update
-sudo apt install tmux neovim git build-essential ripgrep unzip libsecret-tools
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-sudo make install PREFIX=/usr
-```
-
-Or download the latest `.deb` package from [GitHub Releases](https://github.com/coldcanuk/omni-term-ai/releases) and install it:
-
-```bash
-sudo apt install ./omni-term-ai_*_all.deb
-```
-
-Or install a `.deb` built from this tree:
-
-```bash
-make deb
-sudo apt install ./dist/omni-term-ai_*_all.deb
-```
-
-### Fedora / RHEL / Rocky / AlmaLinux
-
-```bash
-sudo dnf install tmux neovim git gcc make ripgrep unzip libsecret
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-sudo make install PREFIX=/usr
-```
-
-Or download the latest `.rpm` package from [GitHub Releases](https://github.com/coldcanuk/omni-term-ai/releases) and install it:
-
-```bash
-sudo dnf install ./omni-term-ai-*.noarch.rpm
-```
-
-With `rpm-build` installed, `make rpm` writes RPMs under `dist/`.
-
-### macOS (Homebrew)
-
-Homebrew 6.0+ **requires tapping repos to be trusted** before their formulae
-may be evaluated (`brew trust`). Until a `homebrew-omni-term-ai` tap repo
-exists, tap this project by URL and trust it (head-only until a tagged
-release):
-
-```bash
-brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai
-brew trust coldcanuk/omni-term-ai
-brew install --HEAD omni-term-ai
-```
-
-Prefer trusting just this formula instead of the whole tap?
-
-```bash
-brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai
-brew trust --formula coldcanuk/omni-term-ai/omni-term-ai
-brew install --HEAD coldcanuk/omni-term-ai/omni-term-ai
-```
-
-From a checkout (no trust step needed for the in-tree formula):
-
-```bash
-brew install --HEAD --formula ./Formula/omni-term-ai.rb
-```
-
-Manage trust with `brew untrust coldcanuk/omni-term-ai` or list trusted
-entries with `brew trust --json=v1`.
-
-### OpenBSD
-
-tmux is in the base system.
-
-```sh
-doas pkg_add neovim git ripgrep
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-doas make install PREFIX=/usr/local
-```
-
-A ports skeleton lives in `packaging/openbsd/sysutils/omni-term-ai/` for `/usr/ports/mystuff`. Official `pkg_add omni-term-ai` requires the port to be imported upstream.
-
-### Any Unix (user prefix)
-
-```bash
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-./install.sh --deps --prefix "$HOME/.local"
-```
-
-Put `$HOME/.local/bin` on `PATH`.
-
-## Usage
-
-```bash
-omni-secret store xai
-omni-secret store deepseek
-omni-config                     # optional: pick your panes' assistants
-launch-ai-workspace
-```
-
-The launcher uses a dedicated tmux socket (`omni-term-ai`) and `NVIM_APPNAME=omni-term-ai`, so it does not replace `~/.config/nvim` or your default tmux server. Harness names appear in each pane's top border.
-
-Packaging internals are documented in `packaging/PACKAGING.md`.
