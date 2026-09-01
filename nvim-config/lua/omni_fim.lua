@@ -98,6 +98,10 @@ local function show_ghost(text)
 end
 
 local function fetch()
+  if vim.g.loaded_copilot or vim.g.loaded_copilot_lua then
+    return -- bail out to prevent ghost text conflicts with Copilot plugins
+  end
+
   local endpoint = cfg.endpoint
   local model = cfg.model
   local auth_header = ""
