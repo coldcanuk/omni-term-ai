@@ -69,3 +69,28 @@ deb:
 
 rpm:
 	sh packaging/build-rpm.sh
+
+# Distribution package aliases
+macos: macosx
+macosx:
+	sh packaging/build-macos.sh
+
+debian: deb
+ubuntu: deb
+ubuntuu: deb
+pop!OS: deb
+popos: deb
+
+fedora: rpm
+
+omarchy: arch
+arch:
+	sh packaging/build-arch.sh
+
+openbsd:
+	sh packaging/build-openbsd.sh
+
+freebsd:
+	sh packaging/build-freebsd.sh
+
+all-packages: deb rpm macos arch openbsd freebsd
