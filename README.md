@@ -159,19 +159,24 @@ Omni Term AI supports seamlessly developing on remote targets via an optional Ju
 
 The workspace will SSH to your jumpbox, mount `production-server:/` locally onto the jumpbox using `sshfs`, and seamlessly run the AI workspace on the remote code!
 
-### DeepSeek FIM Editor Completion
+### FIM Editor Completion (DeepSeek & Azure)
 
-With `DEEPSEEK_API_KEY` stored, the Editor window shows ghost-text completions as you type (insert mode, ~120 ms debounce). Completions call DeepSeek's FIM endpoint:
+With an API key stored via `omni-secret`, the Editor window shows ghost-text completions as you type (insert mode, ~120 ms debounce). Completions call Fill-In-The-Middle (FIM) endpoints.
+
+**DeepSeek FIM**: Uses `DEEPSEEK_API_KEY`.
+**Azure OpenAI FIM**: Uses `AZURE_OPENAI_API_KEY` (requires `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_DEPLOYMENT` exported in your bashrc).
 
 - **`<Tab>`** accepts the ghost completion
 - **`<C-e>`** dismisses it
-- Without a stored DeepSeek key, the plugin quietly does nothing.
+- Without a stored key, the plugin quietly does nothing.
+
+*(Note for corporate environments: You can also use GitHub Copilot instead by installing the official `copilot.vim` plugin in your `~/.config/nvim` directory!)*
 
 Options live at the bottom of `nvim-config/init.lua` (`require("omni_fim").setup({ ... })`).
 
-### DeepSeek AI Bash Completion
+### FIM Bash Completion
 
-You can integrate DeepSeek directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using DeepSeek FIM, presenting choices above your cursor.
+You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using FIM (DeepSeek or Azure OpenAI), presenting choices above your cursor.
 
 Add the following to your `~/.bashrc`:
 ```bash
@@ -203,6 +208,7 @@ omni-secret store anthropic  # claude          -> ANTHROPIC_API_KEY
 omni-secret store openai     # codex           -> OPENAI_API_KEY
 omni-secret store github     # copilot         -> GH_TOKEN / GITHUB_TOKEN
 omni-secret store gemini     # agy (optional)  -> GEMINI_API_KEY
+omni-secret store azure      # azure fim       -> AZURE_OPENAI_API_KEY
 ```
 
 `omni-exec` securely injects the keys into the harnesses at runtime. Keys you never stored are exported empty, so interactive browser logins still work perfectly.

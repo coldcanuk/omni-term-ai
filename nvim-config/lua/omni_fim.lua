@@ -98,17 +98,29 @@ local function show_ghost(text)
 end
 
 local function fetch()
-  local key = vim.env.DEEPSEEK_API_KEY
-  if not key or key == "" then
+  local endpoint = cfg.endpoint
+  local auth_header = ""
+  local azure_key = vim.env.AZURE_OPENAI_API_KEY
+  local azure_endpoint = vim.env.AZURE_OPENAI_ENDPOINT
+  local azure_deployment = vim.env.AZURE_OPENAI_DEPLOYMENT
+  local deepseek_key = vim.env.DEEPSEEK_API_KEY
+
+  if azure_key and azure_key ~= "" and azure_endpoint and azure_endpoint ~= "" and azure_deployment and azure_deployment ~= "" then
+    endpoint = azure_endpoint:gsub("/$", "") .. "/openai/deployments/" .. azure_deployment .. "/completions?api-version=2024-02-15-preview"
+    auth_header = "api-key: " .. azure_key
+  elseif deepseek_key and deepseek_key ~= "" then
+    auth_header = "Authorization: Bearer " .. deepseek_key
+  else
     return -- no key stored yet; stay quiet
   end
+
   if vim.bo.filetype == "" or not vim.bo.modifiable then
     return
   end
   if vim.fn.executable("curl") == 0 then
     if not state.warned then
       state.warned = true
-      vim.notify("omni_fim: curl is required for DeepSeek FIM", vim.log.levels.WARN)
+      vim.notify("omni_fim: curl is required for FIM", vim.log.levels.WARN)
     end
     return
   end
@@ -151,8 +163,8 @@ local function fetch()
   f:close()
 
   state.job = vim.fn.jobstart({
-    "curl", "-sS", "--max-time", "20", cfg.endpoint,
-    "-H", "Authorization: Bearer " .. key,
+    "curl", "-sS", "--max-time", "20", endpoint,
+    "-H", auth_header,
     "-H", "Content-Type: application/json",
     "-d", "@" .. tmp,
   }, {
