@@ -58,6 +58,7 @@ omni_apply_tmux_env() {
     omni_export_harness_keys
     omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
     omni_tmux set-environment -g PATH "$PATH"
+    omni_tmux set-environment -g OMNI_FIM_ENGINE "$OMNI_FIM_ENGINE"
     # Explicit, eval-free: the keys were exported above by
     # omni_export_harness_keys (empty strings when never stored).
     omni_tmux set-environment -g XAI_API_KEY "$XAI_API_KEY"

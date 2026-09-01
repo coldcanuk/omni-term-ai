@@ -193,7 +193,8 @@ omni_load_config() {
     : "${OMNI_LEFT_HARNESS:=agy}"
     : "${OMNI_RIGHT_HARNESS:=grok}"
     : "${OMNI_JUMPBOX:=}"
-    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX
+    : "${OMNI_FIM_ENGINE:=native}"
+    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX OMNI_FIM_ENGINE
 }
 
 omni_config_get() {
@@ -201,6 +202,7 @@ omni_config_get() {
     left) printf '%s\n' "$OMNI_LEFT_HARNESS" ;;
     right) printf '%s\n' "$OMNI_RIGHT_HARNESS" ;;
     jumpbox) printf '%s\n' "$OMNI_JUMPBOX" ;;
+    fim) printf '%s\n' "$OMNI_FIM_ENGINE" ;;
     esac
 }
 

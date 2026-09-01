@@ -34,7 +34,7 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Setup lazy and plugins
-require("lazy").setup({
+local plugins = {
   -- UI & Colorscheme
   {
     "folke/tokyonight.nvim",
@@ -118,11 +118,16 @@ require("lazy").setup({
       indent = { enable = true },
     },
   },
-})
+}
 
--- DeepSeek Fill-In-The-Middle (FIM) ghost-text completion.
--- Uses $DEEPSEEK_API_KEY (injected by omni-exec / launch-ai-workspace from
--- the OS secret store). Quietly no-ops until that key is stored:
---   omni-secret store deepseek
--- <Tab> accepts, <C-e> dismisses. See lua/omni_fim.lua for options.
-require("omni_fim").setup({})
+local fim_engine = vim.env.OMNI_FIM_ENGINE or "native"
+
+if fim_engine == "copilot" then
+  table.insert(plugins, { "github/copilot.vim" })
+end
+
+require("lazy").setup(plugins)
+
+if fim_engine == "native" then
+  require("omni_fim").setup({})
+end
