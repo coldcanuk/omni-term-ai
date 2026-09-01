@@ -8,8 +8,8 @@ Writing, modifying, or committing directly to the `main` branch is **strictly pr
 ### 🌳 Rule 2: Always Use Worktrees
 All new features, bug fixes, or documentation updates must be isolated in a new Git worktree.
 ```bash
-git worktree add -b gb/<feature-name> ../gb-<feature-name>-wt
-cd ../gb-<feature-name>-wt
+git worktree add -b gb/<feature-name> .worktrees/gb-<feature-name>-wt
+cd .worktrees/gb-<feature-name>-wt
 ```
 
 ### 📤 Rule 3: Commit and Push
@@ -33,5 +33,5 @@ After a successful merge, the local worktree must be safely deleted.
 cd /opt/repo/omni-term-ai
 git checkout main
 git pull origin main
-git worktree remove ../gb-<feature-name>-wt
+git worktree remove .worktrees/gb-<feature-name>-wt
 ```
