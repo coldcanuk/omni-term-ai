@@ -216,6 +216,7 @@ omni_export_harness_keys() {
     OPENAI_KEY=$(omni_secret_get openai)
     GITHUB_KEY=$(omni_secret_get github)
     GEMINI_KEY=$(omni_secret_get gemini)
+    AZURE_KEY=$(omni_secret_get azure)
     export XAI_API_KEY="$XAI_KEY"
     export DEEPSEEK_API_KEY="$DEEPSEEK_KEY"
     export ANTHROPIC_API_KEY="$ANTHROPIC_KEY"
@@ -223,4 +224,5 @@ omni_export_harness_keys() {
     export GH_TOKEN="$GITHUB_KEY"
     export GITHUB_TOKEN="$GITHUB_KEY"
     export GEMINI_API_KEY="$GEMINI_KEY"
+    export AZURE_OPENAI_API_KEY="$AZURE_KEY"
 }

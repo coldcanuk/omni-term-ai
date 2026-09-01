@@ -8,18 +8,28 @@ _omni_deepseek_completion() {
     local prefix="${line:0:point}"
     local suffix="${line:point}"
     
-    if [ -z "$DEEPSEEK_API_KEY" ]; then
-        return
-    fi
-    
     local cmd=$(python3 -c '
 import sys, json, urllib.request, os, shutil
 
 prefix = sys.argv[1]
 suffix = sys.argv[2]
 api_key = os.environ.get("DEEPSEEK_API_KEY")
+azure_key = os.environ.get("AZURE_OPENAI_API_KEY")
+azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
+azure_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
 
 if not prefix.strip():
+    sys.exit(0)
+
+endpoint = "https://api.deepseek.com/beta/completions"
+headers = {"Content-Type": "application/json"}
+
+if azure_key and azure_endpoint and azure_deployment:
+    endpoint = azure_endpoint.rstrip("/") + f"/openai/deployments/{azure_deployment}/completions?api-version=2024-02-15-preview"
+    headers["api-key"] = azure_key
+elif api_key:
+    headers["Authorization"] = f"Bearer {api_key}"
+else:
     sys.exit(0)
 
 req_data = {
@@ -32,9 +42,9 @@ req_data = {
 if suffix: req_data["suffix"] = suffix
 
 req = urllib.request.Request(
-    "https://api.deepseek.com/beta/completions",
+    endpoint,
     data=json.dumps(req_data).encode("utf-8"),
-    headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    headers=headers
 )
 
 try:
