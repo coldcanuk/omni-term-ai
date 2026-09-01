@@ -37,7 +37,9 @@ Pick the path for your OS. All of them install the same files via `make install`
 ### Windows 11 (WSL)
 Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) for full setup instructions!
 
-### Ubuntu / Debian / Pop!_OS
+### Debian / Pop!OS / Ubuntu
+Supported Package: **`.deb`**
+
 ```bash
 sudo apt update
 sudo apt install tmux neovim git build-essential ripgrep unzip libsecret-tools
@@ -45,30 +47,54 @@ git clone https://github.com/coldcanuk/omni-term-ai.git
 cd omni-term-ai
 sudo make install PREFIX=/usr
 ```
-*Note: You can also run `make ubuntu` or `make deb` to build `.deb` packages in `dist/`.*
+*Note: You can run `make deb`, `make ubuntu`, or `make popos` to build `.deb` packages in `dist/`.*
 
-### Fedora / RHEL / Rocky / AlmaLinux
+### Fedora / RedHat (RHEL) / AlmaLinux
+Supported Package: **`.rpm`**
+
 ```bash
 sudo dnf install tmux neovim git gcc make ripgrep unzip libsecret
 git clone https://github.com/coldcanuk/omni-term-ai.git
 cd omni-term-ai
 sudo make install PREFIX=/usr
 ```
-*Note: With `rpm-build` installed, run `make fedora` or `make rpm` to build RPMs.*
+*Note: With `rpm-build` installed, run `make rpm`, `make fedora`, or `make redhat` to build RPMs in `dist/`.*
 
-### Arch Linux / Manjaro
-Run `make arch` to automatically build an Arch package (`PKGBUILD`).
+### Omarchy / Arch Linux / Manjaro
+Supported Package: **`PKGBUILD`**
 
-### macOS (Homebrew)
-Run `make macos` to build an installer `.pkg`, or install via Homebrew:
+```bash
+sudo pacman -S tmux neovim git base-devel ripgrep unzip libsecret
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+sudo make install PREFIX=/usr
+```
+*Note: Run `make arch` or `make omarchy` to automatically generate an Arch package (`PKGBUILD`) in `dist/`.*
+
+### MacOSX
+Supported Package: **`.pkg`** (and Homebrew Formula)
+
+Run `make macosx` or `make macos` to build a native macOS installer `.pkg` in `dist/`, or install directly via Homebrew:
 ```bash
 brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai
 brew trust coldcanuk/omni-term-ai
 brew install --HEAD omni-term-ai
 ```
 
-### FreeBSD & OpenBSD
-Run `make freebsd` or `make openbsd` to prepare the respective ports directory.
+### OpenBSD & FreeBSD
+Supported Packages: **Ports Skeleton**
+
+- **OpenBSD**: Run `make openbsd` to prepare the ports skeleton (`/usr/ports/mystuff/sysutils/omni-term-ai`).
+- **FreeBSD**: Run `make freebsd` to prepare the FreeBSD ports directory.
+
+For manual installation on either:
+```bash
+# On FreeBSD use 'pkg install', on OpenBSD use 'pkg_add'
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+# On OpenBSD use 'doas make install', on FreeBSD use 'sudo make install'
+make install PREFIX=/usr/local
+```
 
 ### Any Unix (user prefix)
 ```bash
