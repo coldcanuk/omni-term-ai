@@ -13,6 +13,11 @@ fi
 
 SESSION_NAME="${1:-ai-session}"
 
+if [ ! -f "$(omni_config_path)" ] && [ -t 0 ] && [ -c /dev/tty ]; then
+    echo "First time setup: configuring Omni Term AI..."
+    omni-config
+fi
+
 omni_load_config
 
 if [ -n "${SESSION_NAME}" ] && [ "${SESSION_NAME#@}" != "${SESSION_NAME}" ]; then
