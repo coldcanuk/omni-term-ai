@@ -17,23 +17,29 @@ api_key = os.environ.get("DEEPSEEK_API_KEY")
 azure_key = os.environ.get("AZURE_OPENAI_API_KEY")
 azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")
 azure_deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT")
+openai_key = os.environ.get("OPENAI_API_KEY")
 
 if not prefix.strip():
     sys.exit(0)
 
 endpoint = "https://api.deepseek.com/beta/completions"
+model = "deepseek-v4-pro"
 headers = {"Content-Type": "application/json"}
 
 if azure_key and azure_endpoint and azure_deployment:
     endpoint = azure_endpoint.rstrip("/") + f"/openai/deployments/{azure_deployment}/completions?api-version=2024-02-15-preview"
     headers["api-key"] = azure_key
+elif openai_key:
+    endpoint = "https://api.openai.com/v1/completions"
+    model = "gpt-3.5-turbo-instruct"
+    headers["Authorization"] = f"Bearer {openai_key}"
 elif api_key:
     headers["Authorization"] = f"Bearer {api_key}"
 else:
     sys.exit(0)
 
 req_data = {
-    "model": "deepseek-v4-pro",
+    "model": model,
     "prompt": prefix,
     "max_tokens": 128,
     "n": 3,

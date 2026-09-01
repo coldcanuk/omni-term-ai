@@ -159,11 +159,12 @@ Omni Term AI supports seamlessly developing on remote targets via an optional Ju
 
 The workspace will SSH to your jumpbox, mount `production-server:/` locally onto the jumpbox using `sshfs`, and seamlessly run the AI workspace on the remote code!
 
-### FIM Editor Completion (DeepSeek & Azure)
+### FIM Editor Completion (DeepSeek, OpenAI, Azure)
 
 With an API key stored via `omni-secret`, the Editor window shows ghost-text completions as you type (insert mode, ~120 ms debounce). Completions call Fill-In-The-Middle (FIM) endpoints.
 
 **DeepSeek FIM**: Uses `DEEPSEEK_API_KEY`.
+**OpenAI FIM**: Uses `OPENAI_API_KEY` (uses the `gpt-3.5-turbo-instruct` model).
 **Azure OpenAI FIM**: Uses `AZURE_OPENAI_API_KEY` (requires `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_DEPLOYMENT` exported in your bashrc).
 
 - **`<Tab>`** accepts the ghost completion
@@ -176,7 +177,7 @@ Options live at the bottom of `nvim-config/init.lua` (`require("omni_fim").setup
 
 ### FIM Bash Completion
 
-You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using FIM (DeepSeek or Azure OpenAI), presenting choices above your cursor.
+You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using FIM (DeepSeek, OpenAI, or Azure), presenting choices above your cursor.
 
 Add the following to your `~/.bashrc`:
 ```bash
