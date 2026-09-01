@@ -33,8 +33,12 @@ $(PREFIX)/share/doc/omni-term-ai/LICENSE
 
 | OS | Command |
 | --- | --- |
-| Ubuntu/Debian | `make deb` → `dist/omni-term-ai_*_all.deb` |
+| Ubuntu/Debian/Pop!_OS | `make deb` (or `make ubuntu`, `make popos`) → `dist/omni-term-ai_*_all.deb` |
 | Fedora/RHEL | `make rpm` (needs `rpmbuild`) |
-| macOS | `brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai` then `brew install --HEAD omni-term-ai` |
-| OpenBSD | port in `packaging/openbsd/` or `make install PREFIX=/usr/local` |
+| Arch Linux/Manjaro | `make arch` (needs `makepkg`, builds `PKGBUILD`) |
+| macOS | `make macos` (needs `pkgbuild` for `.pkg` or `brew install --HEAD Formula/omni-term-ai.rb`) |
+| FreeBSD | `make freebsd` (prepares ports directory) |
+| OpenBSD | `make openbsd` (prepares ports directory) |
 | Any | `./install.sh` or `make install PREFIX="$HOME/.local"` |
+
+You can also run `make all-packages` to prepare and build for all platforms at once, skipping architectures whose build tools are absent on the host machine.
