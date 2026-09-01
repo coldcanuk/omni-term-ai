@@ -34,8 +34,8 @@ for f in usr/bin/launch-ai-workspace usr/bin/omni-exec usr/bin/omni-secret usr/b
     [ -x "$STAGE/$f" ] || fail "not executable: $f"
 done
 
-grep -q '^Exec=launch-ai-workspace$' "$STAGE/usr/share/applications/ai-workspace.desktop" \
-    || fail "desktop Exec must be launch-ai-workspace"
+grep -q '^Exec=/usr/bin/launch-ai-workspace$' "$STAGE/usr/share/applications/ai-workspace.desktop" \
+    || fail "desktop Exec must be /usr/bin/launch-ai-workspace"
 grep -q '/usr/share/omni-term-ai' "$STAGE/usr/bin/launch-ai-workspace" \
     || fail "launcher must embed PREFIX share path"
 if grep -R '/opt/repo' "$STAGE" >/dev/null 2>&1; then
