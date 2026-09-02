@@ -27,6 +27,15 @@ die() {
 
 omni_load_config
 
+if [ "$SESSION_NAME" = "ai-session" ]; then
+    JUMPBOX=$(omni_config_get jumpbox)
+    if [ -n "$JUMPBOX" ]; then
+        # Default to remote jumpbox if configured
+        host="${JUMPBOX#*@}"
+        SESSION_NAME="@$host"
+    fi
+fi
+
 if [ -n "${SESSION_NAME}" ] && [ "${SESSION_NAME#@}" != "${SESSION_NAME}" ]; then
     TARGET_NAME="${SESSION_NAME#@}"
     JUMPBOX=$(omni_config_get jumpbox)
