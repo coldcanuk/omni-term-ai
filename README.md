@@ -42,7 +42,7 @@ Supported Package: **`.deb`**
 
 Download and install the latest `.deb` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
 ```bash
-wget https://github.com/coldcanuk/omni-term-ai/releases/latest/download/omni-term-ai.deb
+wget $(curl -s https://api.github.com/repos/coldcanuk/omni-term-ai/releases/latest | grep "browser_download_url.*\.deb" | cut -d '"' -f 4) -O omni-term-ai.deb
 sudo apt update
 sudo apt install ./omni-term-ai.deb
 ```
@@ -52,7 +52,7 @@ Supported Package: **`.rpm`**
 
 Download and install the latest `.rpm` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
 ```bash
-wget https://github.com/coldcanuk/omni-term-ai/releases/latest/download/omni-term-ai.rpm
+wget $(curl -s https://api.github.com/repos/coldcanuk/omni-term-ai/releases/latest | grep "browser_download_url.*\.noarch\.rpm" | cut -d '"' -f 4) -O omni-term-ai.rpm
 sudo dnf install ./omni-term-ai.rpm
 ```
 
