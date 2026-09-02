@@ -1,0 +1,7 @@
+Origin: OmniTermAI
+Label: OmniTermAI
+Suite: stable
+Codename: stable
+Architectures: all
+Components: main
+Description: Omni Term AI Workspace Repository
