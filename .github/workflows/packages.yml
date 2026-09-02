@@ -130,8 +130,8 @@ jobs:
       - name: Generate RPM repository
         run: |
           cd repo/rpm
-          sudo apt-get update && sudo apt-get install -y createrepo
-          createrepo .
+          sudo apt-get update && sudo apt-get install -y createrepo-c
+          createrepo_c .
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
