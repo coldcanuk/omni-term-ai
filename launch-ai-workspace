@@ -18,15 +18,20 @@ if [ ! -f "$(omni_config_path)" ] && [ -t 0 ] && [ -c /dev/tty ]; then
     omni-config
 fi
 
+die() {
+    echo "$@" >&2
+    echo "[Press Enter to exit]" >&2
+    read -r _ </dev/tty || true
+    exit 1
+}
+
 omni_load_config
 
 if [ -n "${SESSION_NAME}" ] && [ "${SESSION_NAME#@}" != "${SESSION_NAME}" ]; then
     TARGET_NAME="${SESSION_NAME#@}"
     JUMPBOX=$(omni_config_get jumpbox)
     if [ -z "$JUMPBOX" ]; then
-        echo "Error: Remote target specified, but no jumpbox configured." >&2
-        echo "Run: omni-config set jumpbox user@host" >&2
-        exit 1
+        die "Error: Remote target specified, but no jumpbox configured. Run: omni-config set jumpbox user@host"
     fi
     echo "Connecting to jumpbox $JUMPBOX for target $TARGET_NAME..."
     exec ssh -t "$JUMPBOX" "
@@ -41,8 +46,7 @@ if [ -n "${SESSION_NAME}" ] && [ "${SESSION_NAME#@}" != "${SESSION_NAME}" ]; the
 fi
 
 if ! command -v tmux >/dev/null 2>&1; then
-    echo "tmux is not installed. Please install it first." >&2
-    exit 1
+    die "tmux is not installed. Please install it first."
 fi
 
 omni_ensure_nvim_config
@@ -90,7 +94,7 @@ validate_harness() {
     if ! omni_valid_harness "$harness"; then
         echo "omni-term-ai: unknown $side harness '$harness' in $(omni_config_path)" >&2
         echo "Run: omni-config set $side <grok|agy|copilot|claude|codex|deepseek>" >&2
-        exit 1
+        die ""
     fi
     if ! omni_harness_installed "$harness"; then
         bin=$(omni_harness_bin "$harness")
@@ -99,7 +103,7 @@ validate_harness() {
         echo "  $(omni_harness_install_hint "$harness")" >&2
         echo "Then re-run launch-ai-workspace, or pick another harness:" >&2
         echo "  omni-config" >&2
-        exit 1
+        die ""
     fi
 }
 
