@@ -11,10 +11,13 @@ omni_secrets_dir() {
 
 omni_ensure_nvim_config() {
     cfg=$(omni_config_dir)
-    if [ ! -e "$cfg" ]; then
-        mkdir -p "$(dirname "$cfg")"
-        ln -s "$OMNI_TERM_AI_HOME/nvim-config" "$cfg"
-    fi
+    if [ -h "$cfg" ]; then rm -f "$cfg"; fi
+    if [ ! -e "$cfg" ]; then mkdir -p "$cfg"; fi
+    
+    # Symlink Neovim config files directly into the directory
+    ln -sfn "$OMNI_TERM_AI_HOME/nvim-config/init.lua" "$cfg/init.lua"
+    ln -sfn "$OMNI_TERM_AI_HOME/nvim-config/lua" "$cfg/lua"
+    ln -sfn "$OMNI_TERM_AI_HOME/nvim-config/lazy-lock.json" "$cfg/lazy-lock.json"
 }
 
 omni_secret_backend() {

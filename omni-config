@@ -106,7 +106,9 @@ cmd_set() {
             ;;
     esac
     file=$(omni_config_path)
-    mkdir -p "$(dirname "$file")"
+    d=$(dirname "$file")
+    if [ -h "$d" ]; then rm -f "$d"; fi
+    mkdir -p "$d"
     if [ ! -f "$file" ]; then
         cat >"$file" <<'EOF'
 # Omni Term AI configuration (POSIX sh).
@@ -221,7 +223,9 @@ cmd_wizard() {
     jumpbox=$(wizard_jumpbox "$OMNI_JUMPBOX") || exit 1
     fim=$(wizard_fim "$OMNI_FIM_ENGINE") || exit 1
     file=$(omni_config_path)
-    mkdir -p "$(dirname "$file")"
+    d=$(dirname "$file")
+    if [ -h "$d" ]; then rm -f "$d"; fi
+    mkdir -p "$d"
     cat >"$file" <<EOF
 # Omni Term AI configuration (POSIX sh).
 # Shell AI assistants shown in the Command Center panes.
