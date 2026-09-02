@@ -40,36 +40,29 @@ Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) 
 ### Debian / Pop!OS / Ubuntu
 Supported Package: **`.deb`**
 
+Download and install the latest `.deb` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
 ```bash
+wget https://github.com/coldcanuk/omni-term-ai/releases/latest/download/omni-term-ai.deb
 sudo apt update
-sudo apt install tmux neovim git build-essential ripgrep unzip libsecret-tools
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-sudo make install PREFIX=/usr
+sudo apt install ./omni-term-ai.deb
 ```
-*Note: You can run `make deb`, `make ubuntu`, or `make popos` to build `.deb` packages in `dist/`.*
 
 ### Fedora / RedHat (RHEL) / AlmaLinux
 Supported Package: **`.rpm`**
 
+Download and install the latest `.rpm` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
 ```bash
-sudo dnf install tmux neovim git gcc make ripgrep unzip libsecret
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-sudo make install PREFIX=/usr
+wget https://github.com/coldcanuk/omni-term-ai/releases/latest/download/omni-term-ai.rpm
+sudo dnf install ./omni-term-ai.rpm
 ```
-*Note: With `rpm-build` installed, run `make rpm`, `make fedora`, or `make redhat` to build RPMs in `dist/`.*
 
 ### Omarchy / Arch Linux / Manjaro
 Supported Package: **`PKGBUILD`**
 
+Download the `PKGBUILD` from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases) and use `makepkg` to build and install it, or use your favorite AUR helper:
 ```bash
-sudo pacman -S tmux neovim git base-devel ripgrep unzip libsecret
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-sudo make install PREFIX=/usr
+yay -S omni-term-ai
 ```
-*Note: Run `make arch` or `make omarchy` to automatically generate an Arch package (`PKGBUILD`) in `dist/`.*
 
 ### MacOSX
 Supported Package: **`.pkg`** (and Homebrew Formula)
@@ -87,22 +80,18 @@ Supported Packages: **Ports Skeleton**
 - **OpenBSD**: Run `make openbsd` to prepare the ports skeleton (`/usr/ports/mystuff/sysutils/omni-term-ai`).
 - **FreeBSD**: Run `make freebsd` to prepare the FreeBSD ports directory.
 
-For manual installation on either:
+### Developer Instructions / Building from source
+If you are a developer or want to install from source, these are the correct instructions for compiling:
 ```bash
-# On FreeBSD use 'pkg install', on OpenBSD use 'pkg_add'
 git clone https://github.com/coldcanuk/omni-term-ai.git
 cd omni-term-ai
-# On OpenBSD use 'doas make install', on FreeBSD use 'sudo make install'
-make install PREFIX=/usr/local
+./configure
+make clean
+make
+sudo make install
 ```
+*Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `libsecret`). You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install.*
 
-### Any Unix (user prefix)
-```bash
-git clone https://github.com/coldcanuk/omni-term-ai.git
-cd omni-term-ai
-./install.sh --deps --prefix "$HOME/.local"
-```
-Put `$HOME/.local/bin` on `PATH`.
 
 ## Usage
 

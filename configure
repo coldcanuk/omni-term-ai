@@ -1,0 +1,4 @@
+#!/bin/sh
+# Dummy configure script for standard source build compatibility
+echo "Configuring omni-term-ai..."
+exit 0
