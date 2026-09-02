@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.4
+## 0.2.5
 - Fix crash on launch caused by broken config symlink (`~/.config/omni-term-ai`) from legacy installations
 - Refactor Neovim config provisioning to link individual files instead of full directory
 
