@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.4
+- Fix crash on launch caused by broken config symlink (`~/.config/omni-term-ai`) from legacy installations
+- Refactor Neovim config provisioning to link individual files instead of full directory
+
 ## 0.2.0
 
 - Configurable Command Center harnesses: `omni-config` (list/get/set/wizard)
