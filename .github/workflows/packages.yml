@@ -114,7 +114,7 @@ jobs:
       - name: Generate APT repository
         run: |
           cd repo/apt
-          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          sudo apt-get update && sudo apt-get install -y dpkg-dev apt-utils
           dpkg-scanpackages . /dev/null > Packages
           gzip -k -f Packages
           cat << 'INNER_EOF' > Release
@@ -126,6 +126,7 @@ jobs:
           Components: main
           Description: Omni Term AI Workspace Repository
           INNER_EOF
+          apt-ftparchive release . >> Release
 
       - name: Generate RPM repository
         run: |
