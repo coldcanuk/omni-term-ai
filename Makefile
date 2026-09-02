@@ -61,6 +61,9 @@ uninstall:
 	rm -rf $(DESTDIR)$(DATADIR)
 	rm -rf $(DESTDIR)$(DOCDIR)
 
+clean:
+	@echo "Nothing to clean."
+
 test:
 	sh packaging/tests/verify-install.sh
 
