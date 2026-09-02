@@ -40,20 +40,27 @@ Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) 
 ### Debian / Pop!OS / Ubuntu
 Supported Package: **`.deb`**
 
-Download and install the latest `.deb` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
+Add our official repository to your package manager to automatically receive future updates:
 ```bash
-wget $(curl -s https://api.github.com/repos/coldcanuk/omni-term-ai/releases/latest | grep "browser_download_url.*\.deb" | cut -d '"' -f 4) -O omni-term-ai.deb
+echo "deb [trusted=yes] https://coldcanuk.github.io/omni-term-ai/apt /" | sudo tee /etc/apt/sources.list.d/omni-term-ai.list
 sudo apt update
-sudo apt install ./omni-term-ai.deb
+sudo apt install omni-term-ai
 ```
 
 ### Fedora / RedHat (RHEL) / AlmaLinux
 Supported Package: **`.rpm`**
 
-Download and install the latest `.rpm` package from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases):
+Add our official repository to your package manager to automatically receive future updates:
 ```bash
-wget $(curl -s https://api.github.com/repos/coldcanuk/omni-term-ai/releases/latest | grep "browser_download_url.*\.noarch\.rpm" | cut -d '"' -f 4) -O omni-term-ai.rpm
-sudo dnf install ./omni-term-ai.rpm
+cat <<REPO | sudo tee /etc/yum.repos.d/omni-term-ai.repo
+[omni-term-ai]
+name=Omni Term AI Repository
+baseurl=https://coldcanuk.github.io/omni-term-ai/rpm
+enabled=1
+gpgcheck=0
+REPO
+
+sudo dnf install omni-term-ai
 ```
 
 ### Omarchy / Arch Linux / Manjaro
