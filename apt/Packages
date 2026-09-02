@@ -6,9 +6,9 @@ Installed-Size: 204
 Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools
 Filename: ./omni-term-ai_0.2.3_all.deb
 Size: 30372
-MD5sum: c89f5ddc6a76780326ba919b07ffa0b8
-SHA1: 05b2a14b1f1f4776f92f66ad10331d340c110832
-SHA256: 1f622a20a8f6bde1767f8076c70d1b7a3880dce1e33f1640b18cb65bfe7eedbb
+MD5sum: e72225f0b33ffa80fe58eb190d314ae3
+SHA1: 3c588bc15852f77d2e6b78be7b2d6ed56638fc7c
+SHA256: e107401dbffca5349299ef20a9d7418b354c72bad2c8412bb27e0209fb41c94f
 Section: editors
 Priority: optional
 Homepage: https://github.com/coldcanuk/omni-term-ai
