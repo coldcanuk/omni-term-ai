@@ -93,6 +93,18 @@ sudo make install
 *Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `libsecret`). You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install.*
 
 
+
+## Uninstallation
+
+If you installed via a package manager (`apt`, `dnf`, `pacman`, `brew`), simply use your package manager to uninstall the `omni-term-ai` package.
+
+If you installed from source or using the local installation scripts, you can uninstall by running:
+```bash
+./uninstall.sh
+# or if you used a custom prefix:
+./uninstall.sh --prefix /usr
+```
+
 ## Usage
 
 ```bash
