@@ -1,14 +1,14 @@
 Package: omni-term-ai
-Version: 0.2.3-1
+Version: 0.2.5-1
 Architecture: all
 Maintainer: Frozen Packet <chuck.pitre@hotmail.com>
 Installed-Size: 204
 Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools
-Filename: ./omni-term-ai_0.2.3_all.deb
-Size: 30372
-MD5sum: e72225f0b33ffa80fe58eb190d314ae3
-SHA1: 3c588bc15852f77d2e6b78be7b2d6ed56638fc7c
-SHA256: e107401dbffca5349299ef20a9d7418b354c72bad2c8412bb27e0209fb41c94f
+Filename: ./omni-term-ai_0.2.5_all.deb
+Size: 30442
+MD5sum: 4bf2e079537997e280c692ce74fd736c
+SHA1: 072891a2a435a9e5d4b744c8b37738ef9fc8c216
+SHA256: 8c300f22ed938141ee0102e7a7e7bc5562a281dd2ab79c5fc403d793de0e9fea
 Section: editors
 Priority: optional
 Homepage: https://github.com/coldcanuk/omni-term-ai

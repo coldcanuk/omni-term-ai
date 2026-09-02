@@ -5,20 +5,20 @@ Codename: stable
 Architectures: all
 Components: main
 Description: Omni Term AI Workspace Repository
-Date: Wed, 02 Sep 2026 17:27:31 +0000
+Date: Wed, 02 Sep 2026 20:16:23 +0000
 MD5Sum:
- 65708c3c6d5dab9da780165bb64f0438              885 Packages
- b908c2ac662e42569e1e4fd857b68251              619 Packages.gz
- 19284579eb73c2d841290fe9f668677a              189 Release
+ 470b966f27ab517cc3242b57e881bcfd              885 Packages
+ f04532117f29e18a2ab22e8db1017a9f              619 Packages.gz
+ 97fda08c3ffe624fd9854281e7874dad              189 Release
 SHA1:
- 014970256d4b4c508841dc30109920cf3b37cbcd              885 Packages
- 3d520c66fc69480914127fb3c001387e3cfddace              619 Packages.gz
- cd733db4f61828a596a8b665a5e8e4b8e27d319c              189 Release
+ 46bae763cb58204b2882e046af082f9f301d1fb6              885 Packages
+ 4c62fd3b960b0e229e67505b9a72c2359860927c              619 Packages.gz
+ 65d74ebf3ec828c8970aa2323a38a9ac45108d5f              189 Release
 SHA256:
- 26e15ccf873aee96646a3eb9ae79e5d8603eff9415fbab3bd5808247149b9aee              885 Packages
- 5252433db1278454d35d9969b236ed1e22d342bf2fa978d5e4addb8488485cca              619 Packages.gz
- 0e4ea6edc9f5f966ff0d0576f3ff1dd96b9c954e59e674b7c0a3ba00aff873bf              189 Release
+ 35f90bdb2bb7412662e54e4e3f1cdb0db9e012c4120c72de7d0f08f8628d134b              885 Packages
+ 5b4fd358642eb190a303c43d044c6c596e31e1535eba0e3537cd3a302346171d              619 Packages.gz
+ d4d73362f51e843344cff986bb855556743afac5154d4e6438a73db5bd3ecf4d              189 Release
 SHA512:
- d50ee6f266d8c3fa142481c804d15a588fac72a74da08e7ae693394dbbafff9897d5f44b00db2f777e461b6c511c2873c6943cdbd13eeff2c3bd0635ba0d71fe              885 Packages
- d0365cfbd593d82438e1f9e7b1086bd4c0d09c09de1d7d8ff4b7ce6d73068769d8dbaacd2474b96d6e732701e5d6fbbd7554cca3745b992ecb21306b6ee1e0fe              619 Packages.gz
- 7a756a26fe1f46bbdefd6958f9bd7347ced05f300a43f9b0b2f3a52e69ab97ef486b2f7454b459522a0f82022fabc7624a8af7284287872d1867a1daa18ac10f              189 Release
+ 94dc727b7caf96df82f02ea2038fab13db668e5ff8f4b737ef6bd16c63269f60bcb633ef5ee65697d961b69836b8cc91dbdd5de367dfb2b1fc27492ae2ed4d4b              885 Packages
+ c9cfa34fc6663bc14b290431a631a5983bebf73c3ed1fbffaffa7f84d35b2b0d749e60f3f550b0f6aa17112c8b8d3fd10ebef446c2ae8a551261f16a48e70550              619 Packages.gz
+ 74c32adadd87ffad1754128d012f11d489b323a3c4683bd55b814b8723d158c499125d0cede5da50ec296f3576dc6ca770337b5e68878e3a22128dfa9fb26fef              189 Release
