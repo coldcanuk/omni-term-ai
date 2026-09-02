@@ -78,3 +78,64 @@ jobs:
             dist/*.deb
             dist/*.rpm
             dist/*.pkg
+
+  pages-repo:
+    needs: [deb, rpm]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: repo
+        continue-on-error: true
+
+      - name: Create repo dirs if they don't exist
+        run: |
+          mkdir -p repo/apt
+          mkdir -p repo/rpm
+
+      - name: Download new packages
+        uses: actions/download-artifact@v4
+        with:
+          name: debian-package
+          path: repo/apt/
+      - name: Download new RPM packages
+        uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: repo/rpm/
+
+      - name: Generate APT repository
+        run: |
+          cd repo/apt
+          sudo apt-get update && sudo apt-get install -y dpkg-dev
+          dpkg-scanpackages . /dev/null > Packages
+          gzip -k -f Packages
+          cat << 'INNER_EOF' > Release
+          Origin: OmniTermAI
+          Label: OmniTermAI
+          Suite: stable
+          Codename: stable
+          Architectures: all
+          Components: main
+          Description: Omni Term AI Workspace Repository
+          INNER_EOF
+
+      - name: Generate RPM repository
+        run: |
+          cd repo/rpm
+          sudo apt-get update && sudo apt-get install -y createrepo
+          createrepo .
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./repo
+          keep_files: false
