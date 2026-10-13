@@ -51,7 +51,7 @@ fi
 for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch install.sh \
     lib/omni.sh packaging/build-deb.sh packaging/build-rpm.sh packaging/tests/verify-install.sh \
     packaging/tests/config-roundtrip.sh packaging/tests/jumpbox-args.sh packaging/tests/empty-secrets.sh \
-    packaging/tests/azure-env.sh packaging/tests/fim-provider.sh; do
+    packaging/tests/azure-env.sh packaging/tests/fim-provider.sh packaging/tests/deps-arch.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done
 
@@ -59,6 +59,7 @@ sh "$ROOT/packaging/tests/config-roundtrip.sh"
 sh "$ROOT/packaging/tests/jumpbox-args.sh"
 sh "$ROOT/packaging/tests/empty-secrets.sh"
 sh "$ROOT/packaging/tests/azure-env.sh"
+sh "$ROOT/packaging/tests/deps-arch.sh"
 sh "$ROOT/packaging/tests/fim-provider.sh"
 
 # pty-driven tests. Need python3; exit 77 means skipped.

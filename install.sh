@@ -38,7 +38,7 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-os=$(uname -s)
+os=${OMNI_OS:-$(uname -s)}
 id_like=""
 dist_id=""
 if [ -f /etc/os-release ]; then
@@ -47,8 +47,14 @@ if [ -f /etc/os-release ]; then
     dist_id=${ID:-}
     id_like=${ID_LIKE:-}
 fi
+dist_id=${OMNI_DIST_ID:-$dist_id}
+id_like=${OMNI_ID_LIKE:-$id_like}
 
 need_root() {
+    if [ "${OMNI_DEPS_DRY:-}" = 1 ]; then
+        printf 'DRY %s\n' "$*"
+        return 0
+    fi
     if [ "$(id -u)" -eq 0 ]; then
         "$@"
     elif command -v sudo >/dev/null 2>&1; then
@@ -74,6 +80,9 @@ install_deps() {
         need_root pkg_add neovim git ripgrep
         echo "tmux is in OpenBSD base. Store keys with: omni-secret store xai" >&2
         ;;
+    FreeBSD)
+        need_root pkg install -y tmux neovim git gcc gmake ripgrep unzip libsecret
+        ;;
     Linux)
         case $dist_id in
         debian | ubuntu | pop | linuxmint)
@@ -86,6 +95,9 @@ install_deps() {
             else
                 need_root yum install -y tmux neovim git gcc make ripgrep unzip libsecret
             fi
+            ;;
+        arch | omarchy | manjaro | endeavouros)
+            need_root pacman -S --needed --noconfirm tmux neovim git gcc make ripgrep unzip libsecret
             ;;
         *)
             case $id_like in
