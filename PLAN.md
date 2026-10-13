@@ -21,13 +21,6 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## Ready
 
-### BUG-02 — Jumpbox default mounts the jumpbox as the target
-- **Kind:** bug, P0
-- **Where:** `launch-ai-workspace` (the `ai-session` rewrite from `f90d526`, and the `@target` ssh block from `9f969fd`)
-- **Evidence:** If `OMNI_JUMPBOX=user@jump.example.com`, a no-arg launch rewrites the session to `@jump.example.com`, then sshfs-mounts that name from the jumpbox. The remote script interpolates `$TARGET_NAME` unquoted. `sshfs` failure is a warning only; `cd` still succeeds on the empty `mkdir`. `sshfs` is not installed on this host. `mountpoint` is Linux-only.
-- **Fix:** Split the two intents. "Run on the jumpbox" is `ssh -t -- "$JUMPBOX" launch-ai-workspace` with no sshfs of the jumpbox's own hostname. `@target` stays the behind-jumpbox case: pass the target as one quoted remote argument (`printf %q`), require `sshfs`, and abort if the mount fails. Do not treat a configured jumpbox as an implicit `@jumpboxhost` target. Desktop and CLI can share an explicit config flag if desktop should default remote; do not overload the session name.
-- **Verify:** Jumpbox set, no args: either a local session or a remote session whose cwd is the jumpbox home, never an sshfs of the jumpbox hostname. `@prod` mounts only `prod`, quoted. A target with `;` or spaces is one argument or rejected. Failed sshfs exits non-zero.
-
 ### BUG-03 — Empty secrets clobber real credentials
 - **Kind:** bug, P0
 - **Where:** `lib/omni.sh` `omni_export_harness_keys`; `launch-ai-workspace` `omni_apply_tmux_env`
@@ -163,6 +156,11 @@ Empty. Pull BUG-03 next.
 
 ## Done
 
+### BUG-02 — Jumpbox no longer mounts itself
+- **Status:** done
+- **Where:** `launch-ai-workspace`, `lib/omni.sh` `omni_jumpbox_target_script`
+- **Verify:** `sh packaging/tests/jumpbox-args.sh` and `make test` passed. No-arg launch with a jumpbox set SSHes `OMNI_SKIP_JUMPBOX=1 exec launch-ai-workspace` and does not sshfs the jumpbox hostname. `@prod` sshfses only the quoted target. A target containing `; touch` is one quoted assignment and does not run. A failing `sshfs` exits non-zero.
+
 ### BUG-01 — Config is parsed, not sourced
 - **Status:** done
 - **Where:** `lib/omni.sh` (`omni_load_config`, `omni_config_quote`, `omni_config_parse_value`, `omni_config_update`); `omni-config` writer; `man/omni-config.1` no longer says the file is sourced
@@ -183,7 +181,7 @@ Empty. Pull BUG-03 next.
 1. BUG-01 done. Next: BUG-03 (both touch how secrets and config enter the process)
 2. BUG-06 (tiny, unblocks first-run testing)
 3. BUG-04 (depends on the non-empty export rule)
-4. BUG-02, then BUG-05
+4. BUG-02 done. Then BUG-05
 5. BUG-07 and BUG-08 together (one provider model)
 6. BUG-09, BUG-10, BUG-11, BUG-13
 7. Improvements, IMP-01 first so later cards have a test to land in

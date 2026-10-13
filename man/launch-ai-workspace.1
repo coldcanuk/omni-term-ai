@@ -13,6 +13,19 @@ Neovim is launched with
 so the packaged configuration does not replace
 .IR ~/.config/nvim .
 .PP
+If
+.B OMNI_JUMPBOX
+is set, a launch with no session name SSHes to that host and starts the
+workspace there. It does not mount the jumpbox itself.
+.B OMNI_SKIP_JUMPBOX=1
+keeps the session local.
+A session name that starts with
+.B @
+is a host reached through the jumpbox:
+.B sshfs
+must succeed on the jumpbox or the launch aborts.
+The target is one quoted argument, not a shell snippet.
+.PP
 The Command Center has three panes. The top-left and top-right panes each
 launch a shell AI assistant ("harness") chosen with
 .BR omni-config (1):

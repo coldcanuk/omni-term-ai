@@ -50,11 +50,12 @@ fi
 # Source-tree scripts must parse.
 for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch install.sh \
     lib/omni.sh packaging/build-deb.sh packaging/build-rpm.sh packaging/tests/verify-install.sh \
-    packaging/tests/config-roundtrip.sh; do
+    packaging/tests/config-roundtrip.sh packaging/tests/jumpbox-args.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done
 
 sh "$ROOT/packaging/tests/config-roundtrip.sh"
+sh "$ROOT/packaging/tests/jumpbox-args.sh"
 
 OMNI_TERM_AI_HOME="$ROOT" "$STAGE/usr/bin/omni-secret" backend >/dev/null \
     || fail "omni-secret backend"

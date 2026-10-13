@@ -428,6 +428,40 @@ omni_config_get() {
     esac
 }
 
+# Remote script for launch-ai-workspace @target. Printed, never executed here.
+# The target is embedded as a single-quoted literal. sshfs failure aborts
+# (set -eu, no "|| echo"). Does not mount the jumpbox's own hostname.
+omni_jumpbox_target_script() {
+    _jt=$1
+    case $_jt in
+    '' | *'
+'*)
+        echo "omni-term-ai: invalid remote target" >&2
+        return 1
+        ;;
+    esac
+    _jq=$(omni_config_quote "$_jt") || return 1
+    cat <<EOF
+set -eu
+target=$_jq
+if ! command -v sshfs >/dev/null 2>&1; then
+    echo "omni-term-ai: sshfs is required on the jumpbox for a remote target" >&2
+    exit 1
+fi
+mnt="\$HOME/mnt/\$target"
+mkdir -p -- "\$mnt"
+if command -v mountpoint >/dev/null 2>&1 && mountpoint -q -- "\$mnt"; then
+    :
+else
+    sshfs -- "\$target":/ "\$mnt"
+fi
+cd -- "\$mnt"
+export OMNI_SKIP_JUMPBOX=1
+export TERM="\$TERM"
+exec launch-ai-workspace "\$target"
+EOF
+}
+
 # ---------------------------------------------------------------------------
 # Key injection: every harness auth env var, fetched from the OS secret store.
 # Unset secrets become empty strings so interactive logins still work.
