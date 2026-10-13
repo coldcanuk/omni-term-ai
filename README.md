@@ -158,14 +158,17 @@ omni-config set left agy    && omni-config set right grok       # agy left, grok
 
 ### Remote Workspaces (Jumpbox)
 
-Omni Term AI supports seamlessly developing on remote targets via an optional Jumpbox architecture. 
+Omni Term AI supports an optional jumpbox. Set it with `omni-config set jumpbox user@jumpbox.example.com`.
 
-1. **Setup**: Run `omni-config` and enter your jumpbox address when prompted, or manually set it: 
-   `omni-config set jumpbox user@jumpbox.example.com`
-2. **Launch**: Start a session with the `@` prefix for your remote target:
-   `launch-ai-workspace @production-server`
+If a jumpbox is configured, `launch-ai-workspace` with no arguments SSHes to that host and starts the workspace there. It does not sshfs-mount the jumpbox itself. Set `OMNI_SKIP_JUMPBOX=1` to stay local anyway.
 
-The workspace will SSH to your jumpbox, mount `production-server:/` locally onto the jumpbox using `sshfs`, and seamlessly run the AI workspace on the remote code!
+To work on a machine reached through the jumpbox:
+
+```bash
+launch-ai-workspace @production-server
+```
+
+That SSHes to the jumpbox, mounts `production-server:/` there with `sshfs`, and starts the workspace in that mount. `sshfs` must be installed on the jumpbox. A failed mount aborts. The target is passed as one quoted argument.
 
 ### FIM Editor Completion (DeepSeek, OpenAI, Azure)
 

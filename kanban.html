@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>Audit of 0.2.5 at e5d2ea5. BUG-01 is done. Next pull is BUG-03. WIP limit 1.</p>
+      <p>BUG-02 is done. Next pull is BUG-03. Pull only works in this chat card.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,20 +176,6 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P0" data-id="BUG-02">
-          <header><span class="id">BUG-02</span><span class="tag">P0 bug</span></header>
-          <h3>Jumpbox default mounts the wrong host</h3>
-          <p>No-arg launch turns the jumpbox hostname into the sshfs target. The remote script is unquoted. A failed mount still continues.</p>
-          <details>
-            <summary>Fix and check</summary>
-            <ul>
-              <li>Separate “run on the jumpbox” from <code>@target</code>.</li>
-              <li>Pass the target as one quoted argument. Abort if sshfs fails.</li>
-              <li>Check: no sshfs of the jumpbox’s own name.</li>
-            </ul>
-          </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-02 on branch gb/audit-kanban. Split jumpbox-local from @target, quote the remote argument, and abort when sshfs fails.">Pull</button>
-        </article>
         <article data-pri="P0" data-id="BUG-03">
           <header><span class="id">BUG-03</span><span class="tag">P0 bug</span></header>
           <h3>Empty secrets clobber real tokens</h3>
@@ -201,7 +187,7 @@
               <li>Otherwise unset. Do not plant empty tmux vars.</li>
             </ul>
           </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-03 on branch gb/audit-kanban. Export harness secrets only when non-empty so an empty GH_TOKEN cannot clobber keyring auth.">Pull</button>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-03. Start a new worktree from main. Export harness secrets only when non-empty so an empty GH_TOKEN cannot clobber keyring auth.">Pull</button>
         </article>
         <article data-pri="P0" data-id="BUG-04">
           <header><span class="id">BUG-04</span><span class="tag">P0 bug</span></header>
@@ -214,7 +200,7 @@
               <li>Store endpoint and deployment in the config file.</li>
             </ul>
           </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-04 on branch gb/audit-kanban. Inject AZURE_OPENAI_API_KEY into the tmux session and store endpoint plus deployment in config.">Pull</button>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-04. Start a new worktree from main. Inject AZURE_OPENAI_API_KEY into the tmux session and store endpoint plus deployment in config.">Pull</button>
         </article>
         <article data-pri="P0" data-id="BUG-05">
           <header><span class="id">BUG-05</span><span class="tag">P0 bug</span></header>
@@ -227,7 +213,7 @@
               <li>Check against a second, default tmux server.</li>
             </ul>
           </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-05 on branch gb/audit-kanban. Make Prefix-Space and Prefix-E run on the omni-term-ai tmux socket, not the default server.">Pull</button>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-05. Start a new worktree from main. Make Prefix-Space and Prefix-E run on the omni-term-ai tmux socket, not the default server.">Pull</button>
         </article>
         <article data-pri="P0" data-id="BUG-06">
           <header><span class="id">BUG-06</span><span class="tag">P0 bug</span></header>
@@ -239,7 +225,7 @@
               <li>Resolve <code>bindir</code> first. Invoke <code>"$bindir/omni-config"</code>.</li>
             </ul>
           </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-06 on branch gb/audit-kanban. Call the sibling omni-config by path before any PATH lookup on first run.">Pull</button>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-06. Start a new worktree from main. Call the sibling omni-config by path before any PATH lookup on first run.">Pull</button>
         </article>
       </div>
     </section>
@@ -322,6 +308,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P0" data-id="BUG-02">
+          <header><span class="id">BUG-02</span><span class="tag">done</span></header>
+          <h3>Jumpbox no longer mounts itself</h3>
+          <p>No-arg launch runs on the jumpbox. <code>@target</code> is one quoted sshfs argument. A failed mount aborts.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-01">
           <header><span class="id">BUG-01</span><span class="tag">done</span></header>
           <h3>Config is parsed, not sourced</h3>
@@ -340,7 +331,7 @@
       </div>
     </section>
   </div>
-  <p class="note">Spec: <code>PLAN.md</code> on <code>gb/audit-kanban</code>. BUG-01 verified, not committed. Click Pull to start the next card.</p>
+  <p class="note">Pull sends a chat message from this card only. The side preview cannot. gb/audit-kanban was merged and deleted; the next card starts a new worktree from main.</p>
 </div>
 <script>
 (function () {
