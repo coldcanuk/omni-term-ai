@@ -71,6 +71,7 @@ export PATH
 # written as an empty string; that would hide keyring auth.
 omni_apply_tmux_env() {
     omni_export_harness_keys
+    omni_apply_azure_config
     omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
     omni_tmux set-environment -g PATH "$PATH"
     omni_tmux set-environment -g OMNI_FIM_ENGINE "$OMNI_FIM_ENGINE"

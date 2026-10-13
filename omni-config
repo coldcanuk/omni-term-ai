@@ -26,8 +26,8 @@ usage() {
     echo "Usage: omni-config [command]" >&2
     echo "  (no command)   interactive wizard" >&2
     echo "  list           supported harnesses and install status" >&2
-    echo "  get [side]     current selection (side: left|right|jumpbox|fim)" >&2
-    echo "  set side name  set a pane's harness, jumpbox or fim (side: left|right|jumpbox|fim)" >&2
+    echo "  get [side]     current selection (side: left|right|jumpbox|fim|azure-endpoint|azure-deployment)" >&2
+    echo "  set side name  set a pane, jumpbox, fim, or Azure endpoint/deployment" >&2
     echo "  path           print the config file path" >&2
     exit 1
 }
@@ -59,8 +59,10 @@ cmd_get() {
         echo "right:   $(omni_config_get right)"
         echo "jumpbox: $(omni_config_get jumpbox)"
         echo "fim:     $(omni_config_get fim)"
+        echo "azure-endpoint:   $(omni_config_get azure-endpoint)"
+        echo "azure-deployment: $(omni_config_get azure-deployment)"
         ;;
-    left | right | jumpbox | fim)
+    left | right | jumpbox | fim | azure-endpoint | azure-deployment)
         omni_config_get "$1"
         ;;
     *)
@@ -82,6 +84,9 @@ cmd_set() {
             ;;
         jumpbox)
             # harness here is the user@host jumpbox target
+            ;;
+        azure-endpoint | azure-deployment)
+            # not a secret; stored as a quoted config literal
             ;;
         fim)
             case $harness in
@@ -110,12 +115,18 @@ OMNI_LEFT_HARNESS=agy
 OMNI_RIGHT_HARNESS=grok
 OMNI_JUMPBOX=
 OMNI_FIM_ENGINE=native
+OMNI_AZURE_ENDPOINT=
+OMNI_AZURE_DEPLOYMENT=
 EOF
     fi
     if [ "$side" = "jumpbox" ]; then
         update_key "OMNI_JUMPBOX" "$harness" "$file"
     elif [ "$side" = "fim" ]; then
         update_key "OMNI_FIM_ENGINE" "$harness" "$file"
+    elif [ "$side" = "azure-endpoint" ]; then
+        update_key "OMNI_AZURE_ENDPOINT" "$harness" "$file"
+    elif [ "$side" = "azure-deployment" ]; then
+        update_key "OMNI_AZURE_DEPLOYMENT" "$harness" "$file"
     else
         update_key "OMNI_$(echo "$side" | tr '[:lower:]' '[:upper:]')_HARNESS" "$harness" "$file"
     fi
@@ -226,6 +237,8 @@ cmd_wizard() {
         printf 'OMNI_RIGHT_HARNESS=%s\n' "$(omni_config_quote "$right")"
         printf 'OMNI_JUMPBOX=%s\n' "$(omni_config_quote "$jumpbox")"
         printf 'OMNI_FIM_ENGINE=%s\n' "$(omni_config_quote "$fim")"
+        printf 'OMNI_AZURE_ENDPOINT=%s\n' "$(omni_config_quote "$OMNI_AZURE_ENDPOINT")"
+        printf 'OMNI_AZURE_DEPLOYMENT=%s\n' "$(omni_config_quote "$OMNI_AZURE_DEPLOYMENT")"
     } >"$file"
     chmod 600 "$file" 2>/dev/null || true
     printf 'Saved: left=%s right=%s jumpbox=%s fim=%s (%s)\n' \

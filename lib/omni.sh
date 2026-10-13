@@ -185,7 +185,7 @@ omni_config_path() {
 
 omni_config_key_ok() {
     case $1 in
-    OMNI_LEFT_HARNESS | OMNI_RIGHT_HARNESS | OMNI_JUMPBOX | OMNI_FIM_ENGINE)
+    OMNI_LEFT_HARNESS | OMNI_RIGHT_HARNESS | OMNI_JUMPBOX | OMNI_FIM_ENGINE | OMNI_AZURE_ENDPOINT | OMNI_AZURE_DEPLOYMENT)
         return 0
         ;;
     *)
@@ -326,6 +326,8 @@ omni_config_assign() {
     OMNI_RIGHT_HARNESS) OMNI_RIGHT_HARNESS=$2 ;;
     OMNI_JUMPBOX) OMNI_JUMPBOX=$2 ;;
     OMNI_FIM_ENGINE) OMNI_FIM_ENGINE=$2 ;;
+    OMNI_AZURE_ENDPOINT) OMNI_AZURE_ENDPOINT=$2 ;;
+    OMNI_AZURE_DEPLOYMENT) OMNI_AZURE_DEPLOYMENT=$2 ;;
     *)
         return 1
         ;;
@@ -416,7 +418,10 @@ omni_load_config() {
     : "${OMNI_RIGHT_HARNESS:=grok}"
     : "${OMNI_JUMPBOX:=}"
     : "${OMNI_FIM_ENGINE:=native}"
+    : "${OMNI_AZURE_ENDPOINT:=}"
+    : "${OMNI_AZURE_DEPLOYMENT:=}"
     export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX OMNI_FIM_ENGINE
+    export OMNI_AZURE_ENDPOINT OMNI_AZURE_DEPLOYMENT
 }
 
 omni_config_get() {
@@ -425,6 +430,8 @@ omni_config_get() {
     right) printf '%s\n' "$OMNI_RIGHT_HARNESS" ;;
     jumpbox) printf '%s\n' "$OMNI_JUMPBOX" ;;
     fim) printf '%s\n' "$OMNI_FIM_ENGINE" ;;
+    azure-endpoint) printf '%s\n' "$OMNI_AZURE_ENDPOINT" ;;
+    azure-deployment) printf '%s\n' "$OMNI_AZURE_DEPLOYMENT" ;;
     esac
 }
 
@@ -534,4 +541,20 @@ omni_publish_tmux_secrets() {
     omni_tmux_publish_one GH_TOKEN "${GH_TOKEN:-}"
     omni_tmux_publish_one GITHUB_TOKEN "${GITHUB_TOKEN:-}"
     omni_tmux_publish_one GEMINI_API_KEY "${GEMINI_API_KEY:-}"
+    omni_tmux_publish_one AZURE_OPENAI_API_KEY "${AZURE_OPENAI_API_KEY:-}"
+    omni_tmux_publish_one AZURE_OPENAI_ENDPOINT "${AZURE_OPENAI_ENDPOINT:-}"
+    omni_tmux_publish_one AZURE_OPENAI_DEPLOYMENT "${AZURE_OPENAI_DEPLOYMENT:-}"
+}
+
+# Config holds the Azure endpoint and deployment (not secrets). A non-empty
+# config value wins. An empty config value leaves a non-empty ambient value.
+omni_apply_azure_config() {
+    if [ -n "${OMNI_AZURE_ENDPOINT:-}" ]; then
+        AZURE_OPENAI_ENDPOINT=$OMNI_AZURE_ENDPOINT
+        export AZURE_OPENAI_ENDPOINT
+    fi
+    if [ -n "${OMNI_AZURE_DEPLOYMENT:-}" ]; then
+        AZURE_OPENAI_DEPLOYMENT=$OMNI_AZURE_DEPLOYMENT
+        export AZURE_OPENAI_DEPLOYMENT
+    fi
 }

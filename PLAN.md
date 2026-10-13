@@ -21,13 +21,6 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## Ready
 
-### BUG-04 — Azure FIM key never reaches the tmux session
-- **Kind:** bug, P0
-- **Where:** `launch-ai-workspace` `omni_apply_tmux_env` (stops at `GEMINI_API_KEY`); README claims `AZURE_OPENAI_API_KEY`
-- **Evidence:** `omni_export_harness_keys` exports `AZURE_OPENAI_API_KEY`, but the launcher never `set-environment`s it. Endpoint and deployment are documented as bashrc exports, which a desktop `Terminal=true` launch often does not source. Neovim inside the session therefore cannot do Azure FIM.
-- **Fix:** Inject `AZURE_OPENAI_API_KEY` with the other keys (non-empty only, per BUG-03). Store endpoint and deployment in the config file (they are not secrets) and inject those too, so desktop launch does not depend on bashrc.
-- **Verify:** After `omni-secret store azure` plus config endpoint/deployment, `tmux show-environment -g` inside the session lists all three. Unset secret does not plant an empty key.
-
 ### BUG-05 — Scratchpad and panic button talk to the wrong tmux server
 - **Kind:** bug, P0
 - **Where:** `tmux.conf` `bind Space` / `bind E`; `tmux-toggle-scratch`
@@ -149,6 +142,11 @@ Empty. Pull BUG-06 next.
 
 ## Done
 
+### BUG-04 — Azure FIM reaches the tmux session
+- **Status:** done
+- **Where:** `lib/omni.sh` `omni_publish_tmux_secrets`, `omni_apply_azure_config`; `omni-config` `azure-endpoint` / `azure-deployment`
+- **Verify:** `sh packaging/tests/azure-env.sh` and `make test` passed. Config endpoint and deployment round-trip, including a `;` that does not run. Publish sets `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT`, and `AZURE_OPENAI_DEPLOYMENT`. A missing secret is `set-environment -g -u`, not an empty value. An empty config does not clobber an ambient endpoint.
+
 ### BUG-03 — Empty secrets no longer clobber tokens
 - **Status:** done
 - **Where:** `lib/omni.sh` `omni_assign_secret`, `omni_publish_tmux_secrets`; `launch-ai-workspace` `omni_apply_tmux_env`
@@ -178,7 +176,7 @@ Empty. Pull BUG-06 next.
 
 1. BUG-01 done. BUG-03 done. Next: BUG-06
 2. BUG-06 (tiny, unblocks first-run testing)
-3. BUG-04 (depends on the non-empty export rule)
+3. BUG-04 done.
 4. BUG-02 done. Then BUG-05
 5. BUG-07 and BUG-08 together (one provider model)
 6. BUG-09, BUG-10, BUG-11, BUG-13
