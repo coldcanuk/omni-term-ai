@@ -39,12 +39,6 @@ Empty. P1 bugs are done.
 
 ## Backlog — improvements
 
-### IMP-04 — Secrets are visible to `ps` and easy to collide
-- **Kind:** improvement, P2
-- **Where:** `lib/omni.sh` `security add-generic-password -w`; `omni_fim.lua` curl `-H` with the key; `secret-tool store/lookup api <name>`
-- **Fix:** Pass the macOS password and the curl auth header via a 0600 file or curl config, not argv. Namespace secret-tool attributes (`service omni-term-ai`) and migrate old items on read so existing keys still resolve.
-- **Verify:** `ps` during an FIM request and during `omni-secret store` does not show the key. A lookup still finds a key stored before the attribute change.
-
 ### IMP-05 — Docs and changelog lag the tree
 - **Kind:** improvement, P2
 - **Where:** `CHANGELOG.md`, `README.md`, `Formula/omni-term-ai.rb`
@@ -55,6 +49,12 @@ Empty. P1 bugs are done.
 ---
 
 ## Done
+
+### IMP-04 — Secrets stay off the command line
+- **Status:** done
+- **Where:** `lib/omni.sh`, `nvim-config/lua/omni_fim.lua`
+- **Fix:** macOS `security -w` is prompted from a 0600 file, not argv. curl reads the auth header from a 0600 config. secret-tool items use `service omni-term-ai`; a lookup of the old `api` attribute still resolves and is copied forward.
+- **Verify:** `sh packaging/tests/key-argv.sh`. `ps` during store and during a stubbed FIM curl does not show the marker key. An old secret-tool item is still returned.
 
 ### IMP-03 — Package metadata matches runtime needs
 - **Status:** done
