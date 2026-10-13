@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>BUG-02 is done. Next pull is BUG-03. Pull only works in this chat card.</p>
+      <p>BUG-03 is done. Next pull is BUG-06. Pull only works in this chat card.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,19 +176,6 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P0" data-id="BUG-03">
-          <header><span class="id">BUG-03</span><span class="tag">P0 bug</span></header>
-          <h3>Empty secrets clobber real tokens</h3>
-          <p>Unset keys are exported as empty <code>GH_TOKEN</code> and friends, which hides keyring auth.</p>
-          <details>
-            <summary>Fix and check</summary>
-            <ul>
-              <li>Export and <code>set-environment</code> only when non-empty.</li>
-              <li>Otherwise unset. Do not plant empty tmux vars.</li>
-            </ul>
-          </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-03. Start a new worktree from main. Export harness secrets only when non-empty so an empty GH_TOKEN cannot clobber keyring auth.">Pull</button>
-        </article>
         <article data-pri="P0" data-id="BUG-04">
           <header><span class="id">BUG-04</span><span class="tag">P0 bug</span></header>
           <h3>Azure key never enters tmux</h3>
@@ -232,7 +219,7 @@
     <section class="col" data-col="doing">
       <h2>In progress <span data-count>0</span></h2>
       <div class="stack">
-        <div class="empty">Empty. Pull BUG-03.</div>
+        <div class="empty">Empty. Pull BUG-06.</div>
       </div>
     </section>
     <section class="col" data-col="backlog">
@@ -308,6 +295,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P0" data-id="BUG-03">
+          <header><span class="id">BUG-03</span><span class="tag">done</span></header>
+          <h3>Empty secrets no longer clobber tokens</h3>
+          <p>A missing secret leaves an ambient <code>GH_TOKEN</code> alone. tmux never receives an empty one.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-02">
           <header><span class="id">BUG-02</span><span class="tag">done</span></header>
           <h3>Jumpbox no longer mounts itself</h3>
