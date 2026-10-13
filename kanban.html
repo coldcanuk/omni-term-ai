@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>BUG-04 is done. Next pull is BUG-06. Pull only works in this chat card.</p>
+      <p>BUG-05 closed: not a bug. Next pull is BUG-06. Pull only works in this chat card.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,19 +176,6 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P0" data-id="BUG-05">
-          <header><span class="id">BUG-05</span><span class="tag">P0 bug</span></header>
-          <h3>Scratchpad and panic hit the wrong server</h3>
-          <p><code>run-shell</code> calls <code>tmux</code> with no <code>-L omni-term-ai</code>. Prefix-Space and Prefix-E miss the workspace socket.</p>
-          <details>
-            <summary>Fix and check</summary>
-            <ul>
-              <li>Use tmux command lists on the current server.</li>
-              <li>Check against a second, default tmux server.</li>
-            </ul>
-          </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-05. Start a new worktree from main. Make Prefix-Space and Prefix-E run on the omni-term-ai tmux socket, not the default server.">Pull</button>
-        </article>
         <article data-pri="P0" data-id="BUG-06">
           <header><span class="id">BUG-06</span><span class="tag">P0 bug</span></header>
           <h3>First-run wizard is not on PATH</h3>
@@ -282,6 +269,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P0" data-id="BUG-05">
+          <header><span class="id">BUG-05</span><span class="tag">not a bug</span></header>
+          <h3>Scratchpad and panic use the right server</h3>
+          <p>tmux gives <code>run-shell</code> <code>TMUX</code> for its own socket. <code>tmux-bindings.py</code> presses the keys next to a decoy server and passes.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-04">
           <header><span class="id">BUG-04</span><span class="tag">done</span></header>
           <h3>Azure FIM reaches tmux</h3>
@@ -305,7 +297,7 @@
         <article data-pri="P2" data-id="AUDIT-00">
           <header><span class="id">AUDIT-00</span><span class="tag">done</span></header>
           <h3>Audit of 0.2.5</h3>
-          <p>Config execution and sed corruption reproduced. Azure, PATH, socket, and gh-pages confirmed by reading.</p>
+          <p>Config execution and sed corruption reproduced. Azure, PATH, and gh-pages confirmed by reading. The socket claim was disproved (BUG-05).</p>
         </article>
         <article data-pri="P2" data-id="PLAN-0.2">
           <header><span class="id">0.2.0</span><span class="tag">done</span></header>

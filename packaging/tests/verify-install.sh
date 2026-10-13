@@ -60,6 +60,16 @@ sh "$ROOT/packaging/tests/jumpbox-args.sh"
 sh "$ROOT/packaging/tests/empty-secrets.sh"
 sh "$ROOT/packaging/tests/azure-env.sh"
 
+# BUG-05: Prefix-E / Prefix-Space stay on the omni-term-ai socket. Needs
+# python3 (pty) and tmux; exit 77 means skipped.
+if command -v python3 >/dev/null 2>&1; then
+    rc=0
+    python3 "$ROOT/packaging/tests/tmux-bindings.py" || rc=$?
+    [ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "tmux-bindings.py"
+else
+    echo "tmux-bindings: SKIP (python3 not installed)"
+fi
+
 OMNI_TERM_AI_HOME="$ROOT" "$STAGE/usr/bin/omni-secret" backend >/dev/null \
     || fail "omni-secret backend"
 
