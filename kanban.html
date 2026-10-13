@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>All P0 cards are done. Next: the P2 improvements, IMP-02 first.</p>
+      <p>P1 bugs are done. Next pull is IMP-01. Pull only works in this chat card.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,58 +176,23 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <div class="empty">Empty. All P0 cards are done.</div>
+        <article data-pri="P1" data-id="IMP-01">
+          <header><span class="id">IMP-01</span><span class="tag">P1 improve</span></header>
+          <h3>Tests check layout, not behavior</h3>
+          <p><code>make test</code> never looks at the bash libs, config quoting, or empty-secret export. No shellcheck in CI.</p>
+          <button type="button" data-hermes-send="Pull IMP-01.">Pull</button>
+        </article>
       </div>
     </section>
     <section class="col" data-col="doing">
       <h2>In progress <span data-count>0</span></h2>
       <div class="stack">
-        <div class="empty">Empty. Pull BUG-06.</div>
+        <div class="empty">Empty.</div>
       </div>
     </section>
     <section class="col" data-col="backlog">
       <h2>Backlog <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P1" data-id="BUG-07">
-          <header><span class="id">BUG-07</span><span class="tag">P1 bug</span></header>
-          <h3>OpenAI key silently wins FIM</h3>
-          <p>Every stored key is exported, so Codex’s OpenAI key replaces DeepSeek. No provider setting.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-08">
-          <header><span class="id">BUG-08</span><span class="tag">P1 bug</span></header>
-          <h3>Bash completion does not insert</h3>
-          <p>Bound only if DeepSeek is set. <code>n=3</code> prints choices and inserts nothing. <code>eval</code>s model text.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-09">
-          <header><span class="id">BUG-09</span><span class="tag">P1 bug</span></header>
-          <h3>Stale ghost text, leaked payload</h3>
-          <p>No generation stamp on curl. Temp file never removed. Multiline accept parks the cursor wrong.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-10">
-          <header><span class="id">BUG-10</span><span class="tag">P1 bug</span></header>
-          <h3>Uninstall leaves a man page</h3>
-          <p><code>omni-config.1</code> stays installed and omits jumpbox/fim. SEE ALSO names pages that do not exist.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-11">
-          <header><span class="id">BUG-11</span><span class="tag">P1 bug</span></header>
-          <h3><code>--deps</code> ignores Arch and Omarchy</h3>
-          <p><code>ID=arch</code> with empty <code>ID_LIKE</code> exits as unknown Linux. FreeBSD is missing too.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-12">
-          <header><span class="id">BUG-12</span><span class="tag">P1 bug</span></header>
-          <h3>Agent cleanup path is fictional</h3>
-          <p><code>AGENTS.md</code> rule 5 cds to <code>/opt/repo/omni-term-ai</code>. This tree is <code>/usr/local/src</code>. Rule 2 uses <code>.worktrees/</code>.</p>
-        </article>
-        <article data-pri="P1" data-id="BUG-13">
-          <header><span class="id">BUG-13</span><span class="tag">P1 bug</span></header>
-          <h3>gh-pages checkout failure can wipe the repo</h3>
-          <p><code>continue-on-error</code> plus <code>keep_files: false</code> publishes only the new deb/rpm if checkout fails.</p>
-        </article>
-        <article data-pri="P1" data-id="IMP-01">
-          <header><span class="id">IMP-01</span><span class="tag">P1 improve</span></header>
-          <h3>Tests check layout, not behavior</h3>
-          <p><code>make test</code> never looks at the bash libs, config quoting, or empty-secret export. No shellcheck in CI.</p>
-        </article>
         <article data-pri="P2" data-id="IMP-02">
           <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
           <h3>Apt and rpm repos are unsigned</h3>
@@ -248,16 +213,51 @@
           <h3>Changelog lags the tree</h3>
           <p>0.2.5 notes the symlink crash only. Jumpbox, Azure FIM, and bash completion are undocumented there.</p>
         </article>
-        <article data-pri="P2" data-id="IMP-06">
-          <header><span class="id">IMP-06</span><span class="tag">P2 improve</span></header>
-          <h3>Shell integration is broader than it looks</h3>
-          <p><code>omni-bash.sh</code> forces <code>NVIM_APPNAME</code> and never loads the FIM engine. Neotree <code>-c</code> can race.</p>
-        </article>
       </div>
     </section>
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P2" data-id="IMP-06">
+          <header><span class="id">IMP-06</span><span class="tag">done</span></header>
+          <h3>Shell integration does not retarget nvim</h3>
+          <p>Sourcing <code>omni-bash.sh</code> leaves <code>NVIM_APPNAME</code> alone unless <code>OMNI_USE_NVIM_CONFIG=1</code>. FIM settings already loaded. Neotree <code>-c</code> did not race.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-12">
+          <header><span class="id">BUG-12</span><span class="tag">done</span></header>
+          <h3>Cleanup uses this clone</h3>
+          <p>Rule 5 starts at the main worktree. PR 62.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-10">
+          <header><span class="id">BUG-10</span><span class="tag">done</span></header>
+          <h3>Man pages match the CLI</h3>
+          <p>Uninstall removes every shipped page. Jumpbox and fim are documented. PR 61.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-09">
+          <header><span class="id">BUG-09</span><span class="tag">done</span></header>
+          <h3>Stale FIM responses are ignored</h3>
+          <p>Older callbacks do not paint. The payload is removed. PR 60.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-08">
+          <header><span class="id">BUG-08</span><span class="tag">done</span></header>
+          <h3>Bash FIM inserts the picked choice</h3>
+          <p>Ctrl-F binds for the configured provider. Model text is not eval'd. PR 59.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-11">
+          <header><span class="id">BUG-11</span><span class="tag">done</span></header>
+          <h3><code>--deps</code> covers Arch and FreeBSD</h3>
+          <p>Arch-family uses pacman. FreeBSD uses pkg. PR 58.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-13">
+          <header><span class="id">BUG-13</span><span class="tag">done</span></header>
+          <h3>A failed gh-pages checkout does not publish</h3>
+          <p>An existing branch is not replaced when checkout fails. PR 57.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-07">
+          <header><span class="id">BUG-07</span><span class="tag">done</span></header>
+          <h3>FIM provider is explicit</h3>
+          <p>Default stays DeepSeek even when an OpenAI key is stored. PR 56.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-06">
           <header><span class="id">BUG-06</span><span class="tag">done</span></header>
           <h3>First run finds its own wizard</h3>

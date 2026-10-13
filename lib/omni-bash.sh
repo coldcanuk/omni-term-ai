@@ -1,7 +1,8 @@
 #!/bin/bash
 # Omni Term AI - Bash Integration
-# Source this file in your ~/.bashrc to get DeepSeek shell completion
+# Source this file in your ~/.bashrc to get shell completion
 # and to export API keys for Neovim AI integration outside of tmux.
+# This does not set NVIM_APPNAME unless OMNI_USE_NVIM_CONFIG=1.
 
 # True when the configured FIM provider has a key to call.
 omni_fim_should_bind() {
@@ -34,9 +35,13 @@ if [ -n "${OMNI_TERM_AI_HOME:-}" ] && [ -f "$OMNI_TERM_AI_HOME/lib/omni.sh" ]; t
         . "$OMNI_TERM_AI_HOME/lib/deepseek-completion.bash"
     fi
     
-    # Point Neovim to our config if NVIM_APPNAME is not already set
-    if [ -z "${NVIM_APPNAME:-}" ]; then
-        export NVIM_APPNAME="omni-term-ai"
-        omni_ensure_nvim_config
+    # Ctrl-F does not retarget nvim. Set OMNI_USE_NVIM_CONFIG=1 to ask.
+    if [ "${OMNI_USE_NVIM_CONFIG:-}" = 1 ]; then
+        if [ -z "${NVIM_APPNAME:-}" ]; then
+            export NVIM_APPNAME="omni-term-ai"
+        fi
+        if [ "$NVIM_APPNAME" = "omni-term-ai" ]; then
+            omni_ensure_nvim_config
+        fi
     fi
 fi

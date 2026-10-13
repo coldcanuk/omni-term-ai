@@ -72,16 +72,16 @@ Empty. P1 bugs are done.
 - **Fix:** When 0.3.0 ships, changelog the fixes above. Do not rewrite history of 0.2.x beyond a one-line "undocumented features now covered by 0.3.0".
 - **Verify:** CHANGELOG 0.3.0 lists every Ready card that merged.
 
-### IMP-06 — Editor startup and shell integration are broader than they look
-- **Kind:** improvement, P2
-- **Where:** `nvim-config/init.lua` (`vim.loop`, treesitter tag `v0.9.3`, `nvim -c "Neotree show"`); `lib/omni-bash.sh`
-- **Evidence:** This host runs Neovim 0.12.5. Headless load of `init.lua` succeeded (plugins cloned, `fim_engine=unset` printed) so the pin is not a crash today. `vim.loop` is the old name. `omni-bash.sh` sets `NVIM_APPNAME` for every nvim in the shell and does not load `OMNI_FIM_ENGINE` from the config file. `-c Neotree` was not proven; it can run before the command exists.
-- **Fix:** Prefer `vim.uv` with a `vim.loop` fallback. Load `OMNI_FIM_ENGINE` (and provider, once BUG-07 exists) in `omni-bash.sh` via the same parser as BUG-01. Make `NVIM_APPNAME` opt-in. Open Neotree from a `VimEnter` autocmd after lazy has defined the command, and drop the racing `-c`.
-- **Verify:** `nvim --headless` on 0.12 prints no `vim.loop` deprecation. A shell that sourced `omni-bash.sh` does not change `NVIM_APPNAME` unless asked. Editor window shows the tree without `E492`.
-
 ---
 
 ## Done
+
+### IMP-06 — Shell integration no longer retargets nvim
+- **Status:** done. Two claims were already true and were not "fixed".
+- **Where:** `lib/omni-bash.sh`; `nvim-config/init.lua`
+- **Finding:** Sourcing `omni-bash.sh` exported `NVIM_APPNAME=omni-term-ai` and linked the packaged config. That is the change. `OMNI_FIM_ENGINE` and `OMNI_FIM_PROVIDER` already load through `omni_load_config` (BUG-01); a quoted `copilot; touch …` stayed data. Neovim 0.12.5 aliases `vim.loop` to `vim.uv` and does not print a deprecation (`runtime/lua/vim/_core/editor.lua`). The source still preferred `vim.uv`, with `vim.loop` kept for the 0.9.5 minimum. `-c "Neotree show"` was not a race: `-c` runs after init and before VimEnter, and lazy loads this start plugin during `setup()`. A private headless run opened the tree (`exists :Neotree` = 2, window count 2) with no `E492`. A command defined only on VimEnter does `E492` under `-c`, so the spec must stay eager. Treesitter tag `v0.9.3` was left alone.
+- **Fix:** `OMNI_USE_NVIM_CONFIG=1` is the ask. Otherwise `NVIM_APPNAME` is unchanged and the config is not linked. An already-set `NVIM_APPNAME` is not overwritten.
+- **Verify:** `sh packaging/tests/shell-integration.sh` and `sh packaging/tests/nvim-startup.sh`. The first failed on the pre-fix tree (`APPNAME=[omni-term-ai]`). Both pass after the fix, and `make test` runs them.
 
 ### BUG-12 — Cleanup uses this clone
 - **Status:** done
@@ -153,7 +153,7 @@ Empty. P1 bugs are done.
 
 ### AUDIT-00 — Audit of 0.2.5
 - **Status:** done
-- **Evidence:** Tree `/usr/local/src/omni-term-ai`, `main` == `origin/main` at `e5d2ea5`, VERSION `0.2.5`. Lua parses (`luac -p`). Reproduced config execution and sed `&` corruption. Confirmed Azure omission, PATH order, wrong tmux socket, and gh-pages `continue-on-error` by reading the files. The tmux socket finding was later disproved by test (BUG-05).
+- **Evidence:** Tree `/usr/local/src/omni-term-ai`, `main` == `origin/main` at `e5d2ea5`, VERSION `0.2.5`. Lua parses (`luac -p`). Reproduced config execution and sed `&` corruption. Confirmed Azure omission, PATH order, wrong tmux socket, and gh-pages `continue-on-error` by reading the files. The tmux socket finding was later disproved by test (BUG-05). The "bash file never loads `OMNI_FIM_ENGINE`" and "Neotree `-c` races" claims were later disproved (IMP-06). `vim.loop` is the old name, but 0.12.5 does not print a warning for it.
 - **Not bugs:** `die()` waiting for Enter is intentional (`b02b79e`, desktop error visibility). Neovim 0.12.5 loaded `init.lua` headless; treesitter `v0.9.3` did not crash that load.
 
 ### PLAN-0.2.0 — Multi-harness, DeepSeek FIM, brew trust

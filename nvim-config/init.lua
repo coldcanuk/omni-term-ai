@@ -1,6 +1,8 @@
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+-- vim.uv since 0.10; vim.loop remains for the 0.9.5 minimum.
+local uv = vim.uv or vim.loop
+if not uv.fs_stat(lazypath) then
   vim.fn.system({
     "git",
     "clone",
@@ -46,6 +48,8 @@ local plugins = {
   },
   
   -- File Explorer
+  -- Start plugin: no lazy, cmd, or event. `nvim -c "Neotree show"` runs
+  -- before VimEnter, so the command must exist when setup() returns.
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",

@@ -51,7 +51,8 @@ fi
 for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch install.sh \
     lib/omni.sh packaging/build-deb.sh packaging/build-rpm.sh packaging/tests/verify-install.sh \
     packaging/tests/config-roundtrip.sh packaging/tests/jumpbox-args.sh packaging/tests/empty-secrets.sh \
-    packaging/tests/azure-env.sh packaging/tests/fim-provider.sh packaging/tests/gh-pages-guard.sh packaging/tests/deps-arch.sh packaging/tests/bash-fim.sh packaging/tests/fim-stale.sh packaging/tests/man-pages.sh packaging/tests/agents-path.sh; do
+    packaging/tests/azure-env.sh packaging/tests/fim-provider.sh packaging/tests/gh-pages-guard.sh packaging/tests/deps-arch.sh packaging/tests/bash-fim.sh packaging/tests/fim-stale.sh packaging/tests/man-pages.sh packaging/tests/agents-path.sh \
+    packaging/tests/shell-integration.sh packaging/tests/nvim-startup.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done
 
@@ -66,6 +67,10 @@ bash "$ROOT/packaging/tests/bash-fim.sh"
 sh "$ROOT/packaging/tests/fim-stale.sh"
 sh "$ROOT/packaging/tests/man-pages.sh"
 sh "$ROOT/packaging/tests/agents-path.sh"
+sh "$ROOT/packaging/tests/shell-integration.sh"
+rc=0
+sh "$ROOT/packaging/tests/nvim-startup.sh" || rc=$?
+[ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "nvim-startup.sh"
 
 # pty-driven tests. Need python3; exit 77 means skipped.
 #   tmux-bindings.py  BUG-05: Prefix-E / Prefix-Space stay on the omni socket
