@@ -1,24 +1,19 @@
-Origin: OmniTermAI
-Label: OmniTermAI
-Suite: stable
-Codename: stable
 Architectures: all
-Components: main
+Codename: stable
+Date: Tue, 13 Oct 2026 11:55:50 +0000
 Description: Omni Term AI Workspace Repository
-Date: Wed, 02 Sep 2026 20:16:23 +0000
+Label: OmniTermAI
+Origin: OmniTermAI
+Suite: stable
 MD5Sum:
  470b966f27ab517cc3242b57e881bcfd              885 Packages
- f04532117f29e18a2ab22e8db1017a9f              619 Packages.gz
- 97fda08c3ffe624fd9854281e7874dad              189 Release
+ 13018799256ecbacbfece7e1806879b6              610 Packages.gz
 SHA1:
  46bae763cb58204b2882e046af082f9f301d1fb6              885 Packages
- 4c62fd3b960b0e229e67505b9a72c2359860927c              619 Packages.gz
- 65d74ebf3ec828c8970aa2323a38a9ac45108d5f              189 Release
+ 0c418c1c4f5063268fa6091ef518c8abbdbbad22              610 Packages.gz
 SHA256:
  35f90bdb2bb7412662e54e4e3f1cdb0db9e012c4120c72de7d0f08f8628d134b              885 Packages
- 5b4fd358642eb190a303c43d044c6c596e31e1535eba0e3537cd3a302346171d              619 Packages.gz
- d4d73362f51e843344cff986bb855556743afac5154d4e6438a73db5bd3ecf4d              189 Release
+ 88934bba7932c3de7b981a24ad3214a7671aa5a506e1478c4e5708961e2a8cce              610 Packages.gz
 SHA512:
  94dc727b7caf96df82f02ea2038fab13db668e5ff8f4b737ef6bd16c63269f60bcb633ef5ee65697d961b69836b8cc91dbdd5de367dfb2b1fc27492ae2ed4d4b              885 Packages
- c9cfa34fc6663bc14b290431a631a5983bebf73c3ed1fbffaffa7f84d35b2b0d749e60f3f550b0f6aa17112c8b8d3fd10ebef446c2ae8a551261f16a48e70550              619 Packages.gz
- 74c32adadd87ffad1754128d012f11d489b323a3c4683bd55b814b8723d158c499125d0cede5da50ec296f3576dc6ca770337b5e68878e3a22128dfa9fb26fef              189 Release
+ 19bf76173d25ba0bec7fe2d2a127d880cdb5c3641a877bb8653aaae263079a53ec5ece6186efa578add461a8db83e7c0b412d86bfd0c07efa1a7bf68369ba491              610 Packages.gz
