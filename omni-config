@@ -7,7 +7,8 @@
 #   omni-config set <side> <h>   set one pane (left|right) to a harness
 #   omni-config path             print the config file path
 #
-# The config file is POSIX sh and sourced by launch-ai-workspace:
+# The config file is literal KEY=VALUE assignments, parsed by lib/omni.sh.
+# It is not sourced.
 #   $XDG_CONFIG_HOME/omni-term-ai/config   (default ~/.config/...)
 set -eu
 
@@ -31,18 +32,9 @@ usage() {
     exit 1
 }
 
-# Replace or append KEY=VALUE in a POSIX config file.
+# Replace or append KEY=VALUE. Values are single-quoted literals, never sed-substituted.
 update_key() {
-    key=$1
-    value=$2
-    file=$3
-    if grep -q "^${key}=" "$file" 2>/dev/null; then
-        tmp=$(mktemp "${file}.XXXXXX") || exit 1
-        sed "s|^${key}=.*|${key}=${value}|" "$file" >"$tmp"
-        mv "$tmp" "$file"
-    else
-        printf '%s=%s\n' "$key" "$value" >>"$file"
-    fi
+    omni_config_update "$1" "$2" "$3"
 }
 
 cmd_list() {
@@ -111,8 +103,8 @@ cmd_set() {
     mkdir -p "$d"
     if [ ! -f "$file" ]; then
         cat >"$file" <<'EOF'
-# Omni Term AI configuration (POSIX sh).
-# Shell AI assistants shown in the Command Center panes.
+# Omni Term AI configuration.
+# Parsed as literal assignments. Not sourced.
 # Supported: grok agy copilot claude codex deepseek
 OMNI_LEFT_HARNESS=agy
 OMNI_RIGHT_HARNESS=grok
@@ -128,7 +120,7 @@ EOF
         update_key "OMNI_$(echo "$side" | tr '[:lower:]' '[:upper:]')_HARNESS" "$harness" "$file"
     fi
     chmod 600 "$file" 2>/dev/null || true
-    echo "Saved: $side = $harness ($file)"
+    printf 'Saved: %s = %s (%s)\n' "$side" "$harness" "$file"
     if [ "$side" = "left" ] || [ "$side" = "right" ]; then
         if ! omni_harness_installed "$harness"; then
             echo "Note: '$harness' is not on PATH yet. Install it with:" >&2
@@ -226,17 +218,18 @@ cmd_wizard() {
     d=$(dirname "$file")
     if [ -h "$d" ]; then rm -f "$d"; fi
     mkdir -p "$d"
-    cat >"$file" <<EOF
-# Omni Term AI configuration (POSIX sh).
-# Shell AI assistants shown in the Command Center panes.
-# Supported: grok agy copilot claude codex deepseek
-OMNI_LEFT_HARNESS=$left
-OMNI_RIGHT_HARNESS=$right
-OMNI_JUMPBOX=$jumpbox
-OMNI_FIM_ENGINE=$fim
-EOF
+    {
+        printf '%s\n' '# Omni Term AI configuration.'
+        printf '%s\n' '# Parsed as literal assignments. Not sourced.'
+        printf '%s\n' '# Supported: grok agy copilot claude codex deepseek'
+        printf 'OMNI_LEFT_HARNESS=%s\n' "$(omni_config_quote "$left")"
+        printf 'OMNI_RIGHT_HARNESS=%s\n' "$(omni_config_quote "$right")"
+        printf 'OMNI_JUMPBOX=%s\n' "$(omni_config_quote "$jumpbox")"
+        printf 'OMNI_FIM_ENGINE=%s\n' "$(omni_config_quote "$fim")"
+    } >"$file"
     chmod 600 "$file" 2>/dev/null || true
-    echo "Saved: left=$left right=$right jumpbox=$jumpbox fim=$fim ($file)"
+    printf 'Saved: left=%s right=%s jumpbox=%s fim=%s (%s)\n' \
+        "$left" "$right" "$jumpbox" "$fim" "$file"
 }
 
 cmd=${1:-}

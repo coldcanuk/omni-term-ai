@@ -10,9 +10,9 @@ of the Omni Term AI Command Center window.
 The top-left pane and the top-right pane can each run any harness, including
 the same harness twice.
 .PP
-Configuration is stored in a POSIX shell file that
+Configuration is stored in a file of literal assignments that
 .BR launch-ai-workspace (1)
-sources at startup:
+reads at startup (it is not sourced):
 .IR $XDG_CONFIG_HOME/omni-term-ai/config
 (default:
 .IR ~/.config/omni-term-ai/config ).
