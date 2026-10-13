@@ -16,11 +16,21 @@ reads at startup (it is not sourced):
 .IR $XDG_CONFIG_HOME/omni-term-ai/config
 (default:
 .IR ~/.config/omni-term-ai/config ).
-It contains two variables:
+It contains assignments for the panes and for jumpbox, FIM, and Azure:
 .IP
 OMNI_LEFT_HARNESS=agy
 .IP
 OMNI_RIGHT_HARNESS=grok
+.IP
+OMNI_JUMPBOX=user@host
+.IP
+OMNI_FIM_ENGINE=native
+.IP
+OMNI_FIM_PROVIDER=deepseek
+.IP
+OMNI_AZURE_ENDPOINT=https://example.openai.azure.com
+.IP
+OMNI_AZURE_DEPLOYMENT=my-deployment
 .PP
 Supported harnesses:
 .TP
@@ -78,13 +88,38 @@ choices.
 Lists every supported harness with its installed status and, for missing
 binaries, the install command.
 .TP
-.B omni-config get [left|right]
-Prints the current selection for one pane, or both panes when no side is
-given.
+.B omni-config get [left|right|jumpbox|fim|fim-provider|azure-endpoint|azure-deployment]
+Prints the current selection. With no side, prints the panes plus jumpbox,
+FIM engine, FIM provider, and Azure endpoint and deployment.
 .TP
-.B omni-config set <left|right> <harness>
-Writes one pane's harness into the config file. Fails for unknown harness
-names.
+.B omni-config set <side> <value>
+Writes one setting.
+.B left
+and
+.B right
+take a harness name.
+.B jumpbox
+takes
+.B user@host
+or
+.B none .
+.B fim
+takes
+.BR native ,
+.BR copilot ,
+or
+.BR none .
+.B fim-provider
+takes
+.BR deepseek ,
+.BR openai ,
+or
+.BR azure .
+.B azure-endpoint
+and
+.B azure-deployment
+take the Azure OpenAI URL and deployment name.
+Unknown names fail.
 .TP
 .B omni-config path
 Prints the config file path.
