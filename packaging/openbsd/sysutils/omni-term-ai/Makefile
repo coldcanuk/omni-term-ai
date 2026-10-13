@@ -15,7 +15,7 @@ GH_PROJECT =	omni-term-ai
 # Replace with GH_COMMIT until a v${V} GitHub tag exists.
 GH_TAGNAME =	v${V}
 
-RUN_DEPENDS =	editors/neovim devel/git textproc/ripgrep
+RUN_DEPENDS =	editors/neovim devel/git textproc/ripgrep net/curl
 
 NO_BUILD =	Yes
 NO_TEST =	Yes

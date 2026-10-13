@@ -20,7 +20,8 @@ LICENSE=	GPLv3
 RUN_DEPENDS=	neovim>0:editors/neovim \\
 		tmux>0:sysutils/tmux \\
 		ripgrep>0:textproc/ripgrep \\
-		git>0:devel/git
+		git>0:devel/git \\
+		curl>0:ftp/curl
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	coldcanuk

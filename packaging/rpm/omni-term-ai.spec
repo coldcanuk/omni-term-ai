@@ -15,13 +15,15 @@ Requires:       make
 Requires:       ripgrep
 Requires:       unzip
 Requires:       libsecret
+Requires:       curl
 
 %description
 Omni Term AI is a tmux-based dual-tab workspace that launches a command
 center with configurable AI assistant panes (grok, agy, copilot, claude,
 codex, deepseek) and a Neovim editor with DeepSeek Fill-In-The-Middle
 completion. API keys are read from the OS keychain via omni-secret
-(libsecret on Linux).
+(libsecret on Linux). python3 is optional, for bash FIM completion.
+sshfs is optional, and only on the jumpbox, for a remote target.
 
 %prep
 %setup -q

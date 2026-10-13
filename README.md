@@ -27,6 +27,8 @@ These are the runtime requirements **you** provide; the package installs only co
 | Neovim | 0.9.5+ | `NVIM_APPNAME=omni-term-ai`; does not touch `~/.config/nvim` |
 | git / ripgrep / unzip | — | Neovim plugins (lazy.nvim, Telescope) |
 | curl | — | DeepSeek FIM completion in the Editor |
+| python3 | — | optional; bash FIM completion only |
+| sshfs | — | optional; on the jumpbox, for a remote target |
 | An AI assistant CLI | — | at least one of: `grok`, `agy`, `copilot`, `claude`, `codex`, `dsh` |
 | An API key | — | stored in the OS keychain via `omni-secret` (see below) |
 
@@ -116,7 +118,7 @@ make clean
 make
 sudo make install
 ```
-*Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `libsecret`). You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install.*
+*Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `curl`, `libsecret`). `python3` and `sshfs` are optional. You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install.*
 
 
 
@@ -214,10 +216,10 @@ Options live at the bottom of `nvim-config/init.lua` (`require("omni_fim").setup
 
 You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` asks the configured provider (`OMNI_FIM_PROVIDER`, default `deepseek`) for a completion. One choice is inserted. Several choices are a numbered pick; the one you choose is inserted. This needs `python3`. It does not run the model's text as shell.
 
-Add the following to your `~/.bashrc`:
+Add the following to your `~/.bashrc`. `omni-config` must be on `PATH`. This works for a `/usr/local` install and for a `~/.local` install:
 ```bash
 # Omni Term AI integration
-. $HOME/.local/share/omni-term-ai/lib/omni-bash.sh
+. "$(omni-config home)/lib/omni-bash.sh"
 ```
 
 Sourcing that file does not change `NVIM_APPNAME`. The launcher still sets it for the workspace. Set `OMNI_USE_NVIM_CONFIG=1` before sourcing if this shell's `nvim` should use the packaged config.

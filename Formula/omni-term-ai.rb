@@ -37,7 +37,13 @@ class OmniTermAi < Formula
         launch-ai-workspace
 
       Neovim uses NVIM_APPNAME=omni-term-ai and will not replace ~/.config/nvim.
-      DeepSeek FIM completion in the Editor uses $DEEPSEEK_API_KEY.
+      DeepSeek FIM completion in the Editor uses $DEEPSEEK_API_KEY and curl.
+      Azure FIM uses `omni-secret store azure`, then:
+        omni-config set azure-endpoint https://example.openai.azure.com
+        omni-config set azure-deployment my-deployment
+
+      Bash completion needs python3. A jumpbox remote target needs sshfs on
+      the jumpbox. Neither is required to launch the workspace.
     EOS
   end
 
