@@ -5,12 +5,27 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      republish:
+        description: "Re-sign and republish the existing gh-pages repo (no new packages)"
+        type: boolean
+        default: false
 
 jobs:
   deb:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # fim-provider.sh and fim-stale.sh load omni_fim.lua in nvim; man-pages.sh
+      # renders pages; tmux-bindings.py drives tmux. Install them so those
+      # checks run here instead of skipping.
+      - name: Install test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y neovim tmux man-db
+          nvim --version | head -1
+          tmux -V
       - name: Verify DESTDIR layout
         run: sh packaging/tests/verify-install.sh
       - name: Build Debian package
@@ -52,6 +67,40 @@ jobs:
           path: dist/*.pkg
           if-no-files-found: error
 
+  # build-repo.sh with a throwaway key, served locally, then used through
+  # apt and dnf with signatures enforced. Does not need REPO_SIGNING_KEY.
+  repo-sign:
+    needs: [deb, rpm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: debian-package
+          path: t/apt/
+      - uses: actions/download-artifact@v4
+        with:
+          name: rpm-package
+          path: t/rpm/
+      - name: Install repo tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils createrepo-c rpm gnupg
+      - name: Build and sign with a throwaway key
+        run: |
+          GNUPGHOME=$RUNNER_TEMP/gnupg
+          mkdir -m 700 "$GNUPGHOME"
+          export GNUPGHOME
+          gpg --batch --passphrase '' --quick-gen-key 'CI throwaway <ci@invalid>' rsa3072 sign 1d
+          fpr=$(gpg --batch --with-colons --list-secret-keys | awk -F: '/^fpr/ { print $10; exit }')
+          REPO_KEY_FPR=$fpr sh packaging/build-repo.sh t
+          echo "FPR=$fpr" >>"$GITHUB_ENV"
+      - name: Use the signed repo as a client
+        run: |
+          python3 -m http.server --bind 127.0.0.1 --directory t 8000 >/dev/null 2>&1 &
+          for i in $(seq 1 50); do curl -fsS http://127.0.0.1:8000/omni-term-ai.asc >/dev/null && break; sleep 0.2; done
+          sh packaging/tests/repo-client.sh http://127.0.0.1:8000 "$FPR"
+
   release:
     needs: [deb, rpm, macos]
     if: startsWith(github.ref, 'refs/tags/v')
@@ -81,13 +130,19 @@ jobs:
 
   pages-repo:
     needs: [deb, rpm]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.republish)
     runs-on: ubuntu-latest
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
     permissions:
       contents: write
-      pages: write
-      id-token: write
     steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          path: src
+
       - name: Checkout gh-pages branch
         id: pages
         uses: actions/checkout@v4
@@ -96,54 +151,72 @@ jobs:
           path: repo
         continue-on-error: true
 
+      # ls-remote runs inside the source checkout, where origin exists.
+      # Exit 2 means the branch is missing; anything else non-zero is an error.
       - name: Refuse to publish over a failed existing checkout
         if: steps.pages.outcome != 'success'
         run: |
-          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+          rc=0
+          git -C src ls-remote --exit-code --heads origin gh-pages >/dev/null || rc=$?
+          case $rc in
+          0)
             echo "gh-pages exists but checkout failed; refusing to replace the package repo"
             exit 1
-          fi
-          echo "gh-pages does not exist yet; this is a first publish"
-          mkdir -p repo/apt repo/rpm
+            ;;
+          2)
+            echo "gh-pages does not exist yet; this is a first publish"
+            mkdir -p repo/apt repo/rpm
+            ;;
+          *)
+            echo "cannot tell whether gh-pages exists (git ls-remote exit $rc); refusing to publish"
+            exit 1
+            ;;
+          esac
 
       - name: Create repo dirs if they don't exist
         run: |
           mkdir -p repo/apt
           mkdir -p repo/rpm
 
+      # A republish re-signs what is already published. It does not rebuild:
+      # a fresh build of an already-published version would replace it.
       - name: Download new packages
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v4
         with:
           name: debian-package
           path: repo/apt/
       - name: Download new RPM packages
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/download-artifact@v4
         with:
           name: rpm-package
           path: repo/rpm/
 
-      - name: Generate APT repository
+      - name: Install repo tools
         run: |
-          cd repo/apt
-          sudo apt-get update && sudo apt-get install -y dpkg-dev apt-utils
-          dpkg-scanpackages . /dev/null > Packages
-          gzip -k -f Packages
-          cat << 'INNER_EOF' > Release
-          Origin: OmniTermAI
-          Label: OmniTermAI
-          Suite: stable
-          Codename: stable
-          Architectures: all
-          Components: main
-          Description: Omni Term AI Workspace Repository
-          INNER_EOF
-          apt-ftparchive release . >> Release
+          sudo apt-get update
+          sudo apt-get install -y dpkg-dev apt-utils createrepo-c rpm gnupg
 
-      - name: Generate RPM repository
+      - name: Import the signing key
+        env:
+          REPO_SIGNING_KEY: ${{ secrets.REPO_SIGNING_KEY }}
         run: |
-          cd repo/rpm
-          sudo apt-get update && sudo apt-get install -y createrepo-c
-          createrepo_c .
+          [ -n "$REPO_SIGNING_KEY" ] || { echo "REPO_SIGNING_KEY is not set"; exit 1; }
+          GNUPGHOME=$RUNNER_TEMP/gnupg
+          mkdir -m 700 "$GNUPGHOME"
+          export GNUPGHOME
+          printf '%s\n' "$REPO_SIGNING_KEY" | gpg --batch --import
+          want=$(gpg --batch --with-colons --show-keys src/packaging/repo-signing-key.asc | awk -F: '/^fpr/ { print $10; exit }')
+          gpg --batch --list-secret-keys "$want" >/dev/null || {
+            echo "REPO_SIGNING_KEY does not hold the published key $want"
+            exit 1
+          }
+          echo "GNUPGHOME=$GNUPGHOME" >>"$GITHUB_ENV"
+          echo "REPO_KEY_FPR=$want" >>"$GITHUB_ENV"
+
+      - name: Build and sign the apt and rpm repos
+        run: sh src/packaging/build-repo.sh repo
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -151,3 +224,35 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./repo
           keep_files: false
+
+  # What a user does: add the key, add the source, update, download.
+  # Signatures are enforced (no trusted=yes, gpgcheck=1, repo_gpgcheck=1).
+  verify-pages:
+    needs: [pages-repo]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for GitHub Pages to serve the signed repo
+        run: |
+          base=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          gpg --batch --dearmor <packaging/repo-signing-key.asc >"$RUNNER_TEMP/key.gpg"
+          t=$RUNNER_TEMP
+          # Pages caches for up to 10 minutes. Wait until both signed indexes
+          # are fresh, or apt and dnf may see a stale file.
+          for i in $(seq 1 90); do
+            if curl -fsSL "$base/apt/InRelease" -o "$t/InRelease" \
+              && gpgv --keyring "$t/key.gpg" "$t/InRelease" 2>/dev/null \
+              && curl -fsSL "$base/rpm/repodata/repomd.xml" -o "$t/repomd.xml" \
+              && curl -fsSL "$base/rpm/repodata/repomd.xml.asc" -o "$t/repomd.xml.asc" \
+              && gpgv --keyring "$t/key.gpg" "$t/repomd.xml.asc" "$t/repomd.xml" 2>/dev/null; then
+              echo "InRelease and repomd.xml are signed by the repo key"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Pages did not serve signed indexes within 15 minutes"
+          exit 1
+      - name: Use the published repo as a client
+        run: |
+          fpr=$(gpg --batch --with-colons --show-keys packaging/repo-signing-key.asc | awk -F: '/^fpr/ { print $10; exit }')
+          sh packaging/tests/repo-client.sh "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}" "$fpr"

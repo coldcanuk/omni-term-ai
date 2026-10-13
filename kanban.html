@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>P1 bugs are done. Next pull is IMP-01. Pull only works in this chat card.</p>
+      <p>P1 bugs are done. IMP-02 is signed. Next pull is IMP-01.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -193,11 +193,6 @@
     <section class="col" data-col="backlog">
       <h2>Backlog <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P2" data-id="IMP-02">
-          <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
-          <h3>Apt and rpm repos are unsigned</h3>
-          <p>README uses <code>trusted=yes</code> and <code>gpgcheck=0</code>. Sign the repos, then drop those flags.</p>
-        </article>
         <article data-pri="P2" data-id="IMP-03">
           <header><span class="id">IMP-03</span><span class="tag">P2 improve</span></header>
           <h3>Package deps and paths disagree</h3>
@@ -222,6 +217,11 @@
           <header><span class="id">IMP-06</span><span class="tag">done</span></header>
           <h3>Shell integration does not retarget nvim</h3>
           <p>Sourcing <code>omni-bash.sh</code> leaves <code>NVIM_APPNAME</code> alone unless <code>OMNI_USE_NVIM_CONFIG=1</code>. FIM settings already loaded. Neotree <code>-c</code> did not race.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-02">
+          <header><span class="id">IMP-02</span><span class="tag">done</span></header>
+          <h3>Apt and rpm repos are signed</h3>
+          <p>Key <code>B395…F91B</code>. The live repo passes apt <code>signed-by</code> and dnf <code>repo_gpgcheck</code>; a wrong key is refused.</p>
         </article>
         <article data-pri="P1" data-id="BUG-12">
           <header><span class="id">BUG-12</span><span class="tag">done</span></header>

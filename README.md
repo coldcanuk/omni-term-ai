@@ -40,28 +40,47 @@ Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) 
 ### Debian / Pop!OS / Ubuntu
 Supported Package: **`.deb`**
 
-Add our official repository to your package manager to automatically receive future updates:
+Add our signed repository to receive future updates:
 ```bash
-echo "deb [trusted=yes] https://coldcanuk.github.io/omni-term-ai/apt /" | sudo tee /etc/apt/sources.list.d/omni-term-ai.list
+curl -fsSL https://coldcanuk.github.io/omni-term-ai/omni-term-ai.gpg \
+  | sudo tee /usr/share/keyrings/omni-term-ai.gpg >/dev/null
+gpg --show-keys /usr/share/keyrings/omni-term-ai.gpg   # expect B395 A979 72B3 09A3 E4CE  D62A B1C4 CFC6 85A8 F91B
+echo "deb [signed-by=/usr/share/keyrings/omni-term-ai.gpg] https://coldcanuk.github.io/omni-term-ai/apt /" \
+  | sudo tee /etc/apt/sources.list.d/omni-term-ai.list
 sudo apt update
 sudo apt install omni-term-ai
 ```
 
+Added the repository before 0.3.0 with `trusted=yes`? Run the commands above. The second `tee` replaces that line.
+
 ### Fedora / RedHat (RHEL) / AlmaLinux
 Supported Package: **`.rpm`**
 
-Add our official repository to your package manager to automatically receive future updates:
+Add our signed repository to receive future updates:
 ```bash
 cat <<REPO | sudo tee /etc/yum.repos.d/omni-term-ai.repo
 [omni-term-ai]
 name=Omni Term AI Repository
 baseurl=https://coldcanuk.github.io/omni-term-ai/rpm
 enabled=1
-gpgcheck=0
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://coldcanuk.github.io/omni-term-ai/omni-term-ai.asc
 REPO
 
 sudo dnf install omni-term-ai
 ```
+
+dnf asks you to confirm the key on first use. Its fingerprint must be `B395 A979 72B3 09A3 E4CE  D62A B1C4 CFC6 85A8 F91B`.
+
+#### Repository signing key
+Packages and repository metadata are signed with **Omni Term AI Repository Signing** (RSA 4096, expires 2029-10-12):
+
+```
+B395 A979 72B3 09A3 E4CE  D62A B1C4 CFC6 85A8 F91B
+```
+
+The same public key is in this repository at [`packaging/repo-signing-key.asc`](packaging/repo-signing-key.asc). Check that it matches the key served by the package site.
 
 ### Omarchy / Arch Linux / Manjaro
 Supported Package: **`PKGBUILD`**
