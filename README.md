@@ -193,7 +193,7 @@ Options live at the bottom of `nvim-config/init.lua` (`require("omni_fim").setup
 
 ### FIM Bash Completion
 
-You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` will predict and complete text using FIM (DeepSeek, OpenAI, or Azure), presenting choices above your cursor.
+You can integrate FIM directly into your actual terminal's bash shell. When enabled, hitting `<Ctrl-F>` asks the configured provider (`OMNI_FIM_PROVIDER`, default `deepseek`) for a completion. One choice is inserted. Several choices are a numbered pick; the one you choose is inserted. This needs `python3`. It does not run the model's text as shell.
 
 Add the following to your `~/.bashrc`:
 ```bash
