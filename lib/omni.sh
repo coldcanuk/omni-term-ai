@@ -173,22 +173,241 @@ omni_harness_installed() {
 }
 
 # ---------------------------------------------------------------------------
-# Configuration: ~/.config/omni-term-ai/config (POSIX sh, sourced).
+# Configuration: ~/.config/omni-term-ai/config
 #   OMNI_LEFT_HARNESS=agy      # top-left Command Center pane
 #   OMNI_RIGHT_HARNESS=grok    # top-right Command Center pane
+# Parsed as literal KEY=VALUE assignments. Never sourced.
 # ---------------------------------------------------------------------------
 
 omni_config_path() {
     printf '%s\n' "${XDG_CONFIG_HOME:-$HOME/.config}/omni-term-ai/config"
 }
 
-# Load the config file; fall back to defaults when absent or unparsable.
+omni_config_key_ok() {
+    case $1 in
+    OMNI_LEFT_HARNESS | OMNI_RIGHT_HARNESS | OMNI_JUMPBOX | OMNI_FIM_ENGINE)
+        return 0
+        ;;
+    *)
+        return 1
+        ;;
+    esac
+}
+
+# First character of $1. Empty if $1 is empty.
+omni_config_first() {
+    printf '%s' "${1%"${1#?}"}"
+}
+
+# Print $1 as a single-quoted literal. No trailing newline.
+# Returns 1 if $1 contains a newline (those cannot round-trip in this file).
+omni_config_quote() {
+    _cq=$1
+    case $_cq in
+    *'
+'*)
+        echo "omni-term-ai: config values cannot contain newlines" >&2
+        return 1
+        ;;
+    esac
+    printf "'"
+    while :; do
+        case $_cq in
+        *\'*)
+            printf '%s' "${_cq%%\'*}"
+            printf '%s' "'\\''"
+            _cq=${_cq#*\'}
+            ;;
+        *)
+            printf '%s' "$_cq"
+            break
+            ;;
+        esac
+    done
+    printf "'"
+}
+
+# Literal value of the text after '='. Does not expand or execute.
+# Prints the value and a newline. Returns 1 on broken quoting.
+omni_config_parse_value() {
+    _cv=$1
+    _cf=$(omni_config_first "$_cv")
+    case $_cf in
+    \')
+        _cv=${_cv#?}
+        _co=
+        while :; do
+            if [ -z "$_cv" ]; then
+                echo "omni-term-ai: unterminated single quote in config" >&2
+                return 1
+            fi
+            _cc=$(omni_config_first "$_cv")
+            _cv=${_cv#?}
+            case $_cc in
+            \')
+                # Writer escapes an embedded quote as: '\''
+                # The closer was just consumed, so the escape remains as \''
+                _n1=$(omni_config_first "$_cv")
+                if [ "$_n1" = \\ ]; then
+                    _rest=${_cv#?}
+                    _n2=$(omni_config_first "$_rest")
+                    _rest2=${_rest#?}
+                    _n3=$(omni_config_first "$_rest2")
+                    if [ "$_n2" = "'" ] && [ "$_n3" = "'" ]; then
+                        _co=${_co}\'
+                        _cv=${_rest2#?}
+                        continue
+                    fi
+                fi
+                case $_cv in
+                '' | [[:space:]]* | \#*)
+                    printf '%s\n' "$_co"
+                    return 0
+                    ;;
+                *)
+                    echo "omni-term-ai: trailing junk after quoted config value" >&2
+                    return 1
+                    ;;
+                esac
+                ;;
+            *)
+                _co=${_co}${_cc}
+                ;;
+            esac
+        done
+        ;;
+    \")
+        _cv=${_cv#?}
+        _co=
+        while :; do
+            if [ -z "$_cv" ]; then
+                echo "omni-term-ai: unterminated double quote in config" >&2
+                return 1
+            fi
+            _cc=$(omni_config_first "$_cv")
+            _cv=${_cv#?}
+            case $_cc in
+            \\)
+                if [ -z "$_cv" ]; then
+                    echo "omni-term-ai: unterminated double quote in config" >&2
+                    return 1
+                fi
+                _co=${_co}$(omni_config_first "$_cv")
+                _cv=${_cv#?}
+                ;;
+            \")
+                case $_cv in
+                '' | [[:space:]]* | \#*)
+                    printf '%s\n' "$_co"
+                    return 0
+                    ;;
+                *)
+                    echo "omni-term-ai: trailing junk after quoted config value" >&2
+                    return 1
+                    ;;
+                esac
+                ;;
+            *)
+                _co=${_co}${_cc}
+                ;;
+            esac
+        done
+        ;;
+    *)
+        # Legacy unquoted assignment. The remainder is literal text.
+        printf '%s\n' "$_cv"
+        ;;
+    esac
+}
+
+omni_config_assign() {
+    case $1 in
+    OMNI_LEFT_HARNESS) OMNI_LEFT_HARNESS=$2 ;;
+    OMNI_RIGHT_HARNESS) OMNI_RIGHT_HARNESS=$2 ;;
+    OMNI_JUMPBOX) OMNI_JUMPBOX=$2 ;;
+    OMNI_FIM_ENGINE) OMNI_FIM_ENGINE=$2 ;;
+    *)
+        return 1
+        ;;
+    esac
+}
+
+# Replace or append one allowlisted assignment. Copies every other line through.
+omni_config_update() {
+    _ukey=$1
+    _uval=$2
+    _ufile=$3
+    omni_config_key_ok "$_ukey" || return 1
+    _uquoted=$(omni_config_quote "$_uval") || return 1
+    _udir=$(dirname "$_ufile")
+    _utmp=$(mktemp "$_udir/config.XXXXXX") || return 1
+    _ufound=0
+    if [ -f "$_ufile" ]; then
+        while IFS= read -r _uline || [ -n "$_uline" ]; do
+            case $_uline in
+            "$_ukey"=*)
+                printf '%s=%s\n' "$_ukey" "$_uquoted"
+                _ufound=1
+                ;;
+            *)
+                printf '%s\n' "$_uline"
+                ;;
+            esac
+        done < "$_ufile" > "$_utmp"
+    else
+        : > "$_utmp"
+    fi
+    if [ "$_ufound" -eq 0 ]; then
+        printf '%s=%s\n' "$_ukey" "$_uquoted" >> "$_utmp"
+    fi
+    mv "$_utmp" "$_ufile"
+    chmod 600 "$_ufile" 2>/dev/null || true
+}
+
+# Load the config file. Unknown keys and broken lines are skipped.
+# Missing keys keep an existing value, or the historical default.
 omni_load_config() {
-    cfg=$(omni_config_path)
-    if [ -f "$cfg" ]; then
-        # shellcheck source=/dev/null
-        . "$cfg" 2>/dev/null || \
-            echo "omni-term-ai: warning: could not parse $cfg; using defaults" >&2
+    _lcfg=$(omni_config_path)
+    if [ -f "$_lcfg" ]; then
+        _lline=0
+        while IFS= read -r _lrow || [ -n "$_lrow" ]; do
+            _lline=$((_lline + 1))
+            _ltrim=$_lrow
+            while :; do
+                case $_ltrim in
+                [[:space:]]*) _ltrim=${_ltrim#?} ;;
+                *) break ;;
+                esac
+            done
+            case $_ltrim in
+            '' | \#*) continue ;;
+            esac
+            case $_ltrim in
+            *=*)
+                _lkey=${_ltrim%%=*}
+                _lrest=${_ltrim#*=}
+                ;;
+            *)
+                echo "omni-term-ai: warning: $_lcfg:$_lline: ignored (not KEY=VALUE)" >&2
+                continue
+                ;;
+            esac
+            case $_lkey in
+            *[[:space:]]* | '')
+                echo "omni-term-ai: warning: $_lcfg:$_lline: ignored" >&2
+                continue
+                ;;
+            esac
+            if ! omni_config_key_ok "$_lkey"; then
+                echo "omni-term-ai: warning: $_lcfg:$_lline: ignored unknown key $_lkey" >&2
+                continue
+            fi
+            if ! _lval=$(omni_config_parse_value "$_lrest"); then
+                echo "omni-term-ai: warning: $_lcfg:$_lline: could not parse $_lkey; skipping" >&2
+                continue
+            fi
+            omni_config_assign "$_lkey" "$_lval"
+        done < "$_lcfg"
     fi
     # Default only when a value is missing, never when it is invalid:
     # launch-ai-workspace reports invalid values so the user can fix their

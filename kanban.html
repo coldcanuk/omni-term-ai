@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Omni Term AI — 0.3.0 Kanban</title>
+<style>
+  :root {
+    --ink: var(--foreground);
+    --muted: var(--muted-foreground);
+    --line: var(--border);
+    --surface: var(--card);
+    --mark: var(--accent);
+    --gap: 10px;
+    --col: 248px;
+  }
+  * { box-sizing: border-box; }
+  .board {
+    width: 1088px;
+    color: var(--ink);
+  }
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 10px;
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+  }
+  header.top p {
+    margin: 2px 0 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .filters {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .filters button {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .filters button[aria-pressed="true"] {
+    border-color: var(--mark);
+    color: var(--mark);
+  }
+  .cols {
+    display: grid;
+    grid-template-columns: var(--col) 168px minmax(0, 1fr) 200px;
+    gap: var(--gap);
+    align-items: start;
+  }
+  .col {
+    min-width: 0;
+  }
+  .col h2 {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .col h2 span { color: var(--ink); letter-spacing: 0; font-variant-numeric: tabular-nums; }
+  .stack { display: flex; flex-direction: column; gap: 8px; }
+  article {
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 8px 10px 10px;
+  }
+  article header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .id {
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .tag {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--mark);
+  }
+  h3 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-weight: 650;
+    line-height: 1.3;
+    text-wrap: pretty;
+  }
+  article p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  details { margin-top: 6px; }
+  summary {
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  details ul {
+    margin: 6px 0 0;
+    padding-left: 16px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .pull {
+    margin-top: 8px;
+    appearance: none;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .pull:hover, .filters button:hover, summary:hover { border-color: var(--mark); }
+  .empty {
+    border: 1px dashed var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="board">
+  <header class="top">
+    <div>
+      <h1>Omni Term AI 0.3.0</h1>
+      <p>Audit of 0.2.5 at e5d2ea5. BUG-01 is done. Next pull is BUG-03. WIP limit 1.</p>
+    </div>
+    <div class="filters" role="group" aria-label="Filter cards">
+      <button type="button" aria-pressed="true" data-filter="all">All</button>
+      <button type="button" aria-pressed="false" data-filter="P0">P0</button>
+      <button type="button" aria-pressed="false" data-filter="P1">P1</button>
+      <button type="button" aria-pressed="false" data-filter="P2">P2</button>
+    </div>
+  </header>
+  <div class="cols">
+    <section class="col" data-col="ready">
+      <h2>Ready <span data-count>0</span></h2>
+      <div class="stack">
+        <article data-pri="P0" data-id="BUG-02">
+          <header><span class="id">BUG-02</span><span class="tag">P0 bug</span></header>
+          <h3>Jumpbox default mounts the wrong host</h3>
+          <p>No-arg launch turns the jumpbox hostname into the sshfs target. The remote script is unquoted. A failed mount still continues.</p>
+          <details>
+            <summary>Fix and check</summary>
+            <ul>
+              <li>Separate “run on the jumpbox” from <code>@target</code>.</li>
+              <li>Pass the target as one quoted argument. Abort if sshfs fails.</li>
+              <li>Check: no sshfs of the jumpbox’s own name.</li>
+            </ul>
+          </details>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-02 on branch gb/audit-kanban. Split jumpbox-local from @target, quote the remote argument, and abort when sshfs fails.">Pull</button>
+        </article>
+        <article data-pri="P0" data-id="BUG-03">
+          <header><span class="id">BUG-03</span><span class="tag">P0 bug</span></header>
+          <h3>Empty secrets clobber real tokens</h3>
+          <p>Unset keys are exported as empty <code>GH_TOKEN</code> and friends, which hides keyring auth.</p>
+          <details>
+            <summary>Fix and check</summary>
+            <ul>
+              <li>Export and <code>set-environment</code> only when non-empty.</li>
+              <li>Otherwise unset. Do not plant empty tmux vars.</li>
+            </ul>
+          </details>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-03 on branch gb/audit-kanban. Export harness secrets only when non-empty so an empty GH_TOKEN cannot clobber keyring auth.">Pull</button>
+        </article>
+        <article data-pri="P0" data-id="BUG-04">
+          <header><span class="id">BUG-04</span><span class="tag">P0 bug</span></header>
+          <h3>Azure key never enters tmux</h3>
+          <p><code>omni_apply_tmux_env</code> stops at Gemini. Endpoint and deployment live only in bashrc, which desktop launch often skips.</p>
+          <details>
+            <summary>Fix and check</summary>
+            <ul>
+              <li>Inject the Azure key with the other non-empty secrets.</li>
+              <li>Store endpoint and deployment in the config file.</li>
+            </ul>
+          </details>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-04 on branch gb/audit-kanban. Inject AZURE_OPENAI_API_KEY into the tmux session and store endpoint plus deployment in config.">Pull</button>
+        </article>
+        <article data-pri="P0" data-id="BUG-05">
+          <header><span class="id">BUG-05</span><span class="tag">P0 bug</span></header>
+          <h3>Scratchpad and panic hit the wrong server</h3>
+          <p><code>run-shell</code> calls <code>tmux</code> with no <code>-L omni-term-ai</code>. Prefix-Space and Prefix-E miss the workspace socket.</p>
+          <details>
+            <summary>Fix and check</summary>
+            <ul>
+              <li>Use tmux command lists on the current server.</li>
+              <li>Check against a second, default tmux server.</li>
+            </ul>
+          </details>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-05 on branch gb/audit-kanban. Make Prefix-Space and Prefix-E run on the omni-term-ai tmux socket, not the default server.">Pull</button>
+        </article>
+        <article data-pri="P0" data-id="BUG-06">
+          <header><span class="id">BUG-06</span><span class="tag">P0 bug</span></header>
+          <h3>First-run wizard is not on PATH</h3>
+          <p><code>omni-config</code> is called before the launcher prepends its own directory. Desktop and source runs miss it.</p>
+          <details>
+            <summary>Fix and check</summary>
+            <ul>
+              <li>Resolve <code>bindir</code> first. Invoke <code>"$bindir/omni-config"</code>.</li>
+            </ul>
+          </details>
+          <button class="pull" type="button" data-hermes-send="Pull BUG-06 on branch gb/audit-kanban. Call the sibling omni-config by path before any PATH lookup on first run.">Pull</button>
+        </article>
+      </div>
+    </section>
+    <section class="col" data-col="doing">
+      <h2>In progress <span data-count>0</span></h2>
+      <div class="stack">
+        <div class="empty">Empty. Pull BUG-03.</div>
+      </div>
+    </section>
+    <section class="col" data-col="backlog">
+      <h2>Backlog <span data-count>0</span></h2>
+      <div class="stack">
+        <article data-pri="P1" data-id="BUG-07">
+          <header><span class="id">BUG-07</span><span class="tag">P1 bug</span></header>
+          <h3>OpenAI key silently wins FIM</h3>
+          <p>Every stored key is exported, so Codex’s OpenAI key replaces DeepSeek. No provider setting.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-08">
+          <header><span class="id">BUG-08</span><span class="tag">P1 bug</span></header>
+          <h3>Bash completion does not insert</h3>
+          <p>Bound only if DeepSeek is set. <code>n=3</code> prints choices and inserts nothing. <code>eval</code>s model text.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-09">
+          <header><span class="id">BUG-09</span><span class="tag">P1 bug</span></header>
+          <h3>Stale ghost text, leaked payload</h3>
+          <p>No generation stamp on curl. Temp file never removed. Multiline accept parks the cursor wrong.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-10">
+          <header><span class="id">BUG-10</span><span class="tag">P1 bug</span></header>
+          <h3>Uninstall leaves a man page</h3>
+          <p><code>omni-config.1</code> stays installed and omits jumpbox/fim. SEE ALSO names pages that do not exist.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-11">
+          <header><span class="id">BUG-11</span><span class="tag">P1 bug</span></header>
+          <h3><code>--deps</code> ignores Arch and Omarchy</h3>
+          <p><code>ID=arch</code> with empty <code>ID_LIKE</code> exits as unknown Linux. FreeBSD is missing too.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-12">
+          <header><span class="id">BUG-12</span><span class="tag">P1 bug</span></header>
+          <h3>Agent cleanup path is fictional</h3>
+          <p><code>AGENTS.md</code> rule 5 cds to <code>/opt/repo/omni-term-ai</code>. This tree is <code>/usr/local/src</code>. Rule 2 uses <code>.worktrees/</code>.</p>
+        </article>
+        <article data-pri="P1" data-id="BUG-13">
+          <header><span class="id">BUG-13</span><span class="tag">P1 bug</span></header>
+          <h3>gh-pages checkout failure can wipe the repo</h3>
+          <p><code>continue-on-error</code> plus <code>keep_files: false</code> publishes only the new deb/rpm if checkout fails.</p>
+        </article>
+        <article data-pri="P1" data-id="IMP-01">
+          <header><span class="id">IMP-01</span><span class="tag">P1 improve</span></header>
+          <h3>Tests check layout, not behavior</h3>
+          <p><code>make test</code> never looks at the bash libs, config quoting, or empty-secret export. No shellcheck in CI.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-02">
+          <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
+          <h3>Apt and rpm repos are unsigned</h3>
+          <p>README uses <code>trusted=yes</code> and <code>gpgcheck=0</code>. Sign the repos, then drop those flags.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-03">
+          <header><span class="id">IMP-03</span><span class="tag">P2 improve</span></header>
+          <h3>Package deps and paths disagree</h3>
+          <p>curl, python3, and sshfs are undeclared or docs-only. Bashrc snippet hard-codes <code>~/.local</code>.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-04">
+          <header><span class="id">IMP-04</span><span class="tag">P2 improve</span></header>
+          <h3>Keys show up in process lists</h3>
+          <p>macOS <code>security -w</code> and curl <code>-H</code> put the key in argv. secret-tool attribute <code>api</code> can collide.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-05">
+          <header><span class="id">IMP-05</span><span class="tag">P2 improve</span></header>
+          <h3>Changelog lags the tree</h3>
+          <p>0.2.5 notes the symlink crash only. Jumpbox, Azure FIM, and bash completion are undocumented there.</p>
+        </article>
+        <article data-pri="P2" data-id="IMP-06">
+          <header><span class="id">IMP-06</span><span class="tag">P2 improve</span></header>
+          <h3>Shell integration is broader than it looks</h3>
+          <p><code>omni-bash.sh</code> forces <code>NVIM_APPNAME</code> and never loads the FIM engine. Neotree <code>-c</code> can race.</p>
+        </article>
+      </div>
+    </section>
+    <section class="col" data-col="done">
+      <h2>Done <span data-count>0</span></h2>
+      <div class="stack">
+        <article data-pri="P0" data-id="BUG-01">
+          <header><span class="id">BUG-01</span><span class="tag">done</span></header>
+          <h3>Config is parsed, not sourced</h3>
+          <p>Allowlisted assignments. Quoted writes. <code>config-roundtrip.sh</code> and <code>make test</code> passed.</p>
+        </article>
+        <article data-pri="P2" data-id="AUDIT-00">
+          <header><span class="id">AUDIT-00</span><span class="tag">done</span></header>
+          <h3>Audit of 0.2.5</h3>
+          <p>Config execution and sed corruption reproduced. Azure, PATH, socket, and gh-pages confirmed by reading.</p>
+        </article>
+        <article data-pri="P2" data-id="PLAN-0.2">
+          <header><span class="id">0.2.0</span><span class="tag">done</span></header>
+          <h3>Multi-harness plan shipped</h3>
+          <p>Do not re-implement. Corrections are the cards to the left.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+  <p class="note">Spec: <code>PLAN.md</code> on <code>gb/audit-kanban</code>. BUG-01 verified, not committed. Click Pull to start the next card.</p>
+</div>
+<script>
+(function () {
+  var root = document.querySelector(".board");
+  function apply(filter) {
+    root.querySelectorAll("article").forEach(function (card) {
+      var show = filter === "all" || card.getAttribute("data-pri") === filter;
+      card.hidden = !show;
+    });
+    root.querySelectorAll(".col").forEach(function (col) {
+      var n = col.querySelectorAll("article:not([hidden])").length;
+      var slot = col.querySelector("[data-count]");
+      if (slot) slot.textContent = String(n);
+    });
+  }
+  root.querySelectorAll(".filters button").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      root.querySelectorAll(".filters button").forEach(function (b) {
+        b.setAttribute("aria-pressed", "false");
+      });
+      btn.setAttribute("aria-pressed", "true");
+      apply(btn.getAttribute("data-filter"));
+    });
+  });
+  apply("all");
+})();
+</script>
+</body>
+</html>

@@ -1,135 +1,196 @@
-# Omni Term AI — Multi-Harness Shell Assistants + DeepSeek FIM + Brew Trust (RDAP)
+# Omni Term AI — Audit remediation (0.3.0)
 
-## 2. Scope of Work
+Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `main` at `e5d2ea5`). This plan is the correction list from an audit of `/usr/local/src/omni-term-ai` on 2026-10-13. Visual board: `kanban.html`.
 
-**Primary Goal:** Make the Command Center's two AI panes (top-left / top-right) configurable by the end user across a registry of shell AI assistants ("harnesses") — `grok`, `agy`, `copilot`, `claude code`, `codex`, and the DeepSeek harness (`dsh`) — with the DeepSeek API key powering Fill-In-The-Middle (FIM) code completion in the Neovim Editor, and with macOS Homebrew install instructions updated for the mandatory `brew trust` step.
+**Target:** 0.3.0. Do not bump VERSION until the Ready column is done and `make test` passes.
 
-**Non-Goals:**
-- Bundling or installing the harness binaries themselves (users install their chosen assistants; we detect and guide)
-- Chat/agent features inside Neovim beyond FIM completion (no nvim-copilot, no avante)
-- FIM providers other than DeepSeek (architecture leaves room, but only DeepSeek ships in this milestone)
-- Windows support
-- Changing the tmux/Neovim defaults already shipped in v0.1.0 other than pane titles and the config-driven harness panes
+**Method:** one card at a time, on this branch (`gb/audit-kanban`), worktree `.worktrees/gb-audit-kanban-wt`. No commits to `main`. WIP limit: 1.
 
-**Success Criteria / Definition of Done:**
-- `omni-config` CLI exists: `list` (supported + installed harnesses with install hints), `get`, `set left|right <harness>`, and an interactive wizard when run bare
-- Config file `~/.config/omni-term-ai/config` (`OMNI_LEFT_HARNESS` / `OMNI_RIGHT_HARNESS`) defaults to `agy` / `grok` (today's hardcoded behavior) and is honored by `launch-ai-workspace`
-- `launch-ai-workspace` validates both harnesses, prints a clear per-harness install hint when a binary is missing, and exits non-zero; pane borders show the harness names (tmux ≥ 3.2 `select-pane -T`)
-- Harness auth env vars are injected into the tmux session and by `omni-exec` (grok→`XAI_API_KEY`, agy→`GEMINI_API_KEY`, copilot→`GH_TOKEN`/`GITHUB_TOKEN`, claude→`ANTHROPIC_API_KEY`, codex→`OPENAI_API_KEY`, deepseek→`DEEPSEEK_API_KEY`)
-- `omni-secret` accepts `xai deepseek anthropic openai github gemini`
-- Neovim shows DeepSeek FIM ghost-text completions (`https://api.deepseek.com/beta/completions`, model `deepseek-v4-pro`, `prompt` + `suffix`) when `DEEPSEEK_API_KEY` is present, with `<Tab>` accept and `<C-e>` dismiss
-- README documents: harness table (install + auth + launch), `omni-config` usage, DeepSeek FIM, and the macOS `brew trust coldcanuk/omni-term-ai` step (Homebrew ≥ 6.0.0 requirement)
-- `man/launch-ai-workspace.1` updated; new `man/omni-config.1`
-- `make test` (verify-install.sh) passes with `omni-config` in the staged tree; `sh -n` clean on all scripts; VERSION bumped to 0.2.0; CHANGELOG updated
-- Feature branch pushed, PR opened and merged per AGENTS.md, worktree removed, `main` clean
+**Non-goals:** new harnesses, new FIM vendors beyond the three already claimed, rewriting the tmux layout.
 
-**Constraints:** GPLv3; POSIX `/bin/sh` (OpenBSD base has no bash); tmux ≥ 3.2 (repo minimum; `select-pane -T` needs 3.2+); Neovim ≥ 0.9.5 with lazy.nvim; no new required system packages (FIM uses `curl`, already a runtime peer for lazy.nvim/telescope); do not clobber `~/.config/nvim`; no hardcoded `/opt/repo` paths in installed files.
+## How to read the board
 
-**Assumptions:** Users install their chosen harnesses themselves; DeepSeek FIM endpoint `https://api.deepseek.com/beta/completions` stays OpenAI-compatible with `prompt`/`suffix` (verified 2026-08-27); `dsh` (DeepSeek Harness) runs as `dsh web --no-open` in a pane; Homebrew ≥ 6.0.0 requires explicit tap trust (verified 2026-08-27, Homebrew 6.0.20 current).
-
-**Required Environment:** git, make, `sh`, `curl` (verification), `tmux` ≥ 3.2 for local run test (this host has 3.4), `gh` for the PR. No API keys needed for build/test (FIM gracefully no-ops without `DEEPSEEK_API_KEY`).
-
-**Top Risks:**
-| Risk | Mitigation |
+| Column | Meaning |
 | --- | --- |
-| DeepSeek FIM model/endpoint drift | Model + endpoint are config (`omni_fim` setup opts); RESEARCH.md pins the 2026-08-27 verified shape |
-| Homebrew trust wording wrong for older Homebrew | Document Homebrew ≥ 6.0.0 trust step plus pre-6.0 fallback (`brew install --HEAD --formula ./Formula/omni-term-ai.rb`) |
-| Harness binary names collide (e.g. `codex` also ships with OpenAI SDK) | `omni_harness_installed` uses `command -v`; install hints show canonical sources |
-| `agy` auth is Google-only (no API key in pane) | `agy` env var optional (`GEMINI_API_KEY`); docs state browser sign-in is primary |
-| Config file syntax errors break launch | Sourcing guarded; fall back to defaults with a warning |
+| Ready | Pull next. Ordered. These are broken or unsafe on the current tree. |
+| In progress | The one card being fixed. Empty until pulled. |
+| Backlog | Confirmed bugs and improvements not yet pulled. |
+| Done | Audit recorded. 0.2.0 plan closed. Cards move here only after the verification line passes. |
 
 ---
 
-## Phase 0 — Environment & Isolation Setup
+## Ready
 
-### Milestone 0.1: Worktree
-- **Task 1 of Milestone 0.1:** Worktree exists: `/opt/repo/gb-multi-harness-ai-wt` on branch `gb/multi-harness-ai` (created earlier, at `main`).
-- **Verification:** `cd /opt/repo/gb-multi-harness-ai-wt && git status` clean; branch name matches.
-- **Status:** DONE.
+### BUG-02 — Jumpbox default mounts the jumpbox as the target
+- **Kind:** bug, P0
+- **Where:** `launch-ai-workspace` (the `ai-session` rewrite from `f90d526`, and the `@target` ssh block from `9f969fd`)
+- **Evidence:** If `OMNI_JUMPBOX=user@jump.example.com`, a no-arg launch rewrites the session to `@jump.example.com`, then sshfs-mounts that name from the jumpbox. The remote script interpolates `$TARGET_NAME` unquoted. `sshfs` failure is a warning only; `cd` still succeeds on the empty `mkdir`. `sshfs` is not installed on this host. `mountpoint` is Linux-only.
+- **Fix:** Split the two intents. "Run on the jumpbox" is `ssh -t -- "$JUMPBOX" launch-ai-workspace` with no sshfs of the jumpbox's own hostname. `@target` stays the behind-jumpbox case: pass the target as one quoted remote argument (`printf %q`), require `sshfs`, and abort if the mount fails. Do not treat a configured jumpbox as an implicit `@jumpboxhost` target. Desktop and CLI can share an explicit config flag if desktop should default remote; do not overload the session name.
+- **Verify:** Jumpbox set, no args: either a local session or a remote session whose cwd is the jumpbox home, never an sshfs of the jumpbox hostname. `@prod` mounts only `prod`, quoted. A target with `;` or spaces is one argument or rejected. Failed sshfs exits non-zero.
 
----
+### BUG-03 — Empty secrets clobber real credentials
+- **Kind:** bug, P0
+- **Where:** `lib/omni.sh` `omni_export_harness_keys`; `launch-ai-workspace` `omni_apply_tmux_env`
+- **Evidence:** Every key is exported and `set-environment -g`'d even when the secret was never stored. Empty `GH_TOKEN` / `GITHUB_TOKEN` override keyring auth for `gh` in every new pane. Same for `OPENAI_API_KEY` and the others.
+- **Fix:** Export and `set-environment` only when the secret is non-empty. Otherwise `unset` and `set-environment -u`. Do not write empty values into the tmux global environment.
+- **Verify:** Parent has `GH_TOKEN=from-keyring` and no github secret stored. `omni-exec sh -c 'printf %s "$GH_TOKEN"'` prints `from-keyring`. A fresh tmux pane does not show an empty `GH_TOKEN`.
 
-## Phase 1 — Research & Discovery
+### BUG-04 — Azure FIM key never reaches the tmux session
+- **Kind:** bug, P0
+- **Where:** `launch-ai-workspace` `omni_apply_tmux_env` (stops at `GEMINI_API_KEY`); README claims `AZURE_OPENAI_API_KEY`
+- **Evidence:** `omni_export_harness_keys` exports `AZURE_OPENAI_API_KEY`, but the launcher never `set-environment`s it. Endpoint and deployment are documented as bashrc exports, which a desktop `Terminal=true` launch often does not source. Neovim inside the session therefore cannot do Azure FIM.
+- **Fix:** Inject `AZURE_OPENAI_API_KEY` with the other keys (non-empty only, per BUG-03). Store endpoint and deployment in the config file (they are not secrets) and inject those too, so desktop launch does not depend on bashrc.
+- **Verify:** After `omni-secret store azure` plus config endpoint/deployment, `tmux show-environment -g` inside the session lists all three. Unset secret does not plant an empty key.
 
-### Milestone 1.1: Domain research
-- **Task 1 of Milestone 1.1:** Verify each harness CLI (install, launch, auth env): grok (xAI Grok Build), agy (Google Antigravity), copilot (github/copilot-cli), claude code (`@anthropic-ai/claude-code`), codex (`@openai/codex`), deepseek (`dsh`, DeepSeek Harness). Verify DeepSeek FIM endpoint shape. Verify Homebrew `brew trust` (Tap-Trust, Homebrew 6.0.0+). Verify tmux `select-pane -T` (3.2+).
-- **Verification:** All claims cross-checked against official docs / npm registry / GitHub (2026-08-27). See RESEARCH.md §7.
-- **Status:** DONE.
+### BUG-05 — Scratchpad and panic button talk to the wrong tmux server
+- **Kind:** bug, P0
+- **Where:** `tmux.conf` `bind Space` / `bind E`; `tmux-toggle-scratch`
+- **Evidence:** Both invoke the `tmux` binary. `run-shell` does not set `TMUX`, and neither command passes `-L omni-term-ai`. The workspace server is socket `omni-term-ai`. Prefix-Space and Prefix-E hit the default server or fail.
+- **Fix:** Use tmux command lists on the current server (`bind E kill-window ... \; new-window ... \; send-keys ...`). Implement the scratchpad with `display-popup` / `if-shell` in `tmux.conf`, or pass `-L omni-term-ai` explicitly. Do not shell out to an unqualified `tmux`.
+- **Verify:** With a default tmux server also running, Prefix-Space toggles a popup on the omni socket only, and Prefix-E recreates the Editor window on that socket only.
 
-### Milestone 1.2: Synthesize and freeze remaining plan
-- **Task 1 of Milestone 1.2:** Write RESEARCH.md §7 and this updated PLAN.md. Commit.
-- **Verification:** Files exist; commit `Milestone 1.2: ...`.
-
----
-
-## Phase 2 — Define / Architecture
-
-### Milestone 2.1: Interfaces and data model
-- **Task 1 of Milestone 2.1:** Freeze harness registry in `lib/omni.sh`: names `grok agy copilot claude codex deepseek`; per-harness binary, launch command, auth env var(s), install hint.
-- **Task 2 of Milestone 2.1:** Freeze config format: `$XDG_CONFIG_HOME/omni-term-ai/config` (POSIX sh, sourced) with `OMNI_LEFT_HARNESS` / `OMNI_RIGHT_HARNESS`; defaults `agy`/`grok`.
-- **Task 3 of Milestone 2.1:** Freeze secret names: `xai deepseek anthropic openai github gemini` mapped to `XAI_API_KEY DEEPSEEK_API_KEY ANTHROPIC_API_KEY OPENAI_API_KEY GH_TOKEN/GITHUB_TOKEN GEMINI_API_KEY`.
-- **Task 4 of Milestone 2.1:** Freeze FIM design: `nvim-config/lua/omni_fim.lua` — debounced ghost-text completion via `curl` → `https://api.deepseek.com/beta/completions` (`model=deepseek-v4-pro`, `prompt`=text before cursor, `suffix`=text after cursor, `max_tokens=128`, `temperature=0`), no-op without `DEEPSEEK_API_KEY`.
-- **Verification:** Decisions recorded here; no code yet.
-
----
-
-## Phase 3 — Implementation
-
-### Milestone 3.1: lib/omni.sh harness registry + config
-- **Task 1 of Milestone 3.1:** Add `omni_config_path`, `omni_load_config` (defaults + guarded source), `omni_config_get`, `omni_validate_harness`.
-- **Task 2 of Milestone 3.1:** Add `omni_harness_list`, `omni_harness_bin`, `omni_harness_cmd`, `omni_harness_env`, `omni_harness_install_hint`, `omni_harness_installed`, `omni_harness_name` (claude→"claude code" display).
-- **Verification:** `sh -n lib/omni.sh`; `omni_harness_list` prints 6 names.
-
-### Milestone 3.2: omni-config CLI
-- **Task 1 of Milestone 3.2:** New `omni-config` script: `list`, `get [left|right]`, `set <left|right> <harness>` (validates), `path`, bare = interactive wizard (numbered menu, POSIX `read`).
-- **Verification:** `omni-config list` shows installed status + hints; `set left codex` writes config; `set left bogus` errors.
-
-### Milestone 3.3: omni-secret + omni-exec multi-key
-- **Task 1 of Milestone 3.3:** Extend `omni-secret` `valid_name` to `xai deepseek anthropic openai github gemini`.
-- **Task 2 of Milestone 3.3:** `omni-exec` exports all six harness env vars (from secrets; empty when unset).
-- **Verification:** `omni-exec env | grep -E 'XAI_API_KEY|DEEPSEEK_API_KEY|ANTHROPIC|OPENAI|GH_TOKEN|GEMINI'` shows keys set from keychain.
-
-### Milestone 3.4: launch-ai-workspace config-driven panes
-- **Task 1 of Milestone 3.4:** Load config; validate left/right harnesses; error+install hint and exit 1 if a binary is missing.
-- **Task 2 of Milestone 3.4:** Send harness launch commands to panes `.0`/`.1`; set pane titles (`select-pane -T`); enable `pane-border-status top` in tmux.conf.
-- **Task 3 of Milestone 3.4:** `omni_apply_tmux_env` also sets harness env vars in tmux global env (from secrets).
-- **Verification:** With config `left=codex right=claude`, session panes run `codex` / `claude`; pane titles visible; missing-binary case prints hint and exits 1.
-
-### Milestone 3.5: DeepSeek FIM in Neovim
-- **Task 1 of Milestone 3.5:** `nvim-config/lua/omni_fim.lua`: debounced insert-mode ghost text via extmark; `curl` to DeepSeek beta completions; `<Tab>` accept, `<C-e>` dismiss; no-op without key; highlight group.
-- **Task 2 of Milestone 3.5:** Wire `require('omni_fim').setup({})` into `nvim-config/init.lua`.
-- **Verification:** `nvim --headless -u NVIM_APPNAME...` loads without error; with `DEEPSEEK_API_KEY` set and network, ghost text appears (manual; CI only checks load).
-
-### Milestone 3.6: Packaging + tests
-- **Task 1 of Milestone 3.6:** Makefile installs `omni-config` + `man/omni-config.1`; `verify-install.sh` checks both; `sh -n` list includes `omni-config`.
-- **Task 2 of Milestone 3.6:** Formula caveats: `brew trust` + key stores; deb/rpm descriptions mention configurable harnesses.
-- **Verification:** `make test` passes; `make DESTDIR=/tmp/... PREFIX=/usr install` includes `bin/omni-config`.
+### BUG-06 — First-run wizard is not on PATH
+- **Kind:** bug, P0
+- **Where:** `launch-ai-workspace` lines 16–18 call `omni-config`; `PATH` is prepended with the script directory only at lines 64–66
+- **Evidence:** Desktop `Exec` is the absolute launcher path. A user-prefix install (`~/.local/bin` not on the desktop PATH) cannot find `omni-config`. Same for `./launch-ai-workspace` from a source tree.
+- **Fix:** Resolve `bindir` first. Invoke `"$bindir/omni-config"`.
+- **Verify:** `PATH=/usr/bin:/bin ./launch-ai-workspace` with no config file runs the sibling `omni-config`, not a PATH lookup.
 
 ---
 
-## Phase 4 — Documentation
+## In progress
 
-### Milestone 4.1: README
-- **Task 1 of Milestone 4.1:** README: harness table (install, auth, launch), `omni-config` usage, DeepSeek FIM section, macOS `brew trust` section (Homebrew ≥ 6.0.0) with the exact command sequence and pre-6.0 fallback, requirements spelled out.
-- **Verification:** All 6 harnesses + trust + FIM documented; commands copy-pasteable.
-
-### Milestone 4.2: Man pages + desktop + version
-- **Task 1 of Milestone 4.2:** Update `man/launch-ai-workspace.1` (config file, harness panes); add `man/omni-config.1`.
-- **Task 2 of Milestone 4.2:** Update `ai-workspace.desktop` comment/keywords; CHANGELOG 0.2.0; VERSION 0.2.0.
-- **Verification:** `man` renders; grep finds no stale "Launch Grok and Agy" text.
+Empty. Pull BUG-03 next.
 
 ---
 
-## Final Phase — Verification, Polish, Integration & Cleanup
+## Backlog — bugs
 
-### Milestone 5.1: Full verify + merge
-- **Task 1 of Milestone 5.1:** `sh -n` all scripts; `make test`; DESTDIR install test; grep staged tree for `/opt/repo` / `/home/chuck`; `omni-config` smoke tests; FIM module loads headless.
-- **Task 2 of Milestone 5.1:** `git add . && git commit -m "Complete: multi-harness, DeepSeek FIM, brew trust docs – ready for merge"`; `git push -u origin gb/multi-harness-ai`.
-- **Task 3 of Milestone 5.1:** `gh pr create` against `main`; `gh pr merge --merge --delete-branch` per AGENTS.md.
-- **Task 4 of Milestone 5.1:** `cd /opt/repo/omni-term-ai && git checkout main && git pull origin main && git worktree remove ../gb-multi-harness-ai-wt`.
-- **Verification:** main clean, worktree gone, PR merged.
+### BUG-07 — Stored OpenAI key silently replaces DeepSeek FIM
+- **Kind:** bug, P1
+- **Where:** `nvim-config/lua/omni_fim.lua` (Azure, then OpenAI, then DeepSeek); `lib/deepseek-completion.bash` (same order)
+- **Evidence:** `omni_export_harness_keys` always exports every stored key. Codex users who also stored `openai` never hit DeepSeek, and `OMNI_FIM_ENGINE` has no provider field (`native|copilot|none` only).
+- **Fix:** Add `OMNI_FIM_PROVIDER=deepseek|openai|azure` (default `deepseek`). Native FIM calls only that provider. Do not infer the vendor from which keys happen to be set.
+- **Verify:** Both OpenAI and DeepSeek keys set, provider `deepseek`: request URL is the DeepSeek beta completions endpoint. Provider `openai` does not call DeepSeek.
+
+### BUG-08 — Bash FIM completion does not complete
+- **Kind:** bug, P1
+- **Where:** `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, README "FIM Bash Completion"
+- **Evidence:** The snippet is sourced only when `DEEPSEEK_API_KEY` is non-empty, so OpenAI-only and Azure-only users get no binding. The Python asks for `n=3` and, when more than one choice comes back, only `echo`s them; nothing is inserted and there is no picker. `python3` is an undeclared dependency. Model text is `eval`'d.
+- **Fix:** Bind when any configured provider key is present. Check `python3` and no-op with a one-line warning if missing. Either request `n=1` or present a numbered pick and insert that choice. Assign `READLINE_LINE` / `READLINE_POINT` without `eval` of model text.
+- **Verify:** OpenAI-only key still binds Ctrl-F. Two choices can be selected and land in the line. Missing `python3` does not abort the shell.
+
+### BUG-09 — FIM can show a stale completion and leak the payload
+- **Kind:** bug, P1
+- **Where:** `nvim-config/lua/omni_fim.lua`
+- **Evidence:** `on_stdout` applies whatever curl returns; there is no generation counter, so a slow response for an old prefix can paint ghost text after the user has typed more. `vim.fn.tempname()` is never deleted. Multiline accept sets the cursor to `col + #last` on the last line; after `nvim_buf_set_text`, later lines start at column 0.
+- **Fix:** Stamp each request. Ignore callbacks whose stamp is not current. `os.remove` the payload in `on_exit`. For a multi-line insert, park the cursor at `#last` on the last inserted line (0-based).
+- **Verify:** Overlapping mocked responses: only the latest prefix is shown. No payload file left in temp. A two-line accept leaves the cursor at the end of line 2, not `col` bytes past it.
+
+### BUG-10 — Uninstall and man pages drift from the CLI
+- **Kind:** bug, P1
+- **Where:** `Makefile` `uninstall` (removes `launch-ai-workspace.1`, not `omni-config.1`); `man/omni-config.1`; `man/launch-ai-workspace.1`
+- **Evidence:** `omni-config` supports `jumpbox` and `fim`. Neither man page says so. Both SEE ALSO `omni-secret(1)` and `omni-exec(1)`, which do not exist. `make uninstall` leaves `omni-config.1` installed.
+- **Fix:** Remove `omni-config.1` on uninstall. Document jumpbox, fim, and azure in the existing pages. Add `omni-secret.1` and `omni-exec.1`, or drop the dangling SEE ALSO.
+- **Verify:** `DESTDIR` install then uninstall leaves no `man1/omni-*` or `man1/launch-ai-workspace.1`. `man -l` text mentions jumpbox and fim.
+
+### BUG-11 — `install.sh --deps` ignores Arch, Omarchy, and FreeBSD
+- **Kind:** bug, P1
+- **Where:** `install.sh` `install_deps` (Debian, Fedora, OpenBSD, Darwin only)
+- **Evidence:** Arch's `ID=arch` with empty `ID_LIKE` falls through to "Unknown Linux" and exits 1. README tells Omarchy users this project is a supported install path. This host is Omarchy.
+- **Fix:** `pacman -S --needed` for arch/omarchy/manjaro. `pkg install` for FreeBSD. Keep the unknown-distro error for everything else.
+- **Verify:** A dry-run or `ID=arch` case selects pacman and does not exit 1 before the package command.
+
+### BUG-12 — Agent cleanup path does not exist
+- **Kind:** bug, P1
+- **Where:** `AGENTS.md` rule 5 (`cd /opt/repo/omni-term-ai`); rule 2 uses `.worktrees/`
+- **Evidence:** This tree is `/usr/local/src/omni-term-ai`. Rule 5 and rule 2 disagree. An agent that follows rule 5 cannot clean up.
+- **Fix:** Cleanup from `git rev-parse --show-toplevel`, then `git worktree remove .worktrees/gb-<feature>-wt`. Delete the `/opt/repo` line.
+- **Verify:** The documented commands succeed in this clone.
+
+### BUG-13 — A failed gh-pages checkout can wipe the package repo
+- **Kind:** bug, P1
+- **Where:** `.github/workflows/packages.yml` `pages-repo`
+- **Evidence:** Checkout of `gh-pages` is `continue-on-error: true`. Deploy uses `peaceiris/actions-gh-pages` with `keep_files: false` and `publish_dir: ./repo`. If checkout fails, the job still publishes a directory that contains only the newly downloaded deb/rpm.
+- **Fix:** Fail the job if the checkout fails, unless the branch truly does not exist yet (first publish). Never publish an empty tree over an existing repo. `keep_files: false` is fine only after a successful checkout of the current site.
+- **Verify:** Workflow YAML no longer continues past a failed checkout. A review of the job shows the publish step is skipped or failed when `repo/` is not a real gh-pages tree.
 
 ---
 
-**Commit after every Milestone:**
-`git add . && git commit -m "Milestone X.Y: <what was achieved>"`
+## Backlog — improvements
+
+### IMP-01 — Tests check layout, not behavior
+- **Kind:** improvement, P1
+- **Where:** `packaging/tests/verify-install.sh`, `.github/workflows/packages.yml`
+- **Evidence:** `make test` checks that files exist and `sh -n`s a subset of scripts. It does not mention `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, or `lib/boot.sh`. No shellcheck on this host. No test covers config round-trip, empty-secret export, or the jumpbox argument quoting.
+- **Fix:** Extend the smoke test to assert those three libs are installed. Add a POSIX test script for BUG-01, BUG-03, and BUG-06 that does not need a live tmux server. Run `shellcheck -s sh` in CI when the runner has it. `nvim --headless` load of `omni_fim` stays a non-network check (`luac -p` already passes).
+- **Verify:** `make test` fails if `omni-bash.sh` is dropped from the Makefile. The new script fails on the pre-fix tree and passes after BUG-01 and BUG-03.
+
+### IMP-02 — Apt and rpm repos are unsigned
+- **Kind:** improvement, P2
+- **Where:** README install blocks (`trusted=yes`, `gpgcheck=0`); `packages.yml` Release generation
+- **Fix:** Sign the Release file and the rpm repo. Document the key fingerprint. Remove `trusted=yes` and `gpgcheck=0` once a key is published. Until then, label the current instructions as unverified.
+- **Verify:** A clean apt source entry without `trusted=yes` updates against the published repo.
+
+### IMP-03 — Package metadata does not match runtime needs
+- **Kind:** improvement, P2
+- **Where:** `packaging/deb/control` (no `curl`), `packaging/build-arch.sh` PKGBUILD (`depends` is only neovim, tmux, git, ripgrep), `Formula/omni-term-ai.rb` caveats (no azure), README bashrc path
+- **Evidence:** FIM needs `curl`. Bash completion needs `python3`. Jumpbox needs `sshfs` and a remote `launch-ai-workspace`. README tells users to source `$HOME/.local/share/omni-term-ai/lib/omni-bash.sh`; `make install` defaults to `PREFIX=/usr/local`.
+- **Fix:** Align Depends/depends with curl at minimum. Document python3 and sshfs as optional features, not silent requirements. Point the bashrc snippet at the installed datadir (`omni-config` can print it) instead of a hard-coded `~/.local` path. Mention azure in the Homebrew caveats.
+- **Verify:** deb control and PKGBUILD both list curl. README snippet works for a `/usr/local` install.
+
+### IMP-04 — Secrets are visible to `ps` and easy to collide
+- **Kind:** improvement, P2
+- **Where:** `lib/omni.sh` `security add-generic-password -w`; `omni_fim.lua` curl `-H` with the key; `secret-tool store/lookup api <name>`
+- **Fix:** Pass the macOS password and the curl auth header via a 0600 file or curl config, not argv. Namespace secret-tool attributes (`service omni-term-ai`) and migrate old items on read so existing keys still resolve.
+- **Verify:** `ps` during an FIM request and during `omni-secret store` does not show the key. A lookup still finds a key stored before the attribute change.
+
+### IMP-05 — Docs and changelog lag the tree
+- **Kind:** improvement, P2
+- **Where:** `CHANGELOG.md`, `README.md`, `Formula/omni-term-ai.rb`
+- **Evidence:** 0.2.5 notes the symlink crash only. Jumpbox, Azure/OpenAI FIM, bash completion, and the desktop jumpbox default are in the tree and not in the changelog. This plan replaces the stale 0.2.0 `PLAN.md`.
+- **Fix:** When 0.3.0 ships, changelog the fixes above. Do not rewrite history of 0.2.x beyond a one-line "undocumented features now covered by 0.3.0".
+- **Verify:** CHANGELOG 0.3.0 lists every Ready card that merged.
+
+### IMP-06 — Editor startup and shell integration are broader than they look
+- **Kind:** improvement, P2
+- **Where:** `nvim-config/init.lua` (`vim.loop`, treesitter tag `v0.9.3`, `nvim -c "Neotree show"`); `lib/omni-bash.sh`
+- **Evidence:** This host runs Neovim 0.12.5. Headless load of `init.lua` succeeded (plugins cloned, `fim_engine=unset` printed) so the pin is not a crash today. `vim.loop` is the old name. `omni-bash.sh` sets `NVIM_APPNAME` for every nvim in the shell and does not load `OMNI_FIM_ENGINE` from the config file. `-c Neotree` was not proven; it can run before the command exists.
+- **Fix:** Prefer `vim.uv` with a `vim.loop` fallback. Load `OMNI_FIM_ENGINE` (and provider, once BUG-07 exists) in `omni-bash.sh` via the same parser as BUG-01. Make `NVIM_APPNAME` opt-in. Open Neotree from a `VimEnter` autocmd after lazy has defined the command, and drop the racing `-c`.
+- **Verify:** `nvim --headless` on 0.12 prints no `vim.loop` deprecation. A shell that sourced `omni-bash.sh` does not change `NVIM_APPNAME` unless asked. Editor window shows the tree without `E492`.
+
+---
+
+## Done
+
+### BUG-01 — Config is parsed, not sourced
+- **Status:** done
+- **Where:** `lib/omni.sh` (`omni_load_config`, `omni_config_quote`, `omni_config_parse_value`, `omni_config_update`); `omni-config` writer; `man/omni-config.1` no longer says the file is sourced
+- **Verify:** `sh packaging/tests/config-roundtrip.sh` and `make test` passed. Values with `;`, backticks, `$()`, `&`, `|`, quotes, spaces, and `\` round-trip. A hand-written `OMNI_JUMPBOX=...; touch` and `$(touch)` do not create the sentinel. Newlines are rejected. Legacy unquoted files still load.
+
+### AUDIT-00 — Audit of 0.2.5
+- **Status:** done
+- **Evidence:** Tree `/usr/local/src/omni-term-ai`, `main` == `origin/main` at `e5d2ea5`, VERSION `0.2.5`. Lua parses (`luac -p`). Reproduced config execution and sed `&` corruption. Confirmed Azure omission, PATH order, wrong tmux socket, and gh-pages `continue-on-error` by reading the files.
+- **Not bugs:** `die()` waiting for Enter is intentional (`b02b79e`, desktop error visibility). Neovim 0.12.5 loaded `init.lua` headless; treesitter `v0.9.3` did not crash that load.
+
+### PLAN-0.2.0 — Multi-harness, DeepSeek FIM, brew trust
+- **Status:** done, shipped through 0.2.5. Do not re-implement. Corrections to what that plan became are the cards above.
+
+---
+
+## Pull order
+
+1. BUG-01 done. Next: BUG-03 (both touch how secrets and config enter the process)
+2. BUG-06 (tiny, unblocks first-run testing)
+3. BUG-04 (depends on the non-empty export rule)
+4. BUG-02, then BUG-05
+5. BUG-07 and BUG-08 together (one provider model)
+6. BUG-09, BUG-10, BUG-11, BUG-13
+7. Improvements, IMP-01 first so later cards have a test to land in
+
+## Definition of done for 0.3.0
+
+- Every Ready card is in Done with its verify line observed, not assumed.
+- `make test` passes, including the new behavior checks.
+- CHANGELOG and VERSION say 0.3.0.
+- PR against `main` per `AGENTS.md`. No direct commit to `main`.
