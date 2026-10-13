@@ -9,6 +9,7 @@ fail() {
     echo "FAIL: $*" >&2
     exit 1
 }
+command -v nvim >/dev/null 2>&1 || fail "nvim is required (CI installs it)"
 
 "$ROOT/omni-config" set fim-provider deepseek >/dev/null
 if [ "$("$ROOT/omni-config" get fim-provider)" != deepseek ]; then
