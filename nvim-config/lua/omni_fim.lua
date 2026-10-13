@@ -47,7 +47,13 @@ local state = {
   extmark = nil, -- ghost extmark handle
   pending = "", -- completion text to insert on accept
   warned = false, -- warned once about a missing curl binary
+  generation = 0, -- request stamp; older callbacks must not paint
 }
+
+local function bump_generation()
+  state.generation = (state.generation or 0) + 1
+  return state.generation
+end
 
 local function clear_ghost()
   if state.extmark then
@@ -59,6 +65,7 @@ local function clear_ghost()
     state.job = nil
   end
   state.pending = ""
+  bump_generation()
 end
 
 -- Accept the pending completion by inserting it at the current cursor.
@@ -74,10 +81,10 @@ local function accept()
   clear_ghost()
   vim.schedule(function()
     local insert = vim.split(text, "\n", { plain = true })
-    local last = insert[#insert]
     vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col, insert)
-    -- Park the cursor at the end of the inserted text.
-    vim.api.nvim_win_set_cursor(0, { row + #insert - 1, col + #last })
+    -- A multi-line insert starts later lines at column 0. Do not add `col`.
+    local cursor_row, cursor_col = M.accept_cursor(row, col, text)
+    vim.api.nvim_win_set_cursor(0, { cursor_row, cursor_col })
   end)
   return true
 end
@@ -181,6 +188,7 @@ local function fetch()
   f:write(payload)
   f:close()
 
+  local stamp = bump_generation()
   state.job = vim.fn.jobstart({
     "curl", "-sS", "--max-time", "20", endpoint,
     "-H", auth_header,
@@ -189,6 +197,9 @@ local function fetch()
   }, {
     stdout_buffered = true,
     on_stdout = function(_, data)
+      if stamp ~= state.generation then
+        return
+      end
       if not data or #data == 0 then
         return
       end
@@ -201,12 +212,22 @@ local function fetch()
       -- a leading newline means the completion starts on the next line, and
       -- leading spaces may be real indentation for a continued line.
       suggestion = suggestion:gsub("%s+$", "")
+      local shown = M.consider(stamp, suggestion)
+      if not shown then
+        return
+      end
       vim.schedule(function()
-        show_ghost(suggestion)
+        if stamp ~= state.generation then
+          return
+        end
+        show_ghost(shown)
       end)
     end,
     on_exit = function()
-      state.job = nil
+      M.finish_request(tmp)
+      if stamp == state.generation then
+        state.job = nil
+      end
     end,
   })
 end
@@ -287,6 +308,31 @@ function M.endpoint_for(env)
     return nil
   end
   return "https://api.deepseek.com/beta/completions"
+end
+
+function M.accept_cursor(row, col, text)
+  local insert = vim.split(text, "\n", { plain = true })
+  local last = insert[#insert] or ""
+  local cursor_row = row + #insert - 1
+  local cursor_col = (#insert > 1) and #last or (col + #last)
+  return cursor_row, cursor_col
+end
+
+function M.consider(stamp, text)
+  if stamp ~= state.generation then
+    return nil
+  end
+  return text
+end
+
+function M.finish_request(path)
+  if path and path ~= "" then
+    os.remove(path)
+  end
+end
+
+function M._test_begin()
+  return bump_generation()
 end
 
 return M
