@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>IMP-02 in progress: signed repo, republish pending.</p>
+      <p>IMP-02 done: package repos are signed and verified live. Next: IMP-03.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -182,11 +182,7 @@
     <section class="col" data-col="doing">
       <h2>In progress <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P2" data-id="IMP-02">
-          <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
-          <h3>Apt and rpm repos are signed</h3>
-          <p>Key <code>B395…F91B</code>. README uses <code>signed-by</code> and <code>gpgcheck=1</code>. Waiting for the republish to pass the client check.</p>
-        </article>
+        <div class="empty">Empty.</div>
       </div>
     </section>
     <section class="col" data-col="backlog">
@@ -257,6 +253,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P2" data-id="IMP-02">
+          <header><span class="id">IMP-02</span><span class="tag">done</span></header>
+          <h3>Apt and rpm repos are signed</h3>
+          <p>Key <code>B395…F91B</code>. The live repo passes apt <code>signed-by</code> and dnf <code>repo_gpgcheck</code>; a wrong key is refused.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-06">
           <header><span class="id">BUG-06</span><span class="tag">done</span></header>
           <h3>First run finds its own wizard</h3>
