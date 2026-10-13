@@ -21,6 +21,22 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.mouse = "a"
 vim.opt.clipboard = "unnamedplus"
+-- Neovim 0.9 on WSL does not always find clip.exe. Point both registers at
+-- the Windows clipboard so unnamedplus works in Windows Terminal.
+if vim.fn.has("wsl") == 1 then
+  vim.g.clipboard = {
+    name = "wsl-clipboard",
+    copy = {
+      ["+"] = "clip.exe",
+      ["*"] = "clip.exe",
+    },
+    paste = {
+      ["+"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+      ["*"] = 'powershell.exe -NoLogo -NoProfile -c [Console]::Out.Write($(Get-Clipboard -Raw).tostring().replace("`r", ""))',
+    },
+    cache_enabled = 0,
+  }
+end
 vim.opt.breakindent = true
 vim.opt.undofile = true
 vim.opt.ignorecase = true

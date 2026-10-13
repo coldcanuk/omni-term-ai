@@ -20,6 +20,10 @@
 - Packages require curl. python3 and sshfs stay optional. The bashrc snippet uses `omni-config home` (IMP-03).
 - API keys stay off the command line. Old secret-tool items still resolve (IMP-04).
 - This changelog covers the features that 0.2.x shipped without notes (IMP-05).
+- `packaging/setup-apt.sh` and `install.sh --package` install the signed Debian/Ubuntu package. The apt repository updates when a version is tagged.
+- Arch and Omarchy build with `make arch` (`libsecret`, `curl`, real sha256). `install.sh --package` installs the release `.pkg.tar.zst`. There is no AUR package.
+- `npm install -g github:coldcanuk/omni-term-ai` installs the launchers. The npm registry package is not published.
+- WSL uses the Ubuntu apt package. A down session bus does not select `secret-tool`. The Editor clipboard uses `clip.exe`. `packaging/windows/Install-OmniTerm.ps1` bootstraps Ubuntu from PowerShell.
 
 ## 0.2.5
 - Fix crash on launch caused by broken config symlink (`~/.config/omni-term-ai`) from legacy installations

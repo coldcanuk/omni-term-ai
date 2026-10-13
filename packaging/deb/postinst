@@ -3,4 +3,20 @@ set -e
 if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database -q /usr/share/applications || true
 fi
+wsl=0
+if [ -n "${WSL_DISTRO_NAME:-}" ] || [ -n "${WSL_INTEROP:-}" ]; then
+    wsl=1
+elif [ -r /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
+    wsl=1
+fi
+if [ "$wsl" -eq 1 ]; then
+    cat <<'EOF'
+Omni Term AI: WSL detected.
+If omni-secret store hangs, the session bus is down. Either start it:
+  sudo service dbus start && eval "$(gnome-keyring-daemon --start)"
+or store keys without libsecret:
+  OMNI_SECRET_BACKEND=file omni-secret store xai
+Clipboard uses clip.exe. Keep Windows interop enabled (appendWindowsPath=true).
+EOF
+fi
 exit 0

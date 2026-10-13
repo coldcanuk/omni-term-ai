@@ -20,12 +20,53 @@ omni_ensure_nvim_config() {
     ln -sfn "$OMNI_TERM_AI_HOME/nvim-config/lazy-lock.json" "$cfg/lazy-lock.json"
 }
 
+# OMNI_WSL=1 forces WSL behavior (tests). OMNI_WSL=0 forces a native host.
+omni_is_wsl() {
+    case ${OMNI_WSL-} in
+    1) return 0 ;;
+    0) return 1 ;;
+    esac
+    if [ -n "${WSL_DISTRO_NAME:-}" ] || [ -n "${WSL_INTEROP:-}" ]; then
+        return 0
+    fi
+    if [ -r /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
+        return 0
+    fi
+    return 1
+}
+
+# secret-tool hangs on WSL when the session bus is down. Do not select it then.
+# OMNI_SESSION_BUS=0/1 overrides detection so tests do not depend on this host.
+omni_session_bus_up() {
+    case ${OMNI_SESSION_BUS-} in
+    1) return 0 ;;
+    0) return 1 ;;
+    esac
+    if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+        return 0
+    fi
+    uid=$(id -u)
+    if [ -S "/run/user/${uid}/bus" ]; then
+        return 0
+    fi
+    return 1
+}
+
+omni_secret_tool_usable() {
+    command -v secret-tool >/dev/null 2>&1 || return 1
+    if omni_is_wsl; then
+        omni_session_bus_up
+        return
+    fi
+    return 0
+}
+
 omni_secret_backend() {
     if [ -n "${OMNI_SECRET_BACKEND:-}" ]; then
         printf '%s\n' "$OMNI_SECRET_BACKEND"
         return 0
     fi
-    if command -v secret-tool >/dev/null 2>&1; then
+    if omni_secret_tool_usable; then
         printf '%s\n' secret-tool
     elif [ "$(uname -s)" = Darwin ] && command -v security >/dev/null 2>&1; then
         printf '%s\n' security

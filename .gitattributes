@@ -1,0 +1,11 @@
+*.sh text eol=lf
+*.bash text eol=lf
+*.ps1 text eol=lf
+configure text eol=lf
+launch-ai-workspace text eol=lf
+omni-config text eol=lf
+omni-secret text eol=lf
+omni-exec.sh text eol=lf
+tmux-toggle-scratch text eol=lf
+install.sh text eol=lf
+uninstall.sh text eol=lf

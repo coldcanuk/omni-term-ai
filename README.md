@@ -34,15 +34,24 @@ These are the runtime requirements **you** provide; the package installs only co
 
 ## Installation
 
-Pick the path for your OS. All of them install the same files via `make install`.
+Pick the path for your OS. Package installs use `PREFIX=/usr`. A source install defaults to `~/.local`. Tagged releases publish the `.deb`, `.rpm`, and macOS `.pkg` and update the signed apt and rpm repositories. `packaging/attach-release-extras.sh` uploads the Arch package and npm tarball to that same [GitHub release](https://github.com/coldcanuk/omni-term-ai/releases).
 
 ### Windows 11 (WSL)
-Are you on Windows? See our [Step-by-Step Windows 11 WSL Guide](WINDOWS_WSL.md) for full setup instructions!
 
-### Debian / Pop!OS / Ubuntu
-Supported Package: **`.deb`**
+Windows is supported through WSL, usually Ubuntu. See the [Windows 11 WSL guide](WINDOWS_WSL.md). From PowerShell, [`packaging/windows/Install-OmniTerm.ps1`](packaging/windows/Install-OmniTerm.ps1) installs into Ubuntu with the signed apt repository. Inside WSL, use the Debian instructions below.
 
-Add our signed repository to receive future updates:
+Two things are not plain Ubuntu. If the session bus is down, `omni-secret` does not call `secret-tool` (that call hangs) and uses `pass` or a mode-0600 file instead. The Editor clipboard uses `clip.exe`, so Windows interop must stay on (`appendWindowsPath=true` in `/etc/wsl.conf`).
+
+### Debian / Pop!_OS / Ubuntu
+
+Supported package: **`.deb`**, from the signed apt repository. Ubuntu on WSL uses this path.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/coldcanuk/omni-term-ai/main/packaging/setup-apt.sh | sh
+```
+
+Or the same steps by hand:
+
 ```bash
 curl -fsSL https://coldcanuk.github.io/omni-term-ai/omni-term-ai.gpg \
   | sudo tee /usr/share/keyrings/omni-term-ai.gpg >/dev/null
@@ -53,7 +62,7 @@ sudo apt update
 sudo apt install omni-term-ai
 ```
 
-Added the repository before 0.3.0 with `trusted=yes`? Run the commands above. The second `tee` replaces that line.
+`./install.sh --package` runs that signed setup. The repository updates when a version is tagged. Added it before 0.3.0 with `trusted=yes`? Run the commands above. The second `tee` replaces that line.
 
 ### Fedora / RedHat (RHEL) / AlmaLinux
 Supported Package: **`.rpm`**
@@ -85,17 +94,42 @@ B395 A979 72B3 09A3 E4CE  D62A B1C4 CFC6 85A8 F91B
 The same public key is in this repository at [`packaging/repo-signing-key.asc`](packaging/repo-signing-key.asc). Check that it matches the key served by the package site.
 
 ### Omarchy / Arch Linux / Manjaro
-Supported Package: **`PKGBUILD`**
 
-Download the `PKGBUILD` from our [Releases page](https://github.com/coldcanuk/omni-term-ai/releases) and use `makepkg` to build and install it, or use your favorite AUR helper:
+Supported package: **pacman**. Omarchy is Arch (`ID=omarchy`), so it uses this package. There is no AUR package.
+
+Build it on the machine (`makepkg` and `base-devel`):
+
 ```bash
-yay -S omni-term-ai
+git clone https://github.com/coldcanuk/omni-term-ai.git
+cd omni-term-ai
+make arch
+sudo pacman -U dist/omni-term-ai-*-any.pkg.tar.zst
 ```
 
-### MacOSX
-Supported Package: **`.pkg`** (and Homebrew Formula)
+After a release has an Arch asset, this downloads it and installs it:
 
-Run `make macosx` or `make macos` to build a native macOS installer `.pkg` in `dist/`, or install directly via Homebrew:
+```bash
+./install.sh --package
+```
+
+`./install.sh --deps` installs runtime packages with `pacman` on Arch, Omarchy, Manjaro, and EndeavourOS, then installs this tree under `~/.local`.
+
+### npm
+
+Install the launchers with npm from this repository. The name is not published on the npm registry.
+
+```bash
+npm install -g github:coldcanuk/omni-term-ai
+```
+
+A release also carries `omni-term-ai-<version>.tgz` for `npm install -g <tarball>`. On Windows, run that inside WSL, not in `cmd.exe`.
+
+### macOS
+
+Supported package: **`.pkg`** (and a Homebrew formula). The formula is head-only.
+
+Run `make macos` (alias `make macosx`) to build a native macOS installer `.pkg` in `dist/`, or install from the tap:
+
 ```bash
 brew tap coldcanuk/omni-term-ai https://github.com/coldcanuk/omni-term-ai
 brew trust coldcanuk/omni-term-ai
@@ -118,13 +152,15 @@ make clean
 make
 sudo make install
 ```
-*Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `curl`, `libsecret`). `python3` and `sshfs` are optional. You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install.*
+*Note: Depending on your OS, you will need to install the dependencies (e.g. `tmux`, `neovim`, `git`, `ripgrep`, `unzip`, `curl`, `libsecret`). `python3` and `sshfs` are optional. You can also use `./install.sh --deps --prefix "$HOME/.local"` for a local user install. On Debian, Ubuntu, Arch, and Omarchy, `./install.sh --package` installs the distro package instead.*
+
+
 
 
 
 ## Uninstallation
 
-If you installed via a package manager (`apt`, `dnf`, `pacman`, `brew`), simply use your package manager to uninstall the `omni-term-ai` package.
+If you installed via a package manager (`apt`, `dnf`, `pacman`, `brew`, `npm`), use that package manager to remove `omni-term-ai` (`npm uninstall -g omni-term-ai`).
 
 If you installed from source or using the local installation scripts, you can uninstall by running:
 ```bash
@@ -251,7 +287,7 @@ omni-secret store gemini     # agy (optional)  -> GEMINI_API_KEY
 omni-secret store azure      # azure fim       -> AZURE_OPENAI_API_KEY
 ```
 
-`omni-exec` securely injects the keys into the harnesses at runtime. Keys you never stored are exported empty, so interactive browser logins still work perfectly.
+`omni-exec` injects stored keys into the harness environment. A key you never stored is not written as an empty value, so an ambient token or a browser login is left alone.
 
 ## License
 

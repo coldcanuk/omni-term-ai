@@ -1,0 +1,49 @@
+{
+  "name": "omni-term-ai",
+  "version": "0.3.0",
+  "description": "tmux workspace with Neovim and pluggable AI assistants",
+  "license": "GPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coldcanuk/omni-term-ai.git"
+  },
+  "homepage": "https://github.com/coldcanuk/omni-term-ai#readme",
+  "bugs": {
+    "url": "https://github.com/coldcanuk/omni-term-ai/issues"
+  },
+  "bin": {
+    "launch-ai-workspace": "./launch-ai-workspace",
+    "omni-config": "./omni-config",
+    "omni-secret": "./omni-secret",
+    "omni-exec": "./omni-exec.sh",
+    "tmux-toggle-scratch": "./tmux-toggle-scratch"
+  },
+  "files": [
+    "launch-ai-workspace",
+    "omni-config",
+    "omni-secret",
+    "omni-exec.sh",
+    "tmux-toggle-scratch",
+    "install.sh",
+    "uninstall.sh",
+    "lib",
+    "nvim-config",
+    "man",
+    "tmux.conf",
+    "brain.svg",
+    "ai-workspace.desktop",
+    "LICENSE",
+    "README.md",
+    "WINDOWS_WSL.md",
+    "VERSION",
+    "packaging/setup-apt.sh",
+    "packaging/setup-arch.sh"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "linux",
+    "darwin"
+  ]
+}
