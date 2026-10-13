@@ -220,6 +220,8 @@ Add the following to your `~/.bashrc`:
 . $HOME/.local/share/omni-term-ai/lib/omni-bash.sh
 ```
 
+Sourcing that file does not change `NVIM_APPNAME`. The launcher still sets it for the workspace. Set `OMNI_USE_NVIM_CONFIG=1` before sourcing if this shell's `nvim` should use the packaged config.
+
 ## Supported AI Assistants
 
 | Harness | Binary | Install | Launch | Auth |
