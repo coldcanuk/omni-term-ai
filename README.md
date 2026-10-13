@@ -176,7 +176,12 @@ With an API key stored via `omni-secret`, the Editor window shows ghost-text com
 
 **DeepSeek FIM**: Uses `DEEPSEEK_API_KEY`.
 **OpenAI FIM**: Uses `OPENAI_API_KEY` (uses the `gpt-3.5-turbo-instruct` model).
-**Azure OpenAI FIM**: Uses `AZURE_OPENAI_API_KEY` (requires `AZURE_OPENAI_ENDPOINT` and `AZURE_OPENAI_DEPLOYMENT` exported in your bashrc).
+**Azure OpenAI FIM**: Uses `AZURE_OPENAI_API_KEY` from `omni-secret store azure`. Set the endpoint and deployment in config (they are not secrets), and the launcher injects all three into the tmux session:
+
+```bash
+omni-config set azure-endpoint https://example.openai.azure.com
+omni-config set azure-deployment my-deployment
+```
 
 - **`<Tab>`** accepts the ghost completion
 - **`<C-e>`** dismisses it

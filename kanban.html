@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>BUG-03 is done. Next pull is BUG-06. Pull only works in this chat card.</p>
+      <p>BUG-04 is done. Next pull is BUG-06. Pull only works in this chat card.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,19 +176,6 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P0" data-id="BUG-04">
-          <header><span class="id">BUG-04</span><span class="tag">P0 bug</span></header>
-          <h3>Azure key never enters tmux</h3>
-          <p><code>omni_apply_tmux_env</code> stops at Gemini. Endpoint and deployment live only in bashrc, which desktop launch often skips.</p>
-          <details>
-            <summary>Fix and check</summary>
-            <ul>
-              <li>Inject the Azure key with the other non-empty secrets.</li>
-              <li>Store endpoint and deployment in the config file.</li>
-            </ul>
-          </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-04. Start a new worktree from main. Inject AZURE_OPENAI_API_KEY into the tmux session and store endpoint plus deployment in config.">Pull</button>
-        </article>
         <article data-pri="P0" data-id="BUG-05">
           <header><span class="id">BUG-05</span><span class="tag">P0 bug</span></header>
           <h3>Scratchpad and panic hit the wrong server</h3>
@@ -295,6 +282,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P0" data-id="BUG-04">
+          <header><span class="id">BUG-04</span><span class="tag">done</span></header>
+          <h3>Azure FIM reaches tmux</h3>
+          <p>Key, endpoint, and deployment are injected. A missing key is not planted empty.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-03">
           <header><span class="id">BUG-03</span><span class="tag">done</span></header>
           <h3>Empty secrets no longer clobber tokens</h3>
