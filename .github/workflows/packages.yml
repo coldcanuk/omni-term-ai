@@ -17,6 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # fim-provider.sh and fim-stale.sh load omni_fim.lua in nvim; man-pages.sh
+      # renders pages; tmux-bindings.py drives tmux. Install them so those
+      # checks run here instead of skipping.
+      - name: Install test tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y neovim tmux man-db
+          nvim --version | head -1
+          tmux -V
       - name: Verify DESTDIR layout
         run: sh packaging/tests/verify-install.sh
       - name: Build Debian package

@@ -43,6 +43,8 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 /usr/share/icons/hicolor/scalable/apps/ai-workspace.svg
 %{_mandir}/man1/launch-ai-workspace.1*
 %{_mandir}/man1/omni-config.1*
+%{_mandir}/man1/omni-exec.1*
+%{_mandir}/man1/omni-secret.1*
 /usr/share/doc/omni-term-ai
 
 %changelog

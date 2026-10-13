@@ -4,7 +4,7 @@
 set -eu
 ROOT=$(CDPATH= cd -P -- "$(dirname "$0")/../.." && pwd)
 fail() { echo "FAIL: $*" >&2; exit 1; }
-command -v nvim >/dev/null 2>&1 || { echo "fim-stale: skip (no nvim)"; exit 0; }
+command -v nvim >/dev/null 2>&1 || fail "nvim is required (CI installs it)"
 
 out=$(nvim --headless -u NONE --cmd "set rtp^=$ROOT/nvim-config" -c 'lua
 local M = require("omni_fim")

@@ -24,4 +24,11 @@ text=$(man -l "$ROOT/man/launch-ai-workspace.1")
 printf '%s\n' "$text" | grep -i jumpbox >/dev/null || fail "launch page omits jumpbox"
 printf '%s\n' "$text" | grep -i fim >/dev/null || fail "launch page omits fim"
 rm -rf "$dest"
+# Every shipped page must be in the rpm %files list, or rpmbuild fails
+# with "Installed (but unpackaged) file(s) found".
+spec=$ROOT/packaging/rpm/omni-term-ai.spec
+for p in "$ROOT"/man/*.1; do
+    b=$(basename "$p")
+    grep -qF "%{_mandir}/man1/$b*" "$spec" || fail "rpm spec %files omits $b"
+done
 echo "man-pages: OK"

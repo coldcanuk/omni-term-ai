@@ -41,14 +41,17 @@ done
 os=${OMNI_OS:-$(uname -s)}
 id_like=""
 dist_id=""
-if [ -f /etc/os-release ]; then
-    # shellcheck disable=SC1091
-    . /etc/os-release
+# OMNI_OS_RELEASE lets tests pin the host description.
+os_release=${OMNI_OS_RELEASE:-/etc/os-release}
+if [ -f "$os_release" ]; then
+    # shellcheck disable=SC1090
+    . "$os_release"
     dist_id=${ID:-}
     id_like=${ID_LIKE:-}
 fi
-dist_id=${OMNI_DIST_ID:-$dist_id}
-id_like=${OMNI_ID_LIKE:-$id_like}
+# Set-but-empty overrides count: OMNI_ID_LIKE= means "no ID_LIKE".
+dist_id=${OMNI_DIST_ID-$dist_id}
+id_like=${OMNI_ID_LIKE-$id_like}
 
 need_root() {
     if [ "${OMNI_DEPS_DRY:-}" = 1 ]; then
@@ -129,6 +132,12 @@ install_deps() {
 
 if [ "$INSTALL_DEPS" -eq 1 ]; then
     install_deps
+fi
+
+# A dry run installs nothing, including this tree.
+if [ "${OMNI_DEPS_DRY:-}" = 1 ]; then
+    printf 'DRY make -C %s install PREFIX=%s\n' "$ROOT" "$PREFIX"
+    exit 0
 fi
 
 make -C "$ROOT" install PREFIX="$PREFIX"
