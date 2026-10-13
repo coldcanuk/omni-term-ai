@@ -27,11 +27,7 @@ Empty. All P0 cards are done.
 
 ## In progress
 
-### IMP-02 — Apt and rpm repos are signed
-- **Kind:** improvement, P2
-- **Where:** `packaging/build-repo.sh` (new), `packaging/repo-signing-key.asc` (new), `packages.yml` `repo-sign` / `pages-repo` / `verify-pages`, README install blocks
-- **Fix:** Dedicated key `B395A97972B309A3E4CED62AB1C4CFC685A8F91B` (RSA 4096, sign-only, expires 2029-10-12). Private half is GitHub secret `REPO_SIGNING_KEY` and Vault `pass/ae/util/omni-term-ai-repo-signing`. `build-repo.sh` writes `InRelease`, `Release.gpg`, signed rpms, and `repomd.xml.asc`, and publishes the public key as `omni-term-ai.gpg` / `omni-term-ai.asc`. README uses `signed-by`, `gpgcheck=1`, `repo_gpgcheck=1`, and shows the fingerprint. `workflow_dispatch` with `republish` re-signs the current gh-pages without rebuilding it. The gh-pages guard now runs `ls-remote` inside a checkout and treats only exit 2 as a first publish.
-- **Verify:** `packaging/tests/repo-signing.sh` (static, in `make test`). CI `repo-sign` builds and signs with a throwaway key, then `repo-client.sh` runs apt (`--error-on=any`, wrong key refused) and dnf (`gpgcheck`, `repo_gpgcheck`, `rpm -K`). After republish, `verify-pages` runs the same client against `coldcanuk.github.io`.
+Empty.
 
 ---
 
@@ -80,6 +76,12 @@ Empty. P1 bugs are done.
 ---
 
 ## Done
+
+### IMP-02 — Apt and rpm repos are signed
+- **Status:** done (#63; CI fix #64)
+- **Where:** `packaging/build-repo.sh` (new), `packaging/repo-signing-key.asc` (new), `packages.yml` `repo-sign` / `pages-repo` / `verify-pages`, README install blocks
+- **Fix:** Dedicated key `B395A97972B309A3E4CED62AB1C4CFC685A8F91B` (RSA 4096, sign-only, expires 2029-10-12). Private half is GitHub secret `REPO_SIGNING_KEY` and Vault `pass/ae/util/omni-term-ai-repo-signing`. `build-repo.sh` writes `InRelease`, `Release.gpg`, signed rpms, and `repomd.xml.asc`, and publishes the public key as `omni-term-ai.gpg` / `omni-term-ai.asc`. README uses `signed-by`, `gpgcheck=1`, `repo_gpgcheck=1`, and shows the fingerprint. `workflow_dispatch` with `republish` re-signs the current gh-pages without rebuilding it. The gh-pages guard now runs `ls-remote` inside a checkout and treats only exit 2 as a first publish.
+- **Verify:** `packaging/tests/repo-signing.sh` (static, in `make test`). CI `repo-sign` builds and signs with a throwaway key, then `repo-client.sh` runs apt (`--error-on=any`, wrong key refused) and dnf (`gpgcheck`, `repo_gpgcheck`, `rpm -K`). Republish run 38393520651 signed gh-pages with `B395…F91B`; `verify-pages` passed against `https://coldcanuk.github.io/omni-term-ai`: apt `signed-by` update with `--error-on=any`, wrong key refused, dnf `repo_gpgcheck` + `gpgcheck`, `rpm -K` `signatures OK` for both rpms. `gpgv` on the live `InRelease` and `repomd.xml.asc` reports Good signature from this host.
 
 ### BUG-12 — Cleanup uses this clone
 - **Status:** done
