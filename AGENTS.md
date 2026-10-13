@@ -28,9 +28,9 @@ gh pr merge --merge --delete-branch
 ```
 
 ### 🧹 Rule 5: Cleanup
-After a successful merge, the local worktree must be safely deleted.
+After a successful merge, clean up from the main worktree. Do not `cd` to a hardcoded path, and do not run this from inside the feature worktree.
 ```bash
-cd /opt/repo/omni-term-ai
+cd "$(git worktree list --porcelain | awk '/^worktree / { print substr($0, 10); exit }')"
 git checkout main
 git pull origin main
 git worktree remove .worktrees/gb-<feature-name>-wt

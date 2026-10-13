@@ -33,12 +33,7 @@ Empty.
 
 ## Backlog — bugs
 
-### BUG-12 — Agent cleanup path does not exist
-- **Kind:** bug, P1
-- **Where:** `AGENTS.md` rule 5 (`cd /opt/repo/omni-term-ai`); rule 2 uses `.worktrees/`
-- **Evidence:** This tree is `/usr/local/src/omni-term-ai`. Rule 5 and rule 2 disagree. An agent that follows rule 5 cannot clean up.
-- **Fix:** Cleanup from `git rev-parse --show-toplevel`, then `git worktree remove .worktrees/gb-<feature>-wt`. Delete the `/opt/repo` line.
-- **Verify:** The documented commands succeed in this clone.
+Empty. P1 bugs are done.
 
 ---
 
@@ -87,6 +82,12 @@ Empty.
 ---
 
 ## Done
+
+### BUG-12 — Cleanup uses this clone
+- **Status:** done
+- **Where:** `AGENTS.md` rule 5
+- **Fix:** Cleanup starts at the main worktree from `git worktree list`, not `/opt/repo`.
+- **Verify:** `packaging/tests/agents-path.sh` and the documented `cd` lands in `/usr/local/src/omni-term-ai`.
 
 ### BUG-10 — Man pages match the CLI
 - **Status:** done
