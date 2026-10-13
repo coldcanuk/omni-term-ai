@@ -104,6 +104,21 @@ local function show_ghost(text)
   })
 end
 
+-- Auth header goes in a 0600 curl config so ps does not show the key.
+function M.write_auth_config(header)
+  local path = vim.fn.tempname()
+  local uv = vim.uv or vim.loop
+  local fd = uv.fs_open(path, "w", tonumber("600", 8))
+  if not fd then
+    return nil
+  end
+  local escaped = header:gsub("\\", "\\\\"):gsub('"', '\\"')
+  uv.fs_write(fd, 'header = "' .. escaped .. '"\n', 0)
+  uv.fs_close(fd)
+  uv.fs_chmod(path, tonumber("600", 8))
+  return path
+end
+
 local function fetch()
   if vim.g.loaded_copilot or vim.g.loaded_copilot_lua then
     return -- bail out to prevent ghost text conflicts with Copilot plugins
@@ -189,9 +204,15 @@ local function fetch()
   f:close()
 
   local stamp = bump_generation()
+  local auth_file = M.write_auth_config(auth_header)
+  if not auth_file then
+    M.finish_request(tmp)
+    return
+  end
   state.job = vim.fn.jobstart({
-    "curl", "-sS", "--max-time", "20", endpoint,
-    "-H", auth_header,
+    "curl", "-sS", "--max-time", "20",
+    "--config", auth_file,
+    endpoint,
     "-H", "Content-Type: application/json",
     "-d", "@" .. tmp,
   }, {
@@ -225,6 +246,7 @@ local function fetch()
     end,
     on_exit = function()
       M.finish_request(tmp)
+      M.finish_request(auth_file)
       if stamp == state.generation then
         state.job = nil
       end
@@ -333,6 +355,27 @@ end
 
 function M._test_begin()
   return bump_generation()
+end
+
+function M._test_start_curl(endpoint, header)
+  local auth_file = M.write_auth_config(header)
+  local tmp = vim.fn.tempname()
+  local f = io.open(tmp, "w")
+  f:write("{}")
+  f:close()
+  local job = vim.fn.jobstart({
+    "curl", "-sS", "--max-time", "20",
+    "--config", auth_file,
+    endpoint,
+    "-H", "Content-Type: application/json",
+    "-d", "@" .. tmp,
+  }, {
+    on_exit = function()
+      M.finish_request(tmp)
+      M.finish_request(auth_file)
+    end,
+  })
+  return job
 end
 
 return M

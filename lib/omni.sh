@@ -21,6 +21,10 @@ omni_ensure_nvim_config() {
 }
 
 omni_secret_backend() {
+    if [ -n "${OMNI_SECRET_BACKEND:-}" ]; then
+        printf '%s\n' "$OMNI_SECRET_BACKEND"
+        return 0
+    fi
     if command -v secret-tool >/dev/null 2>&1; then
         printf '%s\n' secret-tool
     elif [ "$(uname -s)" = Darwin ] && command -v security >/dev/null 2>&1; then
@@ -37,7 +41,14 @@ omni_secret_get() {
     backend=$(omni_secret_backend)
     case $backend in
     secret-tool)
-        secret-tool lookup api "$name" 2>/dev/null || true
+        got=$(secret-tool lookup service omni-term-ai api "$name" 2>/dev/null || true)
+        if [ -z "$got" ]; then
+            got=$(secret-tool lookup api "$name" 2>/dev/null || true)
+            if [ -n "$got" ]; then
+                printf '%s' "$got" | secret-tool store --label="Omni Term AI $name API key" service omni-term-ai api "$name"
+            fi
+        fi
+        printf '%s' "$got"
         ;;
     security)
         security find-generic-password -a "${USER:-$(id -un)}" -s "omni-term-ai.$name" -w 2>/dev/null || true
@@ -60,10 +71,10 @@ omni_secret_store() {
     backend=$(omni_secret_backend)
     case $backend in
     secret-tool)
-        printf '%s' "$value" | secret-tool store --label="Omni Term AI $name API key" api "$name"
+        printf '%s' "$value" | secret-tool store --label="Omni Term AI $name API key" service omni-term-ai api "$name"
         ;;
     security)
-        security add-generic-password -U -a "${USER:-$(id -un)}" -s "omni-term-ai.$name" -w "$value"
+        omni_security_store "${USER:-$(id -un)}" "omni-term-ai.$name" "$value"
         ;;
     pass)
         printf '%s\n' "$value" | pass insert -e "omni-term-ai/$name"
@@ -81,6 +92,53 @@ omni_secret_store() {
         echo "warning: stored $name in $f (mode 0600); prefer an OS keychain when available" >&2
         ;;
     esac
+}
+
+# Store a macOS keychain item without putting the secret on argv.
+# security reads -w from the terminal. A 0600 file feeds that prompt.
+omni_security_store() {
+    account=$1
+    service=$2
+    value=$3
+    if ! command -v python3 >/dev/null 2>&1; then
+        echo "omni-secret: python3 is required to store a keychain item without showing it in ps" >&2
+        return 1
+    fi
+    old_umask=$(umask)
+    umask 077
+    pwfile=$(mktemp) || return 1
+    umask "$old_umask"
+    printf '%s' "$value" > "$pwfile"
+    chmod 600 "$pwfile" 2>/dev/null || true
+    python3 - "$pwfile" "$account" "$service" << 'PY'
+import os, sys, pty, select, time
+pwfile, account, service = sys.argv[1:4]
+with open(pwfile, "r") as fh:
+    password = fh.read()
+os.remove(pwfile)
+argv = ["security", "add-generic-password", "-U", "-a", account, "-s", service, "-w"]
+pid, fd = pty.fork()
+if pid == 0:
+    os.execvp(argv[0], argv)
+blob = (password + "\n").encode()
+sent = 0
+end = time.time() + 5
+while sent < 2 and time.time() < end:
+    _, writable, _ = select.select([], [fd], [], 0.2)
+    if writable:
+        os.write(fd, blob)
+        sent += 1
+    readable, _, _ = select.select([fd], [], [], 0.05)
+    if readable:
+        try:
+            os.read(fd, 4096)
+        except OSError:
+            break
+os.waitpid(pid, 0)
+PY
+    rc=$?
+    rm -f "$pwfile"
+    return "$rc"
 }
 
 omni_tmux() {

@@ -65,7 +65,7 @@ for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-sc
     packaging/tests/azure-env.sh packaging/tests/fim-provider.sh packaging/tests/gh-pages-guard.sh packaging/tests/deps-arch.sh packaging/tests/bash-fim.sh packaging/tests/fim-stale.sh packaging/tests/man-pages.sh packaging/tests/agents-path.sh \
     packaging/tests/shell-integration.sh packaging/tests/nvim-startup.sh \
     packaging/build-repo.sh packaging/tests/repo-client.sh packaging/tests/repo-signing.sh \
-    packaging/tests/package-deps.sh; do
+    packaging/tests/package-deps.sh packaging/tests/key-argv.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done
 
@@ -86,6 +86,9 @@ sh "$ROOT/packaging/tests/nvim-startup.sh" || rc=$?
 [ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "nvim-startup.sh"
 sh "$ROOT/packaging/tests/repo-signing.sh"
 sh "$ROOT/packaging/tests/package-deps.sh"
+rc=0
+sh "$ROOT/packaging/tests/key-argv.sh" || rc=$?
+[ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "key-argv.sh"
 
 # Non-network parse of the editor Lua. Skip if luac is absent.
 if command -v luac >/dev/null 2>&1; then
@@ -108,7 +111,7 @@ if command -v shellcheck >/dev/null 2>&1; then
         packaging/tests/man-pages.sh packaging/tests/agents-path.sh \
         packaging/tests/nvim-startup.sh packaging/tests/repo-client.sh \
         packaging/tests/repo-signing.sh packaging/tests/shell-integration.sh \
-        packaging/tests/package-deps.sh; do
+        packaging/tests/package-deps.sh packaging/tests/key-argv.sh; do
         shellcheck -S error -s sh "$ROOT/$s" || fail "shellcheck $s"
     done
     for s in lib/omni-bash.sh lib/deepseek-completion.bash packaging/tests/bash-fim.sh; do
