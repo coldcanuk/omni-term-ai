@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>BUG-05 closed: not a bug. Next pull is BUG-06. Pull only works in this chat card.</p>
+      <p>All P0 cards are done. Next: the P2 improvements, IMP-02 first.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,18 +176,7 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P0" data-id="BUG-06">
-          <header><span class="id">BUG-06</span><span class="tag">P0 bug</span></header>
-          <h3>First-run wizard is not on PATH</h3>
-          <p><code>omni-config</code> is called before the launcher prepends its own directory. Desktop and source runs miss it.</p>
-          <details>
-            <summary>Fix and check</summary>
-            <ul>
-              <li>Resolve <code>bindir</code> first. Invoke <code>"$bindir/omni-config"</code>.</li>
-            </ul>
-          </details>
-          <button class="pull" type="button" data-hermes-send="Pull BUG-06. Start a new worktree from main. Call the sibling omni-config by path before any PATH lookup on first run.">Pull</button>
-        </article>
+        <div class="empty">Empty. All P0 cards are done.</div>
       </div>
     </section>
     <section class="col" data-col="doing">
@@ -269,6 +258,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P0" data-id="BUG-06">
+          <header><span class="id">BUG-06</span><span class="tag">done</span></header>
+          <h3>First run finds its own wizard</h3>
+          <p>The launcher runs the sibling <code>omni-config</code> before any PATH lookup. <code>first-run.py</code> covers source and installed layouts.</p>
+        </article>
         <article data-pri="P0" data-id="BUG-05">
           <header><span class="id">BUG-05</span><span class="tag">not a bug</span></header>
           <h3>Scratchpad and panic use the right server</h3>
