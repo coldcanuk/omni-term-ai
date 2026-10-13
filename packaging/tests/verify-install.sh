@@ -66,7 +66,9 @@ for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-sc
     packaging/tests/shell-integration.sh packaging/tests/nvim-startup.sh \
     packaging/build-repo.sh packaging/tests/repo-client.sh packaging/tests/repo-signing.sh \
     packaging/tests/package-deps.sh packaging/tests/key-argv.sh \
-    packaging/tests/changelog-030.sh; do
+    packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh \
+    packaging/setup-apt.sh packaging/setup-arch.sh packaging/build-arch.sh \
+    packaging/attach-release-extras.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
 done
 
@@ -91,6 +93,7 @@ rc=0
 sh "$ROOT/packaging/tests/key-argv.sh" || rc=$?
 [ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "key-argv.sh"
 sh "$ROOT/packaging/tests/changelog-030.sh"
+sh "$ROOT/packaging/tests/install-surfaces.sh"
 
 # Non-network parse of the editor Lua. Skip if luac is absent.
 if command -v luac >/dev/null 2>&1; then
@@ -114,7 +117,9 @@ if command -v shellcheck >/dev/null 2>&1; then
         packaging/tests/nvim-startup.sh packaging/tests/repo-client.sh \
         packaging/tests/repo-signing.sh packaging/tests/shell-integration.sh \
         packaging/tests/package-deps.sh packaging/tests/key-argv.sh \
-        packaging/tests/changelog-030.sh; do
+        packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh \
+        packaging/setup-apt.sh packaging/setup-arch.sh packaging/build-arch.sh \
+        packaging/attach-release-extras.sh install.sh; do
         shellcheck -S error -s sh "$ROOT/$s" || fail "shellcheck $s"
     done
     for s in lib/omni-bash.sh lib/deepseek-completion.bash packaging/tests/bash-fim.sh; do

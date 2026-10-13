@@ -3,9 +3,26 @@
 # Usage: omni-exec <command> [args...]
 set -eu
 
-if [ -f "$(dirname "$0")/lib/boot.sh" ]; then
+# npm links these scripts. Resolve the symlink so lib/boot.sh is found
+# next to the real file, not next to the bin directory.
+omni_argv0_dir() {
+    target=$0
+    n=0
+    while [ -L "$target" ] && [ "$n" -lt 40 ]; do
+        n=$((n + 1))
+        link=$(readlink "$target") || break
+        case $link in
+        /*) target=$link ;;
+        *) target=$(dirname "$target")/$link ;;
+        esac
+    done
+    CDPATH= cd -P -- "$(dirname "$target")" && pwd
+}
+script_dir=$(omni_argv0_dir) || exit 1
+
+if [ -f "$script_dir/lib/boot.sh" ]; then
     # shellcheck source=lib/boot.sh
-    . "$(dirname "$0")/lib/boot.sh"
+    . "$script_dir/lib/boot.sh"
 else
     OMNI_TERM_AI_HOME="${OMNI_TERM_AI_HOME:-@OMNI_HOME@}"
     export OMNI_TERM_AI_HOME
@@ -18,8 +35,8 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Inject every harness auth key from the OS secret store. Keys that were
-# never stored become empty strings so interactive logins still work.
+# Inject stored harness keys. A missing secret is left unset so an ambient
+# token or a browser login is not replaced with an empty string.
 omni_export_harness_keys
 
 exec "$@"

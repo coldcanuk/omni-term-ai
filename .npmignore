@@ -1,0 +1,17 @@
+.git
+.github
+.worktrees
+dist
+*.deb
+*.rpm
+*.pkg
+node_modules
+# .gitignore's secret* would also drop the omni-secret launcher.
+# Keep that binary; still keep key material out of the tarball.
+*.key
+*.pem
+*.cert
+*.crt
+credentials*
+secrets/
+

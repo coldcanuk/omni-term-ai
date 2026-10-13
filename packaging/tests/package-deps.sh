@@ -11,9 +11,11 @@ printf '%s\n' "$depends" | grep -F python3 >/dev/null && fail "python3 must stay
 printf '%s\n' "$depends" | grep -F sshfs >/dev/null && fail "sshfs must stay optional in deb Depends"
 grep -F 'Suggests: python3, sshfs' "$ROOT/packaging/deb/control" >/dev/null || fail "deb does not suggest python3 and sshfs"
 
-grep -F "depends=('neovim' 'tmux' 'git' 'ripgrep' 'curl')" "$ROOT/packaging/build-arch.sh" >/dev/null \
-    || fail "PKGBUILD omits curl"
-grep -F "optdepends=('python: bash FIM completion' 'sshfs: jumpbox remote targets')" "$ROOT/packaging/build-arch.sh" >/dev/null \
+depends_line=$(grep -E '^depends=\(' "$ROOT/packaging/build-arch.sh")
+printf '%s\n' "$depends_line" | grep -F curl >/dev/null || fail "PKGBUILD omits curl: $depends_line"
+printf '%s\n' "$depends_line" | grep -F python >/dev/null && fail "python must stay optional in the PKGBUILD depends"
+printf '%s\n' "$depends_line" | grep -F sshfs >/dev/null && fail "sshfs must stay optional in the PKGBUILD depends"
+grep -F "optdepends=('python: bash FIM completion' 'sshfs: jumpbox remote targets'" "$ROOT/packaging/build-arch.sh" >/dev/null \
     || fail "PKGBUILD does not mark python and sshfs optional"
 grep -F 'Requires:       curl' "$ROOT/packaging/rpm/omni-term-ai.spec" >/dev/null || fail "rpm omits curl"
 grep -F azure "$ROOT/Formula/omni-term-ai.rb" >/dev/null || fail "Homebrew caveats omit azure"
