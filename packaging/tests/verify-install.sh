@@ -61,15 +61,18 @@ sh "$ROOT/packaging/tests/empty-secrets.sh"
 sh "$ROOT/packaging/tests/azure-env.sh"
 sh "$ROOT/packaging/tests/fim-provider.sh"
 
-# BUG-05: Prefix-E / Prefix-Space stay on the omni-term-ai socket. Needs
-# python3 (pty) and tmux; exit 77 means skipped.
-if command -v python3 >/dev/null 2>&1; then
-    rc=0
-    python3 "$ROOT/packaging/tests/tmux-bindings.py" || rc=$?
-    [ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "tmux-bindings.py"
-else
-    echo "tmux-bindings: SKIP (python3 not installed)"
-fi
+# pty-driven tests. Need python3; exit 77 means skipped.
+#   tmux-bindings.py  BUG-05: Prefix-E / Prefix-Space stay on the omni socket
+#   first-run.py      BUG-06: first run uses the sibling omni-config
+for t in tmux-bindings.py first-run.py; do
+    if command -v python3 >/dev/null 2>&1; then
+        rc=0
+        python3 "$ROOT/packaging/tests/$t" || rc=$?
+        [ "$rc" -eq 0 ] || [ "$rc" -eq 77 ] || fail "$t"
+    else
+        echo "$t: SKIP (python3 not installed)"
+    fi
+done
 
 OMNI_TERM_AI_HOME="$ROOT" "$STAGE/usr/bin/omni-secret" backend >/dev/null \
     || fail "omni-secret backend"

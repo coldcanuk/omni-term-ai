@@ -21,18 +21,13 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## Ready
 
-### BUG-06 — First-run wizard is not on PATH
-- **Kind:** bug, P0
-- **Where:** `launch-ai-workspace` lines 16–18 call `omni-config`; `PATH` is prepended with the script directory only at lines 64–66
-- **Evidence:** Desktop `Exec` is the absolute launcher path. A user-prefix install (`~/.local/bin` not on the desktop PATH) cannot find `omni-config`. Same for `./launch-ai-workspace` from a source tree.
-- **Fix:** Resolve `bindir` first. Invoke `"$bindir/omni-config"`.
-- **Verify:** `PATH=/usr/bin:/bin ./launch-ai-workspace` with no config file runs the sibling `omni-config`, not a PATH lookup.
+Empty. All P0 cards are done.
 
 ---
 
 ## In progress
 
-Empty. Pull BUG-06 next.
+Empty.
 
 ---
 
@@ -133,6 +128,11 @@ Empty. Pull BUG-06 next.
 - **Where:** `OMNI_FIM_PROVIDER` (`deepseek|openai|azure`, default `deepseek`); `nvim-config/lua/omni_fim.lua`; `lib/deepseek-completion.bash`
 - **Verify:** `sh packaging/tests/fim-provider.sh` and `make test` passed. With both keys set, provider `deepseek` uses the DeepSeek beta URL and provider `openai` does not.
 
+### BUG-06 — First run calls the sibling omni-config
+- **Status:** done
+- **Where:** `launch-ai-workspace` (`bindir` resolved before the first-run check)
+- **Verify:** `python3 packaging/tests/first-run.py` and `make test` passed. With `PATH=/usr/bin:/bin` and no config, both the source tree and a `make install` DESTDIR launcher run the sibling `omni-config`, even when a decoy `omni-config` is first on PATH. A launcher with no sibling falls back to PATH; with none anywhere it says `cannot find omni-config` instead of `command not found`. The test fails on the pre-fix tree (exit 127). End-to-end: the real wizard ran from a staged install with `PATH=/usr/bin:/bin` and wrote the config.
+
 ### BUG-05 — Scratchpad and panic button: not a bug
 - **Status:** closed, not reproduced. No code change.
 - **Where:** `tmux.conf` `bind Space` / `bind E`; `tmux-toggle-scratch`
@@ -171,8 +171,8 @@ Empty. Pull BUG-06 next.
 
 ## Pull order
 
-1. BUG-01 done. BUG-03 done. Next: BUG-06
-2. BUG-06 (tiny, unblocks first-run testing)
+1. BUG-01 done. BUG-03 done.
+2. BUG-06 done.
 3. BUG-04 done.
 4. BUG-02 done. BUG-05 closed: not reproduced (regression test added)
 5. BUG-07 and BUG-08 together (one provider model)
