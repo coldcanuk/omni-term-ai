@@ -33,13 +33,6 @@ Empty.
 
 ## Backlog — bugs
 
-### BUG-08 — Bash FIM completion does not complete
-- **Kind:** bug, P1
-- **Where:** `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, README "FIM Bash Completion"
-- **Evidence:** The snippet is sourced only when `DEEPSEEK_API_KEY` is non-empty, so OpenAI-only and Azure-only users get no binding. The Python asks for `n=3` and, when more than one choice comes back, only `echo`s them; nothing is inserted and there is no picker. `python3` is an undeclared dependency. Model text is `eval`'d.
-- **Fix:** Bind when any configured provider key is present. Check `python3` and no-op with a one-line warning if missing. Either request `n=1` or present a numbered pick and insert that choice. Assign `READLINE_LINE` / `READLINE_POINT` without `eval` of model text.
-- **Verify:** OpenAI-only key still binds Ctrl-F. Two choices can be selected and land in the line. Missing `python3` does not abort the shell.
-
 ### BUG-09 — FIM can show a stale completion and leak the payload
 - **Kind:** bug, P1
 - **Where:** `nvim-config/lua/omni_fim.lua`
@@ -122,6 +115,12 @@ Empty.
 ---
 
 ## Done
+
+### BUG-08 — Bash FIM inserts the picked choice
+- **Status:** done
+- **Where:** `lib/omni-bash.sh`, `lib/deepseek-completion.bash`
+- **Fix:** Bind when the configured provider has a key. Missing `python3` warns and returns. A numbered pick is written into `READLINE_LINE` without `eval`.
+- **Verify:** `packaging/tests/bash-fim.sh`
 
 ### BUG-07 — FIM provider is explicit
 - **Status:** done
