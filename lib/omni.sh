@@ -463,24 +463,75 @@ EOF
 }
 
 # ---------------------------------------------------------------------------
-# Key injection: every harness auth env var, fetched from the OS secret store.
-# Unset secrets become empty strings so interactive logins still work.
+# Key injection: harness auth env vars, fetched from the OS secret store.
+# A stored secret replaces the variable. A missing secret must not export an
+# empty string: that masks keyring auth and ambient tokens. An already-empty
+# variable is unset. A non-empty ambient value is left alone.
 # ---------------------------------------------------------------------------
 
+omni_assign_secret() {
+    _an=$1
+    _as=$2
+    case $_an in
+    XAI_API_KEY | DEEPSEEK_API_KEY | ANTHROPIC_API_KEY | OPENAI_API_KEY | GH_TOKEN | GITHUB_TOKEN | GEMINI_API_KEY | AZURE_OPENAI_API_KEY) ;;
+    *)
+        echo "omni-term-ai: refusing to assign $_an" >&2
+        return 1
+        ;;
+    esac
+    if [ -n "$_as" ]; then
+        case $_an in
+        XAI_API_KEY) XAI_API_KEY=$_as; export XAI_API_KEY ;;
+        DEEPSEEK_API_KEY) DEEPSEEK_API_KEY=$_as; export DEEPSEEK_API_KEY ;;
+        ANTHROPIC_API_KEY) ANTHROPIC_API_KEY=$_as; export ANTHROPIC_API_KEY ;;
+        OPENAI_API_KEY) OPENAI_API_KEY=$_as; export OPENAI_API_KEY ;;
+        GH_TOKEN) GH_TOKEN=$_as; export GH_TOKEN ;;
+        GITHUB_TOKEN) GITHUB_TOKEN=$_as; export GITHUB_TOKEN ;;
+        GEMINI_API_KEY) GEMINI_API_KEY=$_as; export GEMINI_API_KEY ;;
+        AZURE_OPENAI_API_KEY) AZURE_OPENAI_API_KEY=$_as; export AZURE_OPENAI_API_KEY ;;
+        esac
+        return 0
+    fi
+    case $_an in
+    XAI_API_KEY) if [ "${XAI_API_KEY+x}" = x ] && [ -z "$XAI_API_KEY" ]; then unset XAI_API_KEY; fi ;;
+    DEEPSEEK_API_KEY) if [ "${DEEPSEEK_API_KEY+x}" = x ] && [ -z "$DEEPSEEK_API_KEY" ]; then unset DEEPSEEK_API_KEY; fi ;;
+    ANTHROPIC_API_KEY) if [ "${ANTHROPIC_API_KEY+x}" = x ] && [ -z "$ANTHROPIC_API_KEY" ]; then unset ANTHROPIC_API_KEY; fi ;;
+    OPENAI_API_KEY) if [ "${OPENAI_API_KEY+x}" = x ] && [ -z "$OPENAI_API_KEY" ]; then unset OPENAI_API_KEY; fi ;;
+    GH_TOKEN) if [ "${GH_TOKEN+x}" = x ] && [ -z "$GH_TOKEN" ]; then unset GH_TOKEN; fi ;;
+    GITHUB_TOKEN) if [ "${GITHUB_TOKEN+x}" = x ] && [ -z "$GITHUB_TOKEN" ]; then unset GITHUB_TOKEN; fi ;;
+    GEMINI_API_KEY) if [ "${GEMINI_API_KEY+x}" = x ] && [ -z "$GEMINI_API_KEY" ]; then unset GEMINI_API_KEY; fi ;;
+    AZURE_OPENAI_API_KEY) if [ "${AZURE_OPENAI_API_KEY+x}" = x ] && [ -z "$AZURE_OPENAI_API_KEY" ]; then unset AZURE_OPENAI_API_KEY; fi ;;
+    esac
+}
+
 omni_export_harness_keys() {
-    XAI_KEY=$(omni_secret_get xai)
-    DEEPSEEK_KEY=$(omni_secret_get deepseek)
-    ANTHROPIC_KEY=$(omni_secret_get anthropic)
-    OPENAI_KEY=$(omni_secret_get openai)
-    GITHUB_KEY=$(omni_secret_get github)
-    GEMINI_KEY=$(omni_secret_get gemini)
-    AZURE_KEY=$(omni_secret_get azure)
-    export XAI_API_KEY="$XAI_KEY"
-    export DEEPSEEK_API_KEY="$DEEPSEEK_KEY"
-    export ANTHROPIC_API_KEY="$ANTHROPIC_KEY"
-    export OPENAI_API_KEY="$OPENAI_KEY"
-    export GH_TOKEN="$GITHUB_KEY"
-    export GITHUB_TOKEN="$GITHUB_KEY"
-    export GEMINI_API_KEY="$GEMINI_KEY"
-    export AZURE_OPENAI_API_KEY="$AZURE_KEY"
+    omni_assign_secret XAI_API_KEY "$(omni_secret_get xai)"
+    omni_assign_secret DEEPSEEK_API_KEY "$(omni_secret_get deepseek)"
+    omni_assign_secret ANTHROPIC_API_KEY "$(omni_secret_get anthropic)"
+    omni_assign_secret OPENAI_API_KEY "$(omni_secret_get openai)"
+    _gh=$(omni_secret_get github)
+    omni_assign_secret GH_TOKEN "$_gh"
+    omni_assign_secret GITHUB_TOKEN "$_gh"
+    omni_assign_secret GEMINI_API_KEY "$(omni_secret_get gemini)"
+    omni_assign_secret AZURE_OPENAI_API_KEY "$(omni_secret_get azure)"
+}
+
+# Copy a secret into the tmux session only when it has a value.
+# An empty value is removed (set-environment -u) so a pane never inherits "".
+omni_tmux_publish_one() {
+    if [ -n "$2" ]; then
+        omni_tmux set-environment -g "$1" "$2"
+    else
+        omni_tmux set-environment -g -u "$1" || true
+    fi
+}
+
+omni_publish_tmux_secrets() {
+    omni_tmux_publish_one XAI_API_KEY "${XAI_API_KEY:-}"
+    omni_tmux_publish_one DEEPSEEK_API_KEY "${DEEPSEEK_API_KEY:-}"
+    omni_tmux_publish_one ANTHROPIC_API_KEY "${ANTHROPIC_API_KEY:-}"
+    omni_tmux_publish_one OPENAI_API_KEY "${OPENAI_API_KEY:-}"
+    omni_tmux_publish_one GH_TOKEN "${GH_TOKEN:-}"
+    omni_tmux_publish_one GITHUB_TOKEN "${GITHUB_TOKEN:-}"
+    omni_tmux_publish_one GEMINI_API_KEY "${GEMINI_API_KEY:-}"
 }

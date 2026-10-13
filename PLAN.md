@@ -21,13 +21,6 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## Ready
 
-### BUG-03 — Empty secrets clobber real credentials
-- **Kind:** bug, P0
-- **Where:** `lib/omni.sh` `omni_export_harness_keys`; `launch-ai-workspace` `omni_apply_tmux_env`
-- **Evidence:** Every key is exported and `set-environment -g`'d even when the secret was never stored. Empty `GH_TOKEN` / `GITHUB_TOKEN` override keyring auth for `gh` in every new pane. Same for `OPENAI_API_KEY` and the others.
-- **Fix:** Export and `set-environment` only when the secret is non-empty. Otherwise `unset` and `set-environment -u`. Do not write empty values into the tmux global environment.
-- **Verify:** Parent has `GH_TOKEN=from-keyring` and no github secret stored. `omni-exec sh -c 'printf %s "$GH_TOKEN"'` prints `from-keyring`. A fresh tmux pane does not show an empty `GH_TOKEN`.
-
 ### BUG-04 — Azure FIM key never reaches the tmux session
 - **Kind:** bug, P0
 - **Where:** `launch-ai-workspace` `omni_apply_tmux_env` (stops at `GEMINI_API_KEY`); README claims `AZURE_OPENAI_API_KEY`
@@ -53,7 +46,7 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## In progress
 
-Empty. Pull BUG-03 next.
+Empty. Pull BUG-06 next.
 
 ---
 
@@ -156,6 +149,11 @@ Empty. Pull BUG-03 next.
 
 ## Done
 
+### BUG-03 — Empty secrets no longer clobber tokens
+- **Status:** done
+- **Where:** `lib/omni.sh` `omni_assign_secret`, `omni_publish_tmux_secrets`; `launch-ai-workspace` `omni_apply_tmux_env`
+- **Verify:** `sh packaging/tests/empty-secrets.sh` and `make test` passed. Missing github secret leaves `GH_TOKEN=from-keyring` through `omni-exec`. A stored secret still replaces it. An already-empty variable is unset. tmux gets `set-environment -g GH_TOKEN from-keyring`, never an empty value.
+
 ### BUG-02 — Jumpbox no longer mounts itself
 - **Status:** done
 - **Where:** `launch-ai-workspace`, `lib/omni.sh` `omni_jumpbox_target_script`
@@ -178,7 +176,7 @@ Empty. Pull BUG-03 next.
 
 ## Pull order
 
-1. BUG-01 done. Next: BUG-03 (both touch how secrets and config enter the process)
+1. BUG-01 done. BUG-03 done. Next: BUG-06
 2. BUG-06 (tiny, unblocks first-run testing)
 3. BUG-04 (depends on the non-empty export rule)
 4. BUG-02 done. Then BUG-05
