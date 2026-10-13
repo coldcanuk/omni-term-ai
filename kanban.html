@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>P1 bugs are done. IMP-02 is signed. Next pull is IMP-01.</p>
+      <p>P1 bugs are done. Next pull is IMP-03.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -176,11 +176,11 @@
     <section class="col" data-col="ready">
       <h2>Ready <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P1" data-id="IMP-01">
-          <header><span class="id">IMP-01</span><span class="tag">P1 improve</span></header>
-          <h3>Tests check layout, not behavior</h3>
-          <p><code>make test</code> never looks at the bash libs, config quoting, or empty-secret export. No shellcheck in CI.</p>
-          <button type="button" data-hermes-send="Pull IMP-01.">Pull</button>
+        <article data-pri="P2" data-id="IMP-03">
+          <header><span class="id">IMP-03</span><span class="tag">P2 improve</span></header>
+          <h3>Package deps and paths disagree</h3>
+          <p>curl, python3, and sshfs are undeclared or docs-only. Bashrc snippet hard-codes <code>~/.local</code>.</p>
+          <button type="button" data-hermes-send="Pull IMP-03.">Pull</button>
         </article>
       </div>
     </section>
@@ -193,11 +193,6 @@
     <section class="col" data-col="backlog">
       <h2>Backlog <span data-count>0</span></h2>
       <div class="stack">
-        <article data-pri="P2" data-id="IMP-03">
-          <header><span class="id">IMP-03</span><span class="tag">P2 improve</span></header>
-          <h3>Package deps and paths disagree</h3>
-          <p>curl, python3, and sshfs are undeclared or docs-only. Bashrc snippet hard-codes <code>~/.local</code>.</p>
-        </article>
         <article data-pri="P2" data-id="IMP-04">
           <header><span class="id">IMP-04</span><span class="tag">P2 improve</span></header>
           <h3>Keys show up in process lists</h3>
@@ -213,6 +208,11 @@
     <section class="col" data-col="done">
       <h2>Done <span data-count>0</span></h2>
       <div class="stack">
+        <article data-pri="P1" data-id="IMP-01">
+          <header><span class="id">IMP-01</span><span class="tag">done</span></header>
+          <h3>Install test requires the bash libs</h3>
+          <p>Dropping <code>omni-bash.sh</code> from the Makefile fails <code>make test</code>. CI runs shellcheck when it is installed.</p>
+        </article>
         <article data-pri="P2" data-id="IMP-06">
           <header><span class="id">IMP-06</span><span class="tag">done</span></header>
           <h3>Shell integration does not retarget nvim</h3>

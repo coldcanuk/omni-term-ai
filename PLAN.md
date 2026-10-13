@@ -39,13 +39,6 @@ Empty. P1 bugs are done.
 
 ## Backlog — improvements
 
-### IMP-01 — Tests check layout, not behavior
-- **Kind:** improvement, P1
-- **Where:** `packaging/tests/verify-install.sh`, `.github/workflows/packages.yml`
-- **Evidence:** `make test` checks that files exist and `sh -n`s a subset of scripts. It does not mention `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, or `lib/boot.sh`. No shellcheck on this host. No test covers config round-trip, empty-secret export, or the jumpbox argument quoting.
-- **Fix:** Extend the smoke test to assert those three libs are installed. Add a POSIX test script for BUG-01, BUG-03, and BUG-06 that does not need a live tmux server. Run `shellcheck -s sh` in CI when the runner has it. `nvim --headless` load of `omni_fim` stays a non-network check (`luac -p` already passes).
-- **Verify:** `make test` fails if `omni-bash.sh` is dropped from the Makefile. The new script fails on the pre-fix tree and passes after BUG-01 and BUG-03.
-
 ### IMP-03 — Package metadata does not match runtime needs
 - **Kind:** improvement, P2
 - **Where:** `packaging/deb/control` (no `curl`), `packaging/build-arch.sh` PKGBUILD (`depends` is only neovim, tmux, git, ripgrep), `Formula/omni-term-ai.rb` caveats (no azure), README bashrc path
@@ -69,6 +62,13 @@ Empty. P1 bugs are done.
 ---
 
 ## Done
+
+### IMP-01 — Tests fail if the bash libs are not installed
+- **Status:** done
+- **Where:** `packaging/tests/verify-install.sh`, `.github/workflows/packages.yml`
+- **Finding:** Config round-trip, empty-secret export, jumpbox quoting, and the first-run sibling check were already in `make test` (BUG-01, BUG-03, BUG-02, BUG-06). The remaining hole was layout: the installed tree was not required to contain `omni-bash.sh`, `deepseek-completion.bash`, or `boot.sh`.
+- **Fix:** Those three files must exist after `make install`. The two that are rewritten must not still contain `@OMNI_HOME@`. `sh -n` covers them. `luac -p` covers `omni_fim.lua` and `init.lua` when `luac` is present. CI installs shellcheck and the suite runs it at error severity when the binary is on `PATH`.
+- **Verify:** Dropping the `omni-bash.sh` install lines from the Makefile made `verify-install.sh` exit 1 (`missing usr/share/omni-term-ai/lib/omni-bash.sh`). Restored, `make test` passes. shellcheck 0.10.0 `-S error` is clean.
 
 ### IMP-06 — Shell integration no longer retargets nvim
 - **Status:** done. Two claims were already true and were not "fixed".
