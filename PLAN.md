@@ -27,7 +27,11 @@ Empty. All P0 cards are done.
 
 ## In progress
 
-Empty.
+### IMP-02 — Apt and rpm repos are signed
+- **Kind:** improvement, P2
+- **Where:** `packaging/build-repo.sh` (new), `packaging/repo-signing-key.asc` (new), `packages.yml` `repo-sign` / `pages-repo` / `verify-pages`, README install blocks
+- **Fix:** Dedicated key `B395A97972B309A3E4CED62AB1C4CFC685A8F91B` (RSA 4096, sign-only, expires 2029-10-12). Private half is GitHub secret `REPO_SIGNING_KEY` and Vault `pass/ae/util/omni-term-ai-repo-signing`. `build-repo.sh` writes `InRelease`, `Release.gpg`, signed rpms, and `repomd.xml.asc`, and publishes the public key as `omni-term-ai.gpg` / `omni-term-ai.asc`. README uses `signed-by`, `gpgcheck=1`, `repo_gpgcheck=1`, and shows the fingerprint. `workflow_dispatch` with `republish` re-signs the current gh-pages without rebuilding it. The gh-pages guard now runs `ls-remote` inside a checkout and treats only exit 2 as a first publish.
+- **Verify:** `packaging/tests/repo-signing.sh` (static, in `make test`). CI `repo-sign` builds and signs with a throwaway key, then `repo-client.sh` runs apt (`--error-on=any`, wrong key refused) and dnf (`gpgcheck`, `repo_gpgcheck`, `rpm -K`). After republish, `verify-pages` runs the same client against `coldcanuk.github.io`.
 
 ---
 
@@ -45,12 +49,6 @@ Empty. P1 bugs are done.
 - **Evidence:** `make test` checks that files exist and `sh -n`s a subset of scripts. It does not mention `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, or `lib/boot.sh`. No shellcheck on this host. No test covers config round-trip, empty-secret export, or the jumpbox argument quoting.
 - **Fix:** Extend the smoke test to assert those three libs are installed. Add a POSIX test script for BUG-01, BUG-03, and BUG-06 that does not need a live tmux server. Run `shellcheck -s sh` in CI when the runner has it. `nvim --headless` load of `omni_fim` stays a non-network check (`luac -p` already passes).
 - **Verify:** `make test` fails if `omni-bash.sh` is dropped from the Makefile. The new script fails on the pre-fix tree and passes after BUG-01 and BUG-03.
-
-### IMP-02 — Apt and rpm repos are unsigned
-- **Kind:** improvement, P2
-- **Where:** README install blocks (`trusted=yes`, `gpgcheck=0`); `packages.yml` Release generation
-- **Fix:** Sign the Release file and the rpm repo. Document the key fingerprint. Remove `trusted=yes` and `gpgcheck=0` once a key is published. Until then, label the current instructions as unverified.
-- **Verify:** A clean apt source entry without `trusted=yes` updates against the published repo.
 
 ### IMP-03 — Package metadata does not match runtime needs
 - **Kind:** improvement, P2
