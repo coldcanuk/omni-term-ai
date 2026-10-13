@@ -9,7 +9,8 @@ INSTALL_DEPS=0
 
 usage() {
     echo "Usage: ./install.sh [--deps] [--prefix DIR]" >&2
-    echo "  --deps     install tmux, neovim, and other runtime packages" >&2
+    echo "  --deps     install tmux, neovim, curl, and other runtime packages" >&2
+    echo "             python3 and sshfs are optional and are not installed" >&2
     echo "  --prefix   install prefix (default: \$HOME/.local)" >&2
     exit 1
 }
@@ -80,43 +81,43 @@ install_deps() {
         brew install neovim tmux git ripgrep
         ;;
     OpenBSD)
-        need_root pkg_add neovim git ripgrep
+        need_root pkg_add neovim git ripgrep curl
         echo "tmux is in OpenBSD base. Store keys with: omni-secret store xai" >&2
         ;;
     FreeBSD)
-        need_root pkg install -y tmux neovim git gcc gmake ripgrep unzip libsecret
+        need_root pkg install -y tmux neovim git gcc gmake ripgrep unzip libsecret curl
         ;;
     Linux)
         case $dist_id in
         debian | ubuntu | pop | linuxmint)
             need_root apt-get update
-            need_root apt-get install -y tmux neovim git gcc make ripgrep unzip libsecret-tools
+            need_root apt-get install -y tmux neovim git gcc make ripgrep unzip libsecret-tools curl
             ;;
         fedora | rhel | centos | rocky | almalinux)
             if command -v dnf >/dev/null 2>&1; then
-                need_root dnf install -y tmux neovim git gcc make ripgrep unzip libsecret
+                need_root dnf install -y tmux neovim git gcc make ripgrep unzip libsecret curl
             else
-                need_root yum install -y tmux neovim git gcc make ripgrep unzip libsecret
+                need_root yum install -y tmux neovim git gcc make ripgrep unzip libsecret curl
             fi
             ;;
         arch | omarchy | manjaro | endeavouros)
-            need_root pacman -S --needed --noconfirm tmux neovim git gcc make ripgrep unzip libsecret
+            need_root pacman -S --needed --noconfirm tmux neovim git gcc make ripgrep unzip libsecret curl
             ;;
         *)
             case $id_like in
             *debian*)
                 need_root apt-get update
-                need_root apt-get install -y tmux neovim git gcc make ripgrep unzip libsecret-tools
+                need_root apt-get install -y tmux neovim git gcc make ripgrep unzip libsecret-tools curl
                 ;;
             *rhel* | *fedora*)
                 if command -v dnf >/dev/null 2>&1; then
-                    need_root dnf install -y tmux neovim git gcc make ripgrep unzip libsecret
+                    need_root dnf install -y tmux neovim git gcc make ripgrep unzip libsecret curl
                 else
-                    need_root yum install -y tmux neovim git gcc make ripgrep unzip libsecret
+                    need_root yum install -y tmux neovim git gcc make ripgrep unzip libsecret curl
                 fi
                 ;;
             *)
-                echo "Unknown Linux ($dist_id). Install tmux neovim git gcc make ripgrep unzip and a secret store, then re-run without --deps." >&2
+                echo "Unknown Linux ($dist_id). Install tmux neovim git gcc make ripgrep unzip curl and a secret store, then re-run without --deps." >&2
                 exit 1
                 ;;
             esac

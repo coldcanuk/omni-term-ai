@@ -3,7 +3,8 @@ Version: @VERSION@-1
 Section: editors
 Priority: optional
 Architecture: all
-Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools
+Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools, curl
+Suggests: python3, sshfs
 Maintainer: Frozen Packet <chuck.pitre@hotmail.com>
 Homepage: https://github.com/coldcanuk/omni-term-ai
 Description: tmux workspace with Neovim and AI tooling
@@ -11,4 +12,5 @@ Description: tmux workspace with Neovim and AI tooling
  center with configurable AI assistant panes (grok, agy, copilot, claude,
  codex, deepseek) and a Neovim editor with DeepSeek Fill-In-The-Middle
  completion. API keys are read from the OS keychain via omni-secret
- (libsecret on Linux).
+ (libsecret on Linux). python3 is optional, for bash FIM completion.
+ sshfs is optional, and only on the jumpbox, for a remote target.

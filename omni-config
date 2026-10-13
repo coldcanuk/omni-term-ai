@@ -6,6 +6,7 @@
 #   omni-config get [left|right] show current selection
 #   omni-config set <side> <h>   set one pane (left|right) to a harness
 #   omni-config path             print the config file path
+#   omni-config home             print the installed share directory
 #
 # The config file is literal KEY=VALUE assignments, parsed by lib/omni.sh.
 # It is not sourced.
@@ -29,6 +30,7 @@ usage() {
     echo "  get [side]     current selection (side: left|right|jumpbox|fim|fim-provider|azure-endpoint|azure-deployment)" >&2
     echo "  set side name  set a pane, jumpbox, fim engine/provider, or Azure endpoint/deployment" >&2
     echo "  path           print the config file path" >&2
+    echo "  home           print the installed share directory" >&2
     exit 1
 }
 
@@ -275,6 +277,9 @@ set)
     ;;
 path)
     omni_config_path
+    ;;
+home)
+    printf '%s\n' "$OMNI_TERM_AI_HOME"
     ;;
 "")
     cmd_wizard

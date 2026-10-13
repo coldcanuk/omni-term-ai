@@ -39,13 +39,6 @@ Empty. P1 bugs are done.
 
 ## Backlog — improvements
 
-### IMP-03 — Package metadata does not match runtime needs
-- **Kind:** improvement, P2
-- **Where:** `packaging/deb/control` (no `curl`), `packaging/build-arch.sh` PKGBUILD (`depends` is only neovim, tmux, git, ripgrep), `Formula/omni-term-ai.rb` caveats (no azure), README bashrc path
-- **Evidence:** FIM needs `curl`. Bash completion needs `python3`. Jumpbox needs `sshfs` and a remote `launch-ai-workspace`. README tells users to source `$HOME/.local/share/omni-term-ai/lib/omni-bash.sh`; `make install` defaults to `PREFIX=/usr/local`.
-- **Fix:** Align Depends/depends with curl at minimum. Document python3 and sshfs as optional features, not silent requirements. Point the bashrc snippet at the installed datadir (`omni-config` can print it) instead of a hard-coded `~/.local` path. Mention azure in the Homebrew caveats.
-- **Verify:** deb control and PKGBUILD both list curl. README snippet works for a `/usr/local` install.
-
 ### IMP-04 — Secrets are visible to `ps` and easy to collide
 - **Kind:** improvement, P2
 - **Where:** `lib/omni.sh` `security add-generic-password -w`; `omni_fim.lua` curl `-H` with the key; `secret-tool store/lookup api <name>`
@@ -62,6 +55,12 @@ Empty. P1 bugs are done.
 ---
 
 ## Done
+
+### IMP-03 — Package metadata matches runtime needs
+- **Status:** done
+- **Where:** `packaging/deb/control`, `packaging/rpm/omni-term-ai.spec`, `packaging/build-arch.sh`, `install.sh`, `omni-config home`, README bashrc snippet, Homebrew caveats
+- **Fix:** curl is a hard dependency on deb, rpm, Arch, FreeBSD, and OpenBSD, and in `install.sh --deps`. python3 and sshfs stay optional (deb Suggests, Arch optdepends, README, caveats). The bashrc snippet is `. "$(omni-config home)/lib/omni-bash.sh"`. Homebrew caveats mention Azure FIM.
+- **Verify:** `sh packaging/tests/package-deps.sh`. A `PREFIX=.../usr/local` install prints that share directory, and the README snippet sources the installed `omni-bash.sh`.
 
 ### IMP-01 — Tests fail if the bash libs are not installed
 - **Status:** done

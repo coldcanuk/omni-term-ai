@@ -15,7 +15,8 @@ pkgdesc="Tmux workspace with Neovim and AI tooling"
 arch=('any')
 url="https://github.com/coldcanuk/omni-term-ai"
 license=('GPL3')
-depends=('neovim' 'tmux' 'git' 'ripgrep')
+depends=('neovim' 'tmux' 'git' 'ripgrep' 'curl')
+optdepends=('python: bash FIM completion' 'sshfs: jumpbox remote targets')
 source=("\$pkgname-\$pkgver.tar.gz")
 sha256sums=('SKIP')
 
