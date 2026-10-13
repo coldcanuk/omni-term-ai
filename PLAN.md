@@ -33,13 +33,6 @@ Empty.
 
 ## Backlog — bugs
 
-### BUG-09 — FIM can show a stale completion and leak the payload
-- **Kind:** bug, P1
-- **Where:** `nvim-config/lua/omni_fim.lua`
-- **Evidence:** `on_stdout` applies whatever curl returns; there is no generation counter, so a slow response for an old prefix can paint ghost text after the user has typed more. `vim.fn.tempname()` is never deleted. Multiline accept sets the cursor to `col + #last` on the last line; after `nvim_buf_set_text`, later lines start at column 0.
-- **Fix:** Stamp each request. Ignore callbacks whose stamp is not current. `os.remove` the payload in `on_exit`. For a multi-line insert, park the cursor at `#last` on the last inserted line (0-based).
-- **Verify:** Overlapping mocked responses: only the latest prefix is shown. No payload file left in temp. A two-line accept leaves the cursor at the end of line 2, not `col` bytes past it.
-
 ### BUG-10 — Uninstall and man pages drift from the CLI
 - **Kind:** bug, P1
 - **Where:** `Makefile` `uninstall` (removes `launch-ai-workspace.1`, not `omni-config.1`); `man/omni-config.1`; `man/launch-ai-workspace.1`
@@ -115,6 +108,12 @@ Empty.
 ---
 
 ## Done
+
+### BUG-09 — Stale FIM responses are ignored
+- **Status:** done
+- **Where:** `nvim-config/lua/omni_fim.lua`
+- **Fix:** Each request has a stamp. Older callbacks do not paint. `on_exit` removes the payload. A multi-line accept parks the cursor at the end of the last inserted line.
+- **Verify:** `packaging/tests/fim-stale.sh`
 
 ### BUG-08 — Bash FIM inserts the picked choice
 - **Status:** done
