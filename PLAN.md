@@ -21,13 +21,6 @@ Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `ma
 
 ## Ready
 
-### BUG-05 — Scratchpad and panic button talk to the wrong tmux server
-- **Kind:** bug, P0
-- **Where:** `tmux.conf` `bind Space` / `bind E`; `tmux-toggle-scratch`
-- **Evidence:** Both invoke the `tmux` binary. `run-shell` does not set `TMUX`, and neither command passes `-L omni-term-ai`. The workspace server is socket `omni-term-ai`. Prefix-Space and Prefix-E hit the default server or fail.
-- **Fix:** Use tmux command lists on the current server (`bind E kill-window ... \; new-window ... \; send-keys ...`). Implement the scratchpad with `display-popup` / `if-shell` in `tmux.conf`, or pass `-L omni-term-ai` explicitly. Do not shell out to an unqualified `tmux`.
-- **Verify:** With a default tmux server also running, Prefix-Space toggles a popup on the omni socket only, and Prefix-E recreates the Editor window on that socket only.
-
 ### BUG-06 — First-run wizard is not on PATH
 - **Kind:** bug, P0
 - **Where:** `launch-ai-workspace` lines 16–18 call `omni-config`; `PATH` is prepended with the script directory only at lines 64–66
@@ -142,6 +135,12 @@ Empty. Pull BUG-06 next.
 
 ## Done
 
+### BUG-05 — Scratchpad and panic button: not a bug
+- **Status:** closed, not reproduced. No code change.
+- **Where:** `tmux.conf` `bind Space` / `bind E`; `tmux-toggle-scratch`
+- **Finding:** The audit premise was wrong. `run-shell` jobs get `TMUX=<server socket>,<pid>,<session>` from tmux (`environ_for_session` in `job.c`, tmux 3.2+), so a bare `tmux` inside them talks to the `omni-term-ai` server. `display-popup -E` gets the same environment. `README.md` and `packaging/deb/control` already require tmux 3.2.
+- **Verify:** `python3 packaging/tests/tmux-bindings.py` passed on tmux 3.7c. It attaches a real client to the omni socket, runs a decoy default server, and presses Prefix-E and Prefix-Space. Editor is recreated and the scratch popup opens and closes on the omni socket only. The decoy is untouched. With a `tmux` wrapper that drops `TMUX` (the audit's claim), the test fails and the decoy gains an Editor window, so the test detects the bug if it ever regresses. Wired into `make test`.
+
 ### BUG-04 — Azure FIM reaches the tmux session
 - **Status:** done
 - **Where:** `lib/omni.sh` `omni_publish_tmux_secrets`, `omni_apply_azure_config`; `omni-config` `azure-endpoint` / `azure-deployment`
@@ -164,7 +163,7 @@ Empty. Pull BUG-06 next.
 
 ### AUDIT-00 — Audit of 0.2.5
 - **Status:** done
-- **Evidence:** Tree `/usr/local/src/omni-term-ai`, `main` == `origin/main` at `e5d2ea5`, VERSION `0.2.5`. Lua parses (`luac -p`). Reproduced config execution and sed `&` corruption. Confirmed Azure omission, PATH order, wrong tmux socket, and gh-pages `continue-on-error` by reading the files.
+- **Evidence:** Tree `/usr/local/src/omni-term-ai`, `main` == `origin/main` at `e5d2ea5`, VERSION `0.2.5`. Lua parses (`luac -p`). Reproduced config execution and sed `&` corruption. Confirmed Azure omission, PATH order, wrong tmux socket, and gh-pages `continue-on-error` by reading the files. The tmux socket finding was later disproved by test (BUG-05).
 - **Not bugs:** `die()` waiting for Enter is intentional (`b02b79e`, desktop error visibility). Neovim 0.12.5 loaded `init.lua` headless; treesitter `v0.9.3` did not crash that load.
 
 ### PLAN-0.2.0 — Multi-harness, DeepSeek FIM, brew trust
@@ -177,7 +176,7 @@ Empty. Pull BUG-06 next.
 1. BUG-01 done. BUG-03 done. Next: BUG-06
 2. BUG-06 (tiny, unblocks first-run testing)
 3. BUG-04 done.
-4. BUG-02 done. Then BUG-05
+4. BUG-02 done. BUG-05 closed: not reproduced (regression test added)
 5. BUG-07 and BUG-08 together (one provider model)
 6. BUG-09, BUG-10, BUG-11, BUG-13
 7. Improvements, IMP-01 first so later cards have a test to land in
