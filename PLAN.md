@@ -38,13 +38,6 @@ Empty. Pull BUG-06 next.
 
 ## Backlog — bugs
 
-### BUG-07 — Stored OpenAI key silently replaces DeepSeek FIM
-- **Kind:** bug, P1
-- **Where:** `nvim-config/lua/omni_fim.lua` (Azure, then OpenAI, then DeepSeek); `lib/deepseek-completion.bash` (same order)
-- **Evidence:** `omni_export_harness_keys` always exports every stored key. Codex users who also stored `openai` never hit DeepSeek, and `OMNI_FIM_ENGINE` has no provider field (`native|copilot|none` only).
-- **Fix:** Add `OMNI_FIM_PROVIDER=deepseek|openai|azure` (default `deepseek`). Native FIM calls only that provider. Do not infer the vendor from which keys happen to be set.
-- **Verify:** Both OpenAI and DeepSeek keys set, provider `deepseek`: request URL is the DeepSeek beta completions endpoint. Provider `openai` does not call DeepSeek.
-
 ### BUG-08 — Bash FIM completion does not complete
 - **Kind:** bug, P1
 - **Where:** `lib/omni-bash.sh`, `lib/deepseek-completion.bash`, README "FIM Bash Completion"
@@ -134,6 +127,11 @@ Empty. Pull BUG-06 next.
 ---
 
 ## Done
+
+### BUG-07 — FIM provider is explicit
+- **Status:** done
+- **Where:** `OMNI_FIM_PROVIDER` (`deepseek|openai|azure`, default `deepseek`); `nvim-config/lua/omni_fim.lua`; `lib/deepseek-completion.bash`
+- **Verify:** `sh packaging/tests/fim-provider.sh` and `make test` passed. With both keys set, provider `deepseek` uses the DeepSeek beta URL and provider `openai` does not.
 
 ### BUG-05 — Scratchpad and panic button: not a bug
 - **Status:** closed, not reproduced. No code change.

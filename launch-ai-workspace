@@ -75,6 +75,7 @@ omni_apply_tmux_env() {
     omni_tmux set-environment -g NVIM_APPNAME omni-term-ai
     omni_tmux set-environment -g PATH "$PATH"
     omni_tmux set-environment -g OMNI_FIM_ENGINE "$OMNI_FIM_ENGINE"
+    omni_tmux set-environment -g OMNI_FIM_PROVIDER "$OMNI_FIM_PROVIDER"
     omni_publish_tmux_secrets
 }
 

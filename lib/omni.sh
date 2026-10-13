@@ -185,7 +185,7 @@ omni_config_path() {
 
 omni_config_key_ok() {
     case $1 in
-    OMNI_LEFT_HARNESS | OMNI_RIGHT_HARNESS | OMNI_JUMPBOX | OMNI_FIM_ENGINE | OMNI_AZURE_ENDPOINT | OMNI_AZURE_DEPLOYMENT)
+    OMNI_LEFT_HARNESS | OMNI_RIGHT_HARNESS | OMNI_JUMPBOX | OMNI_FIM_ENGINE | OMNI_FIM_PROVIDER | OMNI_AZURE_ENDPOINT | OMNI_AZURE_DEPLOYMENT)
         return 0
         ;;
     *)
@@ -326,6 +326,7 @@ omni_config_assign() {
     OMNI_RIGHT_HARNESS) OMNI_RIGHT_HARNESS=$2 ;;
     OMNI_JUMPBOX) OMNI_JUMPBOX=$2 ;;
     OMNI_FIM_ENGINE) OMNI_FIM_ENGINE=$2 ;;
+    OMNI_FIM_PROVIDER) OMNI_FIM_PROVIDER=$2 ;;
     OMNI_AZURE_ENDPOINT) OMNI_AZURE_ENDPOINT=$2 ;;
     OMNI_AZURE_DEPLOYMENT) OMNI_AZURE_DEPLOYMENT=$2 ;;
     *)
@@ -418,9 +419,10 @@ omni_load_config() {
     : "${OMNI_RIGHT_HARNESS:=grok}"
     : "${OMNI_JUMPBOX:=}"
     : "${OMNI_FIM_ENGINE:=native}"
+    : "${OMNI_FIM_PROVIDER:=deepseek}"
     : "${OMNI_AZURE_ENDPOINT:=}"
     : "${OMNI_AZURE_DEPLOYMENT:=}"
-    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX OMNI_FIM_ENGINE
+    export OMNI_LEFT_HARNESS OMNI_RIGHT_HARNESS OMNI_JUMPBOX OMNI_FIM_ENGINE OMNI_FIM_PROVIDER
     export OMNI_AZURE_ENDPOINT OMNI_AZURE_DEPLOYMENT
 }
 
@@ -430,6 +432,7 @@ omni_config_get() {
     right) printf '%s\n' "$OMNI_RIGHT_HARNESS" ;;
     jumpbox) printf '%s\n' "$OMNI_JUMPBOX" ;;
     fim) printf '%s\n' "$OMNI_FIM_ENGINE" ;;
+    fim-provider) printf '%s\n' "$OMNI_FIM_PROVIDER" ;;
     azure-endpoint) printf '%s\n' "$OMNI_AZURE_ENDPOINT" ;;
     azure-deployment) printf '%s\n' "$OMNI_AZURE_DEPLOYMENT" ;;
     esac
