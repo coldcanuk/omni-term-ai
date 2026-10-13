@@ -2,7 +2,7 @@
 
 Supersedes the 0.2.0 multi-harness plan. That work shipped (VERSION `0.2.5`, `main` at `e5d2ea5`). This plan is the correction list from an audit of `/usr/local/src/omni-term-ai` on 2026-10-13. Visual board: `kanban.html`.
 
-**Target:** 0.3.0. Do not bump VERSION until the Ready column is done and `make test` passes.
+**Target:** 0.3.0, shipped. VERSION and CHANGELOG say 0.3.0.
 
 **Method:** one card at a time, on this branch (`gb/audit-kanban`), worktree `.worktrees/gb-audit-kanban-wt`. No commits to `main`. WIP limit: 1.
 
@@ -39,16 +39,17 @@ Empty. P1 bugs are done.
 
 ## Backlog — improvements
 
-### IMP-05 — Docs and changelog lag the tree
-- **Kind:** improvement, P2
-- **Where:** `CHANGELOG.md`, `README.md`, `Formula/omni-term-ai.rb`
-- **Evidence:** 0.2.5 notes the symlink crash only. Jumpbox, Azure/OpenAI FIM, bash completion, and the desktop jumpbox default are in the tree and not in the changelog. This plan replaces the stale 0.2.0 `PLAN.md`.
-- **Fix:** When 0.3.0 ships, changelog the fixes above. Do not rewrite history of 0.2.x beyond a one-line "undocumented features now covered by 0.3.0".
-- **Verify:** CHANGELOG 0.3.0 lists every Ready card that merged.
+Empty.
 
 ---
 
 ## Done
+
+### IMP-05 — Changelog covers 0.3.0
+- **Status:** done
+- **Where:** `CHANGELOG.md`, `VERSION`
+- **Fix:** 0.3.0 lists every merged remediation card. 0.2.5 keeps its two original notes and adds one line pointing at 0.3.0. VERSION is 0.3.0.
+- **Verify:** `sh packaging/tests/changelog-030.sh`
 
 ### IMP-04 — Secrets stay off the command line
 - **Status:** done
