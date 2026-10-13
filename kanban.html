@@ -163,7 +163,7 @@
   <header class="top">
     <div>
       <h1>Omni Term AI 0.3.0</h1>
-      <p>All P0 cards are done. Next: the P2 improvements, IMP-02 first.</p>
+      <p>IMP-02 in progress: signed repo, republish pending.</p>
     </div>
     <div class="filters" role="group" aria-label="Filter cards">
       <button type="button" aria-pressed="true" data-filter="all">All</button>
@@ -182,7 +182,11 @@
     <section class="col" data-col="doing">
       <h2>In progress <span data-count>0</span></h2>
       <div class="stack">
-        <div class="empty">Empty. Pull BUG-06.</div>
+        <article data-pri="P2" data-id="IMP-02">
+          <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
+          <h3>Apt and rpm repos are signed</h3>
+          <p>Key <code>B395…F91B</code>. README uses <code>signed-by</code> and <code>gpgcheck=1</code>. Waiting for the republish to pass the client check.</p>
+        </article>
       </div>
     </section>
     <section class="col" data-col="backlog">
@@ -227,11 +231,6 @@
           <header><span class="id">IMP-01</span><span class="tag">P1 improve</span></header>
           <h3>Tests check layout, not behavior</h3>
           <p><code>make test</code> never looks at the bash libs, config quoting, or empty-secret export. No shellcheck in CI.</p>
-        </article>
-        <article data-pri="P2" data-id="IMP-02">
-          <header><span class="id">IMP-02</span><span class="tag">P2 improve</span></header>
-          <h3>Apt and rpm repos are unsigned</h3>
-          <p>README uses <code>trusted=yes</code> and <code>gpgcheck=0</code>. Sign the repos, then drop those flags.</p>
         </article>
         <article data-pri="P2" data-id="IMP-03">
           <header><span class="id">IMP-03</span><span class="tag">P2 improve</span></header>
