@@ -3,36 +3,36 @@ Hash: SHA512
 
 Architectures: all
 Codename: stable
-Date: Tue, 13 Oct 2026 11:55:50 +0000
+Date: Tue, 13 Oct 2026 14:28:23 +0000
 Description: Omni Term AI Workspace Repository
 Label: OmniTermAI
 Origin: OmniTermAI
 Suite: stable
 MD5Sum:
- 470b966f27ab517cc3242b57e881bcfd              885 Packages
- 13018799256ecbacbfece7e1806879b6              610 Packages.gz
+ 317347fbed65a4b40b31eb8d6b23bafe             1028 Packages
+ febec1e3715884fb86ab05c4522b5eae              681 Packages.gz
 SHA1:
- 46bae763cb58204b2882e046af082f9f301d1fb6              885 Packages
- 0c418c1c4f5063268fa6091ef518c8abbdbbad22              610 Packages.gz
+ bd656584c6afc72654373ae26fb342b73bc5ce03             1028 Packages
+ 60780d5340df8859fbf0da3aa2c38050a3923381              681 Packages.gz
 SHA256:
- 35f90bdb2bb7412662e54e4e3f1cdb0db9e012c4120c72de7d0f08f8628d134b              885 Packages
- 88934bba7932c3de7b981a24ad3214a7671aa5a506e1478c4e5708961e2a8cce              610 Packages.gz
+ 37df711636a4c19478b8353b5f26c5c15eee0b5e9d79fb2cbfdf8ee94b4ca8cc             1028 Packages
+ 33a115c18aa48de4b42a4735c466cc13483cfdb2a7dff1c8f30ff5bcbdfed3c0              681 Packages.gz
 SHA512:
- 94dc727b7caf96df82f02ea2038fab13db668e5ff8f4b737ef6bd16c63269f60bcb633ef5ee65697d961b69836b8cc91dbdd5de367dfb2b1fc27492ae2ed4d4b              885 Packages
- 19bf76173d25ba0bec7fe2d2a127d880cdb5c3641a877bb8653aaae263079a53ec5ece6186efa578add461a8db83e7c0b412d86bfd0c07efa1a7bf68369ba491              610 Packages.gz
+ 82f228b41fe51f0321ed8386ac68581b3449770d5d2adc1e9b98c16330c8f46386a6aa7d486f3e732ea9d908cd50f9f31d77ebf22096b22b49cce53dd0505a8a             1028 Packages
+ db5e5b61574a8ebd1942911a42e2cb6d1b8c6c079ba160b3295a22ac942ad74128729ec98bbdc4fb2636a5227523173aa2bdc70ff27c7772faa02539b4a90861              681 Packages.gz
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCgAdFiEEs5WpeXKzCaPkztYqscTPxoWo+RsFAmrOHEYACgkQscTPxoWo
-+RsdZBAAuv05gqfBoGi+X+n53IBkH5i0HsiP/DTlvR61T/h7YAE9nB+YriBKf0IM
-BsFTKLrjDhAQAF+ij608Uh9IV8IaR/ednUCGRBvpI8VGLz4Ji0GV8LzYOLLzPpAV
-ReBa0kJARCyZHqlPm9wqViXpBi7u9mMr4i9VH/xVWTB6Q7BWcjyhuv4+8Lxz6QXF
-IYkM/i2XFktDqhs9iQGjut6pFCJQn2JJs+2YJHyVMvNT2FLQaOWDEqTVDbxZh1zJ
-QKyC194GQI8l2z3V2ukKOdcWOJ2DHj158xqoWVR4SNS5AZcDnA5uUqRKulSvPBuX
-JkxV8ahRXZzs54Eiss9Ws7x+o12XnqBvC+BCmgE9jirHVcHwwy3mmJ5lZQ2r5/or
-iWd/uy0jfQ3+4y5krBQB5gjO3UsLX+Skq9TMmb3rmefr3S23Yo9Y24/HdBb9mDio
-my9yNRVkbX6rc/gsf4pC2RzxndvRL5aVYuq9NCqWNbqB4bK/JLxzh6J49L99sXmS
-wZZLVxW1EDybAb/GPINN8VmnzJ6fgMZPVS5+F4A9datvS3p4cUrsbbXnBjCVazn+
-qVAIVtuwHugq3uXUDlteqbDGVgY8koLqTPxsJ8HyiQp/BW+DZWmydA3IcCxQd2LL
-385TAN1xdZNZfiVe5+wWDd2Ks7uHhwVoajF+KQp1RIL4n8VjyCA=
-=ahOo
+iQIzBAEBCgAdFiEEs5WpeXKzCaPkztYqscTPxoWo+RsFAmrOQAcACgkQscTPxoWo
++RtOKA//dvN8oNeAuPbXKu7LK8Bh/ZFRJn0H38It2RwlGAzVO7srfB5jPinVJ65Q
+Q0+/VP/8EH+Joxt2MjXIyRDSq90Z1xJtM8LDmeqNGVLQT1en3cO3OyxuL/RLM5fg
+yksMtshRhiaZNl3SZFcw8wiWJn/Ii9iaEnLhabkNeSKAOU7nglzY2PdaVZ+Pjssi
+UXUwxMUGX91dsmxgu8kUVueodArp53eWB1GAoEfJVINfj99kvXm9ON+2URrO6z68
+pwUt+iCWa6YKLXS2nxktCZ+Nzb393pQc6Qhidn7Vz9k5BGGGoxiqv++KAPALK4YP
+IhujkjLa7GrVk3lkGLQ+T9WDwMxXOOjpMq92ulOy0Hx1fk5F2dispCi1/tLzVS2K
+viMCZkBE94YQYE5cvKIZ53KFa2xazxqXuaOGRxgqOw+hMI64WIH6/yGUus2Gk71U
+YRhqCm6Z0vkp8T2th8KCfKEwUHhP3RidyJcIvRB9gbyrsaJ8cfv3DN1Ka2TrrW7I
+q1kXcVtcNPPaPrIqlwGmNd32H/feLOEDRulVeAqpZ4GemptqYwQK3lysyXco9Odq
+IANjwrhghfDSxnlNlqNNziO431fXt6RGzIcQ3zcByWIycKjtLorgJHXjWKImVqdr
+ZF7jweSYNdTDecwTq2CdsTLPIiEX0YGn2yY+jUdNHZ+KVAdMW8E=
+=qJf6
 -----END PGP SIGNATURE-----

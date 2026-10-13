@@ -1,14 +1,15 @@
 Package: omni-term-ai
-Version: 0.2.5-1
+Version: 0.3.0-1
 Architecture: all
 Maintainer: Frozen Packet <chuck.pitre@hotmail.com>
-Installed-Size: 204
-Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools
-Filename: ./omni-term-ai_0.2.5_all.deb
-Size: 30442
-MD5sum: 4bf2e079537997e280c692ce74fd736c
-SHA1: 072891a2a435a9e5d4b744c8b37738ef9fc8c216
-SHA256: 8c300f22ed938141ee0102e7a7e7bc5562a281dd2ab79c5fc403d793de0e9fea
+Installed-Size: 244
+Depends: tmux (>= 3.2), neovim (>= 0.9.5), git, gcc, make, ripgrep, unzip, libsecret-tools, curl
+Suggests: python3, sshfs
+Filename: ./omni-term-ai_0.3.0_all.deb
+Size: 37844
+MD5sum: 46090b06b700245576ad0bee2d141c7a
+SHA1: 1c16ca729791c7298c5b96d5dd6264ac01b77014
+SHA256: ee21c400064228d4494ccc2cf1dec92df47b7ff59f5b9071a4276396e2a7707f
 Section: editors
 Priority: optional
 Homepage: https://github.com/coldcanuk/omni-term-ai
@@ -17,5 +18,6 @@ Description: tmux workspace with Neovim and AI tooling
  center with configurable AI assistant panes (grok, agy, copilot, claude,
  codex, deepseek) and a Neovim editor with DeepSeek Fill-In-The-Middle
  completion. API keys are read from the OS keychain via omni-secret
- (libsecret on Linux).
+ (libsecret on Linux). python3 is optional, for bash FIM completion.
+ sshfs is optional, and only on the jumpbox, for a remote target.
 
