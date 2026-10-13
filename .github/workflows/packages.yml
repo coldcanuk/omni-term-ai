@@ -89,11 +89,22 @@ jobs:
       id-token: write
     steps:
       - name: Checkout gh-pages branch
+        id: pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: repo
         continue-on-error: true
+
+      - name: Refuse to publish over a failed existing checkout
+        if: steps.pages.outcome != 'success'
+        run: |
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            echo "gh-pages exists but checkout failed; refusing to replace the package repo"
+            exit 1
+          fi
+          echo "gh-pages does not exist yet; this is a first publish"
+          mkdir -p repo/apt repo/rpm
 
       - name: Create repo dirs if they don't exist
         run: |
