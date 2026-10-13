@@ -33,33 +33,12 @@ Empty.
 
 ## Backlog — bugs
 
-### BUG-10 — Uninstall and man pages drift from the CLI
-- **Kind:** bug, P1
-- **Where:** `Makefile` `uninstall` (removes `launch-ai-workspace.1`, not `omni-config.1`); `man/omni-config.1`; `man/launch-ai-workspace.1`
-- **Evidence:** `omni-config` supports `jumpbox` and `fim`. Neither man page says so. Both SEE ALSO `omni-secret(1)` and `omni-exec(1)`, which do not exist. `make uninstall` leaves `omni-config.1` installed.
-- **Fix:** Remove `omni-config.1` on uninstall. Document jumpbox, fim, and azure in the existing pages. Add `omni-secret.1` and `omni-exec.1`, or drop the dangling SEE ALSO.
-- **Verify:** `DESTDIR` install then uninstall leaves no `man1/omni-*` or `man1/launch-ai-workspace.1`. `man -l` text mentions jumpbox and fim.
-
-### BUG-11 — `install.sh --deps` ignores Arch, Omarchy, and FreeBSD
-- **Kind:** bug, P1
-- **Where:** `install.sh` `install_deps` (Debian, Fedora, OpenBSD, Darwin only)
-- **Evidence:** Arch's `ID=arch` with empty `ID_LIKE` falls through to "Unknown Linux" and exits 1. README tells Omarchy users this project is a supported install path. This host is Omarchy.
-- **Fix:** `pacman -S --needed` for arch/omarchy/manjaro. `pkg install` for FreeBSD. Keep the unknown-distro error for everything else.
-- **Verify:** A dry-run or `ID=arch` case selects pacman and does not exit 1 before the package command.
-
 ### BUG-12 — Agent cleanup path does not exist
 - **Kind:** bug, P1
 - **Where:** `AGENTS.md` rule 5 (`cd /opt/repo/omni-term-ai`); rule 2 uses `.worktrees/`
 - **Evidence:** This tree is `/usr/local/src/omni-term-ai`. Rule 5 and rule 2 disagree. An agent that follows rule 5 cannot clean up.
 - **Fix:** Cleanup from `git rev-parse --show-toplevel`, then `git worktree remove .worktrees/gb-<feature>-wt`. Delete the `/opt/repo` line.
 - **Verify:** The documented commands succeed in this clone.
-
-### BUG-13 — A failed gh-pages checkout can wipe the package repo
-- **Kind:** bug, P1
-- **Where:** `.github/workflows/packages.yml` `pages-repo`
-- **Evidence:** Checkout of `gh-pages` is `continue-on-error: true`. Deploy uses `peaceiris/actions-gh-pages` with `keep_files: false` and `publish_dir: ./repo`. If checkout fails, the job still publishes a directory that contains only the newly downloaded deb/rpm.
-- **Fix:** Fail the job if the checkout fails, unless the branch truly does not exist yet (first publish). Never publish an empty tree over an existing repo. `keep_files: false` is fine only after a successful checkout of the current site.
-- **Verify:** Workflow YAML no longer continues past a failed checkout. A review of the job shows the publish step is skipped or failed when `repo/` is not a real gh-pages tree.
 
 ---
 
@@ -108,6 +87,20 @@ Empty.
 ---
 
 ## Done
+
+### BUG-10 — Man pages match the CLI
+- **Status:** done
+- **Where:** `Makefile`, `man/*.1`
+- **Fix:** Uninstall removes every shipped man page. Pages document jumpbox, fim, and Azure. `omni-secret.1` and `omni-exec.1` exist.
+- **Verify:** `packaging/tests/man-pages.sh`
+
+### BUG-11 — `--deps` covers Arch, Omarchy, and FreeBSD
+- **Status:** done
+- **Verify:** `packaging/tests/deps-arch.sh`
+
+### BUG-13 — A failed gh-pages checkout does not publish
+- **Status:** done
+- **Verify:** `packaging/tests/gh-pages-guard.sh`
 
 ### BUG-09 — Stale FIM responses are ignored
 - **Status:** done

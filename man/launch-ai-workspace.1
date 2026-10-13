@@ -48,9 +48,26 @@ Run a command with every harness API key
 .BR DEEPSEEK_API_KEY ,
 .BR ANTHROPIC_API_KEY ,
 .BR OPENAI_API_KEY ,
-.BR GH_TOKEN ,
-.BR GEMINI_API_KEY )
+.B GH_TOKEN ,
+.BR GEMINI_API_KEY ,
+.BR AZURE_OPENAI_API_KEY )
 injected from the OS secret store.
+An empty stored secret is not exported, so an ambient token is left alone.
+.PP
+Fill-in-the-middle completion uses
+.B OMNI_FIM_PROVIDER
+.RB ( deepseek ,
+.BR openai ,
+or
+.BR azure ;
+default
+.BR deepseek ).
+Azure also needs
+.B OMNI_AZURE_ENDPOINT
+and
+.B OMNI_AZURE_DEPLOYMENT ,
+set with
+.BR omni-config (1).
 .TP
 .B omni-secret
 Store or retrieve API keys. Backends: Linux
@@ -70,6 +87,9 @@ Selects the panes' harnesses:
 .RS
 OMNI_LEFT_HARNESS=agy
 OMNI_RIGHT_HARNESS=grok
+OMNI_JUMPBOX=
+OMNI_FIM_ENGINE=native
+OMNI_FIM_PROVIDER=deepseek
 .RE
 .SH ENVIRONMENT
 .TP

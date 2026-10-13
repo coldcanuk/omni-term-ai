@@ -40,6 +40,8 @@ install:
 	$(INSTALL) -m 644 brain.svg $(DESTDIR)$(ICONDIR)/ai-workspace.svg
 	$(INSTALL) -m 644 man/launch-ai-workspace.1 $(DESTDIR)$(MANDIR)/launch-ai-workspace.1
 	$(INSTALL) -m 644 man/omni-config.1 $(DESTDIR)$(MANDIR)/omni-config.1
+	$(INSTALL) -m 644 man/omni-secret.1 $(DESTDIR)$(MANDIR)/omni-secret.1
+	$(INSTALL) -m 644 man/omni-exec.1 $(DESTDIR)$(MANDIR)/omni-exec.1
 	$(INSTALL) -m 644 README.md $(DESTDIR)$(DOCDIR)/README.md
 	$(INSTALL) -m 644 LICENSE $(DESTDIR)$(DOCDIR)/LICENSE
 	sed "s|@OMNI_HOME@|$(OMNI_HOME_VALUE)|g" launch-ai-workspace > $(DESTDIR)$(BINDIR)/launch-ai-workspace
@@ -58,6 +60,9 @@ uninstall:
 	rm -f $(DESTDIR)$(APPDIR)/ai-workspace.desktop
 	rm -f $(DESTDIR)$(ICONDIR)/ai-workspace.svg
 	rm -f $(DESTDIR)$(MANDIR)/launch-ai-workspace.1
+	rm -f $(DESTDIR)$(MANDIR)/omni-config.1
+	rm -f $(DESTDIR)$(MANDIR)/omni-secret.1
+	rm -f $(DESTDIR)$(MANDIR)/omni-exec.1
 	rm -rf $(DESTDIR)$(DATADIR)
 	rm -rf $(DESTDIR)$(DOCDIR)
 

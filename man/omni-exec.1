@@ -1,0 +1,26 @@
+.TH OMNI-EXEC 1 "October 2026" "omni-term-ai" "User Commands"
+.SH NAME
+omni-exec \\- run a command with harness API keys injected
+.SH SYNOPSIS
+.B omni-exec
+.I command
+.RI [ args... ]
+.SH DESCRIPTION
+Loads stored harness keys and then execs
+.I command .
+A key that was never stored is left unset, so an ambient token is not
+replaced by an empty string.
+.PP
+Injected names:
+.BR XAI_API_KEY ,
+.BR DEEPSEEK_API_KEY ,
+.BR ANTHROPIC_API_KEY ,
+.BR OPENAI_API_KEY ,
+.BR GH_TOKEN ,
+.BR GITHUB_TOKEN ,
+.BR GEMINI_API_KEY ,
+.BR AZURE_OPENAI_API_KEY .
+.SH SEE ALSO
+.BR omni-secret (1),
+.BR omni-config (1),
+.BR launch-ai-workspace (1)
