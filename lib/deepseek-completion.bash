@@ -26,16 +26,20 @@ endpoint = "https://api.deepseek.com/beta/completions"
 model = "deepseek-v4-pro"
 headers = {"Content-Type": "application/json"}
 
-if azure_key and azure_endpoint and azure_deployment:
+if azure_key and azure_endpoint and azure_deployment and os.environ.get("OMNI_FIM_PROVIDER") == "azure":
     endpoint = azure_endpoint.rstrip("/") + f"/openai/deployments/{azure_deployment}/completions?api-version=2024-02-15-preview"
     headers["api-key"] = azure_key
-elif openai_key:
+elif openai_key and os.environ.get("OMNI_FIM_PROVIDER", "deepseek") == "openai":
     endpoint = "https://api.openai.com/v1/completions"
     model = "gpt-3.5-turbo-instruct"
     headers["Authorization"] = f"Bearer {openai_key}"
-elif api_key:
+elif api_key and os.environ.get("OMNI_FIM_PROVIDER", "deepseek") == "deepseek":
     headers["Authorization"] = f"Bearer {api_key}"
 else:
+    sys.exit(0)
+
+if os.environ.get("OMNI_FIM_DRY") == "1":
+    print(endpoint)
     sys.exit(0)
 
 req_data = {

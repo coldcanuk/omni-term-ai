@@ -110,19 +110,28 @@ local function fetch()
   local azure_deployment = vim.env.AZURE_OPENAI_DEPLOYMENT
   local openai_key = vim.env.OPENAI_API_KEY
   local deepseek_key = vim.env.DEEPSEEK_API_KEY
+  local provider = vim.env.OMNI_FIM_PROVIDER or "deepseek"
 
-  if azure_key and azure_key ~= "" and azure_endpoint and azure_endpoint ~= "" and azure_deployment and azure_deployment ~= "" then
+  if provider == "azure" then
+    if not (azure_key and azure_key ~= "" and azure_endpoint and azure_endpoint ~= "" and azure_deployment and azure_deployment ~= "") then
+      return
+    end
     endpoint = azure_endpoint:gsub("/$", "") .. "/openai/deployments/" .. azure_deployment .. "/completions?api-version=2024-02-15-preview"
     auth_header = "api-key: " .. azure_key
-  elseif openai_key and openai_key ~= "" then
+  elseif provider == "openai" then
+    if not (openai_key and openai_key ~= "") then
+      return
+    end
     endpoint = "https://api.openai.com/v1/completions"
     model = "gpt-3.5-turbo-instruct"
     auth_header = "Authorization: Bearer " .. openai_key
-  elseif deepseek_key and deepseek_key ~= "" then
-    auth_header = "Authorization: Bearer " .. deepseek_key
   else
-    return -- no key stored yet; stay quiet
+    if not (deepseek_key and deepseek_key ~= "") then
+      return
+    end
+    auth_header = "Authorization: Bearer " .. deepseek_key
   end
+
 
   if vim.bo.filetype == "" or not vim.bo.modifiable then
     return
@@ -255,4 +264,29 @@ local function setup(opts)
 end
 
 M.setup = setup
+
+function M.endpoint_for(env)
+  env = env or vim.env
+  local provider = env.OMNI_FIM_PROVIDER or "deepseek"
+  if provider == "azure" then
+    if not (env.AZURE_OPENAI_API_KEY and env.AZURE_OPENAI_API_KEY ~= ""
+        and env.AZURE_OPENAI_ENDPOINT and env.AZURE_OPENAI_ENDPOINT ~= ""
+        and env.AZURE_OPENAI_DEPLOYMENT and env.AZURE_OPENAI_DEPLOYMENT ~= "") then
+      return nil
+    end
+    return (env.AZURE_OPENAI_ENDPOINT:gsub("/$", ""))
+      .. "/openai/deployments/" .. env.AZURE_OPENAI_DEPLOYMENT
+      .. "/completions?api-version=2024-02-15-preview"
+  elseif provider == "openai" then
+    if not (env.OPENAI_API_KEY and env.OPENAI_API_KEY ~= "") then
+      return nil
+    end
+    return "https://api.openai.com/v1/completions"
+  end
+  if not (env.DEEPSEEK_API_KEY and env.DEEPSEEK_API_KEY ~= "") then
+    return nil
+  end
+  return "https://api.deepseek.com/beta/completions"
+end
+
 return M
