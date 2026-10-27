@@ -14,6 +14,7 @@ $(PREFIX)/bin/omni-secret
 $(PREFIX)/bin/tmux-toggle-scratch
 $(PREFIX)/bin/omni-watch-row
 $(PREFIX)/bin/omni-ceci-detect
+$(PREFIX)/bin/omni-watch-move
 $(PREFIX)/share/omni-term-ai/lib/omni.sh
 $(PREFIX)/share/omni-term-ai/tmux.conf
 $(PREFIX)/share/omni-term-ai/nvim-config/

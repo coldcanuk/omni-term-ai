@@ -52,6 +52,7 @@ install:
 	$(INSTALL) -m 755 tmux-toggle-scratch $(DESTDIR)$(BINDIR)/tmux-toggle-scratch
 	$(INSTALL) -m 755 omni-watch-row $(DESTDIR)$(BINDIR)/omni-watch-row
 	$(INSTALL) -m 755 omni-ceci-detect $(DESTDIR)$(BINDIR)/omni-ceci-detect
+	$(INSTALL) -m 755 omni-watch-move $(DESTDIR)$(BINDIR)/omni-watch-move
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/launch-ai-workspace
@@ -61,6 +62,7 @@ uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/tmux-toggle-scratch
 	rm -f $(DESTDIR)$(BINDIR)/omni-watch-row
 	rm -f $(DESTDIR)$(BINDIR)/omni-ceci-detect
+	rm -f $(DESTDIR)$(BINDIR)/omni-watch-move
 	rm -f $(DESTDIR)$(APPDIR)/ai-workspace.desktop
 	rm -f $(DESTDIR)$(ICONDIR)/ai-workspace.svg
 	rm -f $(DESTDIR)$(MANDIR)/launch-ai-workspace.1
