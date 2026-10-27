@@ -107,6 +107,11 @@ omni_apply_tmux_env() {
 }
 
 attach_or_switch() {
+    # Start the /cecicela --watch detector once per session.
+    if ! omni_tmux show-options -t "$SESSION_NAME" -qv @omni_ceci_detect 2>/dev/null | grep -qx 1; then
+        omni_tmux set-option -t "$SESSION_NAME" @omni_ceci_detect 1
+        omni_tmux run-shell -b "omni-ceci-detect"
+    fi
     if [ -n "${TMUX:-}" ]; then
         omni_tmux switch-client -t "$SESSION_NAME"
     else

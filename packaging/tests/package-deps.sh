@@ -32,6 +32,9 @@ trap 'rm -rf "$stage" "$stub"' EXIT
 printf '%s\n' '#!/bin/sh' 'exit 1' > "$stub/secret-tool"
 chmod +x "$stub/secret-tool"
 make -C "$ROOT" install PREFIX="$stage/usr/local" >/dev/null
+# A developer machine may already export OMNI_TERM_AI_HOME. The staged binary
+# must report the tree we just installed.
+unset OMNI_TERM_AI_HOME
 home=$("$stage/usr/local/bin/omni-config" home)
 [ "$home" = "$stage/usr/local/share/omni-term-ai" ] || fail "home is $home"
 [ -f "$home/lib/omni-bash.sh" ] || fail "installed bash lib missing"

@@ -33,6 +33,32 @@ grok, agy, copilot, claude, codex, or deepseek.
 The bottom pane is a plain terminal.
 Harness names are shown in the pane's top border (tmux >= 3.2).
 .PP
+Prefix + Shift + W
+.RB ( tmux
+.BR bind-key
+.BR W )
+runs
+.B omni-watch-row
+on the current pane.
+The pane's process stays in a 24-row rectangle and an 80-column pane opens beside it.
+On attach, the launcher starts
+.B omni-ceci-detect
+once per session.
+If a pane shows
+.B /cecicela
+and
+.B --watch
+on the same line, that detector opens the same row.
+A
+.B --work-dir
+on that line is passed to
+.BR ceci .
+Set
+.B OMNI_CECI_WORK_DIR
+when the manual key should run
+.B ceci status --watch
+and the line did not name a directory.
+.PP
 If a chosen harness binary is missing,
 .B launch-ai-workspace
 prints the install command for that harness and exits non-zero before
