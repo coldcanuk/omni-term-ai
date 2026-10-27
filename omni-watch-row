@@ -26,19 +26,27 @@ fi
 
 width=$(tmux display-message -p -t "$orig" '#{pane_width}')
 height=$(tmux display-message -p -t "$orig" '#{pane_height}')
+# pane-border-status draws inside the size passed to split-window -l.
+# Ask for one extra row so the content area stays 24 lines, which is the
+# ceci status --watch screen.
+band=24
+border=$(tmux show-options -gv pane-border-status 2>/dev/null || true)
+case $border in
+top|bottom) band=25 ;;
+esac
 if [ "$width" -lt 82 ]; then
     echo "omni-watch-row: pane is ${width} columns; need at least 82" >&2
     exit 1
 fi
-if [ "$height" -lt 26 ]; then
-    echo "omni-watch-row: pane is ${height} rows; need at least 26" >&2
+if [ "$height" -lt $((band + 2)) ]; then
+    echo "omni-watch-row: pane is ${height} rows; need at least $((band + 2))" >&2
     exit 1
 fi
 
 win=$(tmux display-message -p -t "$orig" '#{window_id}')
 before_top=$(tmux display-message -p -t "$orig" '#{pane_top}')
 before_left=$(tmux display-message -p -t "$orig" '#{pane_left}')
-tmux split-window -v -l 24 -b -d -t "$orig"
+tmux split-window -v -l "$band" -b -d -t "$orig"
 top=$(tmux list-panes -t "$win" -F '#{pane_id} #{pane_top} #{pane_left}' |
     awk -v t="$before_top" -v l="$before_left" '$2 == t && $3 == l { print $1; exit }')
 if [ -z "${top}" ]; then
