@@ -1,0 +1,156 @@
+#!/bin/sh
+# Slide a detected watch row. up and down move the whole row past the
+# neighboring pane. left and right do the same when a pane sits beside the
+# row; otherwise they flip the 80-column watch pane to the other side.
+# Usage: omni-watch-move up|down|left|right [pane]
+set -eu
+
+usage() {
+    echo "usage: omni-watch-move up|down|left|right [pane]" >&2
+    exit 1
+}
+
+dir=${1:-}
+case $dir in
+up|down|left|right) ;;
+*) usage ;;
+esac
+
+if ! command -v tmux >/dev/null 2>&1; then
+    echo "omni-watch-move: tmux is not installed" >&2
+    exit 1
+fi
+
+if [ -n "${2:-}" ]; then
+    origin=$(tmux display-message -p -t "$2" '#{pane_id}') || exit 1
+else
+    origin=$(tmux display-message -p '#{pane_id}') || {
+        echo "omni-watch-move: pass a pane id, or run this inside tmux" >&2
+        exit 1
+    }
+fi
+
+win=$(tmux display-message -p -t "$origin" '#{window_id}')
+snapshot=$(mktemp)
+trap 'rm -f "$snapshot"' EXIT
+tmux list-panes -t "$win" -F '#{pane_id}|#{pane_top}|#{pane_left}|#{pane_width}|#{pane_height}|#{@omni_watch_row}|#{@omni_watch_role}|#{pane_title}' > "$snapshot"
+
+row_top=$(awk -F'|' -v id="$origin" '
+    $1 == id && $6 == "1" { print $2; found = 1; exit }
+    END { if (!found) exit 1 }
+' "$snapshot" || true)
+
+if [ -z "$row_top" ]; then
+    row_top=$(awk -F'|' -v id="$origin" '
+        { top[$1] = $2; high[$1] = $5; mark[$1] = $6; ids[++n] = $1 }
+        END {
+            ot = top[id] + high[id] / 2
+            for (i = 1; i <= n; i++) {
+                p = ids[i]
+                if (mark[p] != "1") continue
+                dist = (top[p] + high[p] / 2) - ot
+                if (dist < 0) dist = -dist
+                if (best == "" || dist < bestd) { best = top[p]; bestd = dist }
+            }
+            if (best == "") exit 1
+            print best
+        }
+    ' "$snapshot" || true)
+fi
+
+if [ -z "$row_top" ]; then
+    echo "omni-watch-move: no watch row in this window" >&2
+    exit 1
+fi
+
+row=$(awk -F'|' -v top="$row_top" '$6 == "1" && $2 == top { print }' "$snapshot")
+if [ -z "$row" ]; then
+    echo "omni-watch-move: no watch row in this window" >&2
+    exit 1
+fi
+
+anchor=$(printf '%s\n' "$row" | awk -F'|' '$7 == "assistant" { print $1; exit }')
+if [ -z "$anchor" ]; then
+    anchor=$(printf '%s\n' "$row" | awk -F'|' '{ print $1; exit }')
+fi
+watch=$(printf '%s\n' "$row" | awk -F'|' '$7 == "watch" || $8 == "watch" { print $1; exit }')
+if [ -z "$watch" ]; then
+    watch=$(printf '%s\n' "$row" | awk -F'|' '$4 == 80 { print $1; exit }')
+fi
+height=$(tmux display-message -p -t "$anchor" '#{pane_height}')
+
+set -- $(printf '%s\n' "$row" | awk -F'|' '
+    BEGIN { top = 999999; left = 999999; right = 0; bottom = 0 }
+    {
+        if ($2 < top) top = $2
+        if ($3 < left) left = $3
+        if ($3 + $4 > right) right = $3 + $4
+        if ($2 + $5 > bottom) bottom = $2 + $5
+    }
+    END { print top, left, right, bottom }
+')
+rtop=$1
+rleft=$2
+rright=$3
+rbottom=$4
+
+neighbor=$(awk -F'|' -v dir="$dir" -v top="$rtop" -v left="$rleft" -v right="$rright" -v bottom="$rbottom" -v rowtop="$row_top" '
+    function hover(a, b, c, d,    s, e) {
+        s = a > c ? a : c
+        e = b < d ? b : d
+        return e - s
+    }
+    $6 == "1" && $2 == rowtop { next }
+    {
+        ptop = $2 + 0; pleft = $3 + 0; pwidth = $4 + 0; pheight = $5 + 0
+        pright = pleft + pwidth; pbottom = ptop + pheight
+        hit = 0; rank = 0; ov = 0
+        if (dir == "down" && ptop >= bottom - 1) {
+            ov = hover(left, right, pleft, pright); hit = ov > 0; rank = ptop
+        }
+        if (dir == "up" && pbottom <= top + 1) {
+            ov = hover(left, right, pleft, pright); hit = ov > 0; rank = -pbottom
+        }
+        if (dir == "right" && pleft >= right - 1) {
+            ov = hover(top, bottom, ptop, pbottom); hit = ov > 0; rank = pleft
+        }
+        if (dir == "left" && pright <= left + 1) {
+            ov = hover(top, bottom, ptop, pbottom); hit = ov > 0; rank = -pright
+        }
+        if (hit && (best == "" || rank < bestrank || (rank == bestrank && ov > bestov))) {
+            best = $1; bestrank = rank; bestov = ov
+        }
+    }
+    END { if (best != "") print best }
+' "$snapshot")
+
+if [ -n "$neighbor" ]; then
+    case $dir in
+    down) tmux join-pane -v -b -f -d -s "$neighbor" -t "$anchor" ;;
+    up) tmux join-pane -v -f -d -s "$neighbor" -t "$anchor" ;;
+    right) tmux join-pane -h -b -f -d -s "$neighbor" -t "$anchor" ;;
+    left) tmux join-pane -h -f -d -s "$neighbor" -t "$anchor" ;;
+    esac
+else
+    count=$(printf '%s\n' "$row" | wc -l)
+    count=$(printf '%s' "$count" | tr -d ' ')
+    case $dir in
+    left|right)
+        if [ "$count" -lt 2 ] || [ -z "$watch" ]; then
+            echo "omni-watch-move: nowhere to move $dir" >&2
+            exit 1
+        fi
+        other=$(printf '%s\n' "$row" | awk -F'|' -v w="$watch" '$1 != w { print $1; exit }')
+        tmux swap-pane -d -s "$watch" -t "$other"
+        ;;
+    *)
+        echo "omni-watch-move: nowhere to move $dir" >&2
+        exit 1
+        ;;
+    esac
+fi
+
+tmux resize-pane -t "$anchor" -y "$height"
+if [ -n "$watch" ]; then
+    tmux resize-pane -t "$watch" -x 80
+fi

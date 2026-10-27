@@ -69,4 +69,6 @@ fi
 watch_pane=$(tmux split-window -h -l 80 -d -P -F '#{pane_id}' -t "$orig" "$watch")
 tmux select-pane -T watch -t "$watch_pane"
 tmux set-option -p -t "$orig" @omni_watch_row 1
+tmux set-option -p -t "$orig" @omni_watch_role assistant
 tmux set-option -p -t "$watch_pane" @omni_watch_row 1
+tmux set-option -p -t "$watch_pane" @omni_watch_role watch

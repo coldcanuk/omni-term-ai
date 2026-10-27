@@ -193,6 +193,7 @@ The workspace is powered by tmux. By default, the tmux prefix is `Ctrl+b`. Here 
 - **`Prefix + E`**: Panic Button (kills the Editor tab and spawns a fresh Neovim instance)
 - **`Prefix + Space`**: Toggle the floating scratchpad terminal
 - **`Prefix + Shift + W`**: Open a watch row. The current pane becomes a 24-row assistant rectangle with an 80-column pane beside it. That pane runs `ceci status --watch` when `ceci` is on `PATH` and `OMNI_CECI_WORK_DIR` is set. The launcher also opens this row when a pane shows `/cecicela` and `--watch` on the same line. A `--work-dir` on that line is the work directory.
+- **`Prefix + Alt + h/j/k/l`**: Move that watch row left, down, up, or right. Up and down slide the whole row past the pane above or below it. Left and right do the same when a pane sits beside the row, and otherwise flip the 80-column pane to the other side.
 - **`Prefix + n`**: Open Neovim with Neotree in the current focused pane
 
 ## Features
