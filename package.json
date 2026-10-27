@@ -17,7 +17,8 @@
     "omni-secret": "./omni-secret",
     "omni-exec": "./omni-exec.sh",
     "tmux-toggle-scratch": "./tmux-toggle-scratch",
-    "omni-watch-row": "./omni-watch-row"
+    "omni-watch-row": "./omni-watch-row",
+    "omni-ceci-detect": "./omni-ceci-detect"
   },
   "files": [
     "launch-ai-workspace",
@@ -26,6 +27,7 @@
     "omni-exec.sh",
     "tmux-toggle-scratch",
     "omni-watch-row",
+    "omni-ceci-detect",
     "install.sh",
     "uninstall.sh",
     "lib",

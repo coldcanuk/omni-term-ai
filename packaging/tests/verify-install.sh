@@ -18,6 +18,7 @@ for f in \
     usr/bin/omni-config \
     usr/bin/tmux-toggle-scratch \
     usr/bin/omni-watch-row \
+    usr/bin/omni-ceci-detect \
     usr/share/omni-term-ai/lib/omni.sh \
     usr/share/omni-term-ai/lib/omni-bash.sh \
     usr/share/omni-term-ai/lib/deepseek-completion.bash \
@@ -34,7 +35,7 @@ for f in \
     [ -e "$STAGE/$f" ] || fail "missing $f"
 done
 
-for f in usr/bin/launch-ai-workspace usr/bin/omni-exec usr/bin/omni-secret usr/bin/omni-config usr/bin/tmux-toggle-scratch usr/bin/omni-watch-row; do
+for f in usr/bin/launch-ai-workspace usr/bin/omni-exec usr/bin/omni-secret usr/bin/omni-config usr/bin/tmux-toggle-scratch usr/bin/omni-watch-row usr/bin/omni-ceci-detect; do
     # R5 make install places an executable omni-watch-row under PREFIX/bin
     [ -x "$STAGE/$f" ] || fail "not executable: $f"
 done
@@ -61,14 +62,14 @@ if grep -R '/home/chuck' "$STAGE" >/dev/null 2>&1; then
 fi
 
 # Source-tree scripts must parse.
-for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch omni-watch-row install.sh \
+for s in launch-ai-workspace omni-exec.sh omni-secret omni-config tmux-toggle-scratch omni-watch-row omni-ceci-detect install.sh \
     lib/omni.sh lib/omni-bash.sh lib/deepseek-completion.bash lib/boot.sh packaging/build-deb.sh packaging/build-rpm.sh packaging/tests/verify-install.sh \
     packaging/tests/config-roundtrip.sh packaging/tests/jumpbox-args.sh packaging/tests/empty-secrets.sh \
     packaging/tests/azure-env.sh packaging/tests/fim-provider.sh packaging/tests/gh-pages-guard.sh packaging/tests/deps-arch.sh packaging/tests/bash-fim.sh packaging/tests/fim-stale.sh packaging/tests/man-pages.sh packaging/tests/agents-path.sh \
     packaging/tests/shell-integration.sh packaging/tests/nvim-startup.sh \
     packaging/build-repo.sh packaging/tests/repo-client.sh packaging/tests/repo-signing.sh \
     packaging/tests/package-deps.sh packaging/tests/key-argv.sh \
-    packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh packaging/tests/watch-row.sh \
+    packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh packaging/tests/watch-row.sh packaging/tests/ceci-detect.sh \
     packaging/setup-apt.sh packaging/setup-arch.sh packaging/build-arch.sh \
     packaging/attach-release-extras.sh; do
     sh -n "$ROOT/$s" || fail "sh -n $s"
@@ -97,6 +98,7 @@ sh "$ROOT/packaging/tests/key-argv.sh" || rc=$?
 sh "$ROOT/packaging/tests/changelog-030.sh"
 sh "$ROOT/packaging/tests/install-surfaces.sh"
 sh "$ROOT/packaging/tests/watch-row.sh"
+sh "$ROOT/packaging/tests/ceci-detect.sh"
 
 # Non-network parse of the editor Lua. Skip if luac is absent.
 if command -v luac >/dev/null 2>&1; then
@@ -110,7 +112,7 @@ fi
 # CDPATH= cd idiom, which this linter misreads as SC1007.
 if command -v shellcheck >/dev/null 2>&1; then
     for s in lib/omni.sh lib/boot.sh launch-ai-workspace omni-secret omni-config \
-        tmux-toggle-scratch omni-watch-row install.sh packaging/build-deb.sh packaging/build-rpm.sh \
+        tmux-toggle-scratch omni-watch-row omni-ceci-detect install.sh packaging/build-deb.sh packaging/build-rpm.sh \
         packaging/build-repo.sh packaging/tests/verify-install.sh \
         packaging/tests/config-roundtrip.sh packaging/tests/jumpbox-args.sh \
         packaging/tests/empty-secrets.sh packaging/tests/azure-env.sh \
@@ -120,7 +122,7 @@ if command -v shellcheck >/dev/null 2>&1; then
         packaging/tests/nvim-startup.sh packaging/tests/repo-client.sh \
         packaging/tests/repo-signing.sh packaging/tests/shell-integration.sh \
         packaging/tests/package-deps.sh packaging/tests/key-argv.sh \
-        packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh packaging/tests/watch-row.sh \
+        packaging/tests/changelog-030.sh packaging/tests/install-surfaces.sh packaging/tests/watch-row.sh packaging/tests/ceci-detect.sh \
         packaging/setup-apt.sh packaging/setup-arch.sh packaging/build-arch.sh \
         packaging/attach-release-extras.sh install.sh; do
         shellcheck -S error -s sh "$ROOT/$s" || fail "shellcheck $s"

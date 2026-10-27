@@ -41,6 +41,7 @@ make DESTDIR=%{buildroot} PREFIX=/usr install
 /usr/bin/omni-config
 /usr/bin/tmux-toggle-scratch
 /usr/bin/omni-watch-row
+/usr/bin/omni-ceci-detect
 /usr/share/omni-term-ai
 /usr/share/applications/ai-workspace.desktop
 /usr/share/icons/hicolor/scalable/apps/ai-workspace.svg

@@ -1,0 +1,44 @@
+#!/bin/sh
+# Watch tmux panes for a /cecicela invocation that includes --watch,
+# then hand that pane to omni-watch-row. --once runs a single pass.
+set -eu
+
+once=0
+if [ "${1:-}" = "--once" ]; then
+    once=1
+fi
+
+pass() {
+    tmux list-panes -a -F '#{pane_id}' | while IFS= read -r pane; do
+        [ -n "$pane" ] || continue
+        marked=$(tmux show-options -p -t "$pane" -qv @omni_watch_row 2>/dev/null || true)
+        if [ "$marked" = 1 ]; then
+            continue
+        fi
+        text=$(tmux capture-pane -p -J -t "$pane" 2>/dev/null || true)
+        line=$(printf '%s\n' "$text" | grep -F '/cecicela' | grep -F -e '--watch' | tail -n 1 || true)
+        if [ -z "$line" ]; then
+            continue
+        fi
+        dir=$(printf '%s\n' "$line" | sed -n "s/.*--work-dir[= ]['\"]\{0,1\}\([^ '\"]*\).*/\1/p" | tail -n 1)
+        if command -v ceci >/dev/null 2>&1 && [ -n "$dir" ]; then
+            q=$(printf '%s' "$dir" | sed "s/'/'\\\\''/g")
+            OMNI_WATCH_CMD="ceci status --work-dir '$q' --watch" omni-watch-row "$pane" || true
+        elif [ -n "$dir" ]; then
+            q=$(printf '%s' "$dir" | sed "s/'/'\\\\''/g")
+            OMNI_WATCH_CMD="printf '%s\n' 'omni-ceci-detect: ceci is not on PATH for $q'; exec sleep 86400" omni-watch-row "$pane" || true
+        else
+            omni-watch-row "$pane" || true
+        fi
+    done
+}
+
+if [ "$once" -eq 1 ]; then
+    pass
+    exit 0
+fi
+
+while tmux list-panes -a >/dev/null 2>&1; do
+    pass
+    sleep 1
+done

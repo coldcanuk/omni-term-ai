@@ -3,6 +3,7 @@ bin/omni-exec
 bin/omni-secret
 bin/tmux-toggle-scratch
 bin/omni-watch-row
+bin/omni-ceci-detect
 share/omni-term-ai/lib/boot.sh
 share/omni-term-ai/lib/omni.sh
 share/omni-term-ai/tmux.conf
