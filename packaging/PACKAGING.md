@@ -12,6 +12,7 @@ $(PREFIX)/bin/launch-ai-workspace
 $(PREFIX)/bin/omni-exec
 $(PREFIX)/bin/omni-secret
 $(PREFIX)/bin/tmux-toggle-scratch
+$(PREFIX)/bin/omni-watch-row
 $(PREFIX)/share/omni-term-ai/lib/omni.sh
 $(PREFIX)/share/omni-term-ai/tmux.conf
 $(PREFIX)/share/omni-term-ai/nvim-config/

@@ -78,7 +78,7 @@ doc = json.load(open(path))
 assert doc["name"] == "omni-term-ai", doc["name"]
 assert doc["version"] == ver, doc["version"]
 bins = doc["bin"]
-for name in ("launch-ai-workspace", "omni-config", "omni-secret", "omni-exec", "tmux-toggle-scratch"):
+for name in ("launch-ai-workspace", "omni-config", "omni-secret", "omni-exec", "tmux-toggle-scratch", "omni-watch-row"):
     assert name in bins, name
 assert bins["omni-secret"] == "./omni-secret"
 PY

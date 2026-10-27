@@ -50,6 +50,7 @@ install:
 	sed "s|@OMNI_HOME@|$(OMNI_HOME_VALUE)|g" omni-config > $(DESTDIR)$(BINDIR)/omni-config
 	chmod 755 $(DESTDIR)$(BINDIR)/launch-ai-workspace $(DESTDIR)$(BINDIR)/omni-exec $(DESTDIR)$(BINDIR)/omni-secret $(DESTDIR)$(BINDIR)/omni-config
 	$(INSTALL) -m 755 tmux-toggle-scratch $(DESTDIR)$(BINDIR)/tmux-toggle-scratch
+	$(INSTALL) -m 755 omni-watch-row $(DESTDIR)$(BINDIR)/omni-watch-row
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/launch-ai-workspace
@@ -57,6 +58,7 @@ uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/omni-secret
 	rm -f $(DESTDIR)$(BINDIR)/omni-config
 	rm -f $(DESTDIR)$(BINDIR)/tmux-toggle-scratch
+	rm -f $(DESTDIR)$(BINDIR)/omni-watch-row
 	rm -f $(DESTDIR)$(APPDIR)/ai-workspace.desktop
 	rm -f $(DESTDIR)$(ICONDIR)/ai-workspace.svg
 	rm -f $(DESTDIR)$(MANDIR)/launch-ai-workspace.1

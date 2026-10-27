@@ -1,0 +1,64 @@
+#!/bin/sh
+# Carve a 24-row band out of a tmux pane. The pane's process stays in the
+# wide left side. An 80-column pane on the right runs the watch command.
+# Usage: omni-watch-row [target-pane]
+set -eu
+
+if ! command -v tmux >/dev/null 2>&1; then
+    echo "omni-watch-row: tmux is not installed" >&2
+    exit 1
+fi
+
+target=${1:-}
+if [ -n "$target" ]; then
+    orig=$(tmux display-message -p -t "$target" '#{pane_id}') || exit 1
+else
+    orig=$(tmux display-message -p '#{pane_id}') || {
+        echo "omni-watch-row: pass a pane id, or run this inside tmux" >&2
+        exit 1
+    }
+fi
+
+marked=$(tmux show-options -p -t "$orig" -qv @omni_watch_row 2>/dev/null || true)
+if [ "$marked" = 1 ]; then
+    exit 0
+fi
+
+width=$(tmux display-message -p -t "$orig" '#{pane_width}')
+height=$(tmux display-message -p -t "$orig" '#{pane_height}')
+if [ "$width" -lt 82 ]; then
+    echo "omni-watch-row: pane is ${width} columns; need at least 82" >&2
+    exit 1
+fi
+if [ "$height" -lt 26 ]; then
+    echo "omni-watch-row: pane is ${height} rows; need at least 26" >&2
+    exit 1
+fi
+
+win=$(tmux display-message -p -t "$orig" '#{window_id}')
+before_top=$(tmux display-message -p -t "$orig" '#{pane_top}')
+before_left=$(tmux display-message -p -t "$orig" '#{pane_left}')
+tmux split-window -v -l 24 -b -d -t "$orig"
+top=$(tmux list-panes -t "$win" -F '#{pane_id} #{pane_top} #{pane_left}' |
+    awk -v t="$before_top" -v l="$before_left" '$2 == t && $3 == l { print $1; exit }')
+if [ -z "${top}" ]; then
+    echo "omni-watch-row: could not find the new top pane" >&2
+    exit 1
+fi
+if [ "$top" != "$orig" ]; then
+    tmux swap-pane -s "$orig" -t "$top"
+fi
+
+if [ -n "${OMNI_WATCH_CMD:-}" ]; then
+    watch=$OMNI_WATCH_CMD
+elif command -v ceci >/dev/null 2>&1 && [ -n "${OMNI_CECI_WORK_DIR:-}" ]; then
+    q=$(printf '%s' "$OMNI_CECI_WORK_DIR" | sed "s/'/'\\\\''/g")
+    watch="ceci status --work-dir '$q' --watch"
+else
+    watch="printf '%s\n' 'omni-watch-row: set OMNI_CECI_WORK_DIR or install ceci'; exec sleep 86400"
+fi
+
+watch_pane=$(tmux split-window -h -l 80 -d -P -F '#{pane_id}' -t "$orig" "$watch")
+tmux select-pane -T watch -t "$watch_pane"
+tmux set-option -p -t "$orig" @omni_watch_row 1
+tmux set-option -p -t "$watch_pane" @omni_watch_row 1
